@@ -1,0 +1,43 @@
+serial_no = 47
+global_defs  {
+     notification_email  {
+         test@gmail.com
+         test1@gmail.com
+     }
+     notification_email_from vincent.mc.li@gmail.com
+     smtp_server 192.168.200.1
+     smtp_connect_timeout 30
+     router_id LVS_DEVEL
+}
+static_ipaddress  {
+    192.168.3.165/24 dev eth1
+}
+local_address_group laddr_g1 {
+    192.168.3.164
+    192.168.3.165
+    192.168.3.167
+}
+local_address_group laddr_g2 {
+    192.168.3.164
+    192.168.3.165
+    192.168.3.167
+}
+virtual_server 192.168.3.6 23 {
+     delay_loop 5
+     sorry_server 0
+     lb_algo wrr
+     lb_kind FNAT
+     laddr_group_name none
+     quorum_up 1
+     est_timeout 15
+     protocol tcp
+     real_server 1.1.1.1 23 {
+         weight 1
+         HTTP_GET  {
+             url  {
+                 path /1111111111111111111111111111111111111111
+                 digest tretryrtjtyjkykjh,jk.k.k,m
+             }
+         }
+     }
+}

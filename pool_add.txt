@@ -1,0 +1,2658 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <title></title>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <meta http-equiv="Content-Language" content="en-us" />
+        <meta http-equiv="imagetoolbar" content="false" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="-1" />
+        <meta name="MSSmartTagsPreventParsing" content="true" />
+        <meta name="robots" content="all" />
+        <meta name="Copyright" content="(c) Copyright 1996-2014, F5 Networks, Inc., Seattle, Washington. All rights reserved." />
+        <meta name="author" content="F5 Networks, Inc." />
+
+        <link rel="Shortcut Icon" type="image/x-icon" href="/tmui/tmui/skins/Default/images/favicon.ico?ver=11.5.0_0.0.221" />
+        <link rel="stylesheet" type="text/css" media="screen" href="/tmui/tmui/skins/Default/css/screen.css?ver=11.5.0_0.0.221" />
+        <link rel="stylesheet" type="text/css" media="print" href="/tmui/tmui/skins/Default/css/print.css?ver=11.5.0_0.0.221" />
+
+
+        <script type="text/javascript">
+            // These variables are used by the static Javascript files. They used to be dynamically inserted
+            // when those files were rendered by the JSP processor, but now that they're static, we need to
+            // set the Javascript variables somewhere. If the number of these grow too large, we may consider 
+            // creating a "variables.jsp" Javascript file, but for now it saves an HTTP request to just shove 
+            // them here in the shared template file.
+            
+            // content.js
+            var advancedDisplayDefault = 'basic';
+            
+            // dealer.js
+            var common_all_Progress = 'Progress';
+            var optionFilterText = 'em.device.configbrowser.NoFilterDefined'
+            var browserFilterMatchTxt = 'em.device.configbrowser.FilterMatch'
+            var browserFilterTotalTxt = 'em.device.configbrowser.Total'
+            var progressText="Progress"
+            
+        </script>
+      
+        <script type="text/javascript" src="/tmui/tmui/login/scripts/base.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/login/scripts/logged_in_checker.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/base.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/content.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/skin.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/util.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/dealer.js?ver=11.5.0_0.0.221"></script>
+        <script type="text/javascript" src="/tmui/tmui/skins/Default/scripts/boxover.js?ver=11.5.0_0.0.221"></script>
+
+        <link rel="stylesheet" type="text/css" media="screen" href="/xui/common/css/content.css?ver=11.5.0_0.0.221" />
+        <script type="text/javascript" src="/xui/common/scripts/api.js?ver=11.5.0_0.0.221"></script>
+        
+
+        
+    </head>
+
+    <body>
+        <script type="text/javascript">onLayoutLoad();</script>
+        
+            <!-- standard_layout dot jsp [BEGIN] -->
+
+
+
+
+
+
+
+
+
+<!-- Header -->
+<!-- create dot jsp for locallb pools -->
+
+<!-- tag libraries -->
+
+
+
+    
+
+
+<!-- settings dot jsp for locallb pools -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- utility dot jsp for locallb pools -->
+
+
+
+<script>
+   function togglePersistence(persistence) {
+        
+    // filter out none
+        if(persistence == 'none') {
+            
+            hideObj('pool_persistence_timeout');
+            hideObj('pool_persistence_timeout_fallback');
+
+            return;
+        } 
+
+        var persistType = document.forms[0].elements[(persistence + "_type")].value;
+        var persistValue =  document.forms[0].elements[(persistence + "_hidden_timeout")].value;
+
+        if(persistType == '1') { 
+            
+            showObj('pool_persistence_timeout');
+            hideObj('pool_persistence_timeout_fallback');
+            findObj('simple_timeout' + "_SELECT").options[0].value = persistValue;
+            findObj('simple_timeout' + "_SELECT").options[0].text = persistValue;
+
+        } else {
+
+            hideObj('pool_persistence_timeout');
+            showObj('pool_persistence_timeout_fallback');
+            findObj('simple_timeout'  + "_FALLBACK").value = persistValue;
+        }
+    }
+</script>
+
+
+<script language="JavaScript" type="text/JavaScript">
+    function noConntionLimitWarning(message, field, nosubmit){
+        var select = document.getElementById(field);
+        if (select.options[select.selectedIndex].value =='no') {
+            return true;
+        } else {
+            if(nosubmit) {
+                alert(message);
+                return false;
+            }    
+        }
+        return confirm(message);
+    }
+</script>
+
+
+
+
+
+<!-- Preparation of PageRenderer object -->
+
+
+<script>
+    
+
+        function onLoad() {
+
+            var nodeRadio = findObj('member_address_radio_node');
+            if(nodeRadio.checked) {
+
+                var poolAddress = findObj('pool_address');
+                var poolMemberNodeSelect = findObj('pool_member_node_select');
+
+                if(poolAddress != null && poolMemberNodeSelect != null) {
+
+                    poolAddress.value = poolMemberNodeSelect.value;
+                }
+            }
+        }
+    
+</script>
+
+
+
+
+
+ 
+
+
+
+
+<script language="JavaScript" type="text/JavaScript">
+<!--
+
+    helpURL = '/tmui/help/en/tmui/locallb/pool/create.jsp'
+
+-->
+</script>
+
+<!-- scripts from BS2. -->
+
+
+<!-- standard_configuration_tables_body_layout dot jsp [BEGIN] -->
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- standard_functions.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+            <!-- Page Menu -->
+            <!-- SS standard_tabs dot jsp [BEGIN] -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+    Xui.setMainMenu("localtraffic", "pools");
+ </script>
+
+                <script type="text/javascript">
+                    Xui.setPageMenu();
+                </script>
+            
+        <script type="text/javascript">
+            Xui.setPageTrail("New Pool...");
+        </script>
+        
+
+<!-- SS standard_tabs dot jsp [END] -->
+
+            <!-- End Page Menu -->
+
+            <!-- Content Div -->
+            <div id="content" onkeydown="return preventEnterFormSubmit(event);">
+                <div class="glass"><img alt="" src="/tmui/tmui/skins/Default/images/transparent.gif"  />
+</div>
+
+                
+
+                <!-- Form Warning -->
+                
+
+
+
+
+
+
+
+
+
+                <!-- Form -->
+                <FORM id="myform" onSubmit=";onSubmit(this);" name="myform" enctype="application/x-www-form-urlencoded" action="/tmui/Control/form" method="post" >
+<input name="_timenow" value="Fri Jul 11 11:02:01 PDT 2014" type="hidden"  />
+<input name="_timenow_before" value="Fri Jul 11 11:02:01 PDT 2014" type="hidden"  />
+<input style="position: absolute; top: 0px; background-color: transparent; border: 0px solid transparent;" name="_form_holder_opener_" value="" type="hidden" readonly="readonly"  />
+<input id="nosubmit" style="position: absolute; top: 0px; background-color: transparent; border: 0px solid transparent;" name="nosubmit" value=" " onclick="return false;" type="submit" readonly="readonly"  />
+<input name="handler" value="/tmui/locallb/pool/create" type="hidden"  />
+<input name="handler_before" value="/tmui/locallb/pool/create" type="hidden"  />
+<input name="showObjList" value="" type="hidden"  />
+<input name="showObjList_before" value="" type="hidden"  />
+<input name="hideObjList" value="" type="hidden"  />
+<input name="hideObjList_before" value="" type="hidden"  />
+<input name="enableObjList" value="" type="hidden"  />
+<input name="enableObjList_before" value="" type="hidden"  />
+<input name="disableObjList" value="" type="hidden"  />
+<input name="disableObjList_before" value="" type="hidden"  />
+<input name="_bufvalue" value="MaB9Sp9DPAZUIeWdHeLCPz1PNJk=" type="hidden"  />
+<input name="_bufvalue_before" value="MaB9Sp9DPAZUIeWdHeLCPz1PNJk=" type="hidden"  />
+<input name="_bufvalue_validation" value="NO_VALIDATION" type="hidden"  />
+
+
+                
+                
+
+                <input name="com.f5.util.LinkedAdd.action_override" value="/tmui/locallb/pool/create" type="hidden"  />
+<input name="com.f5.util.LinkedAdd.action_override_before" value="/tmui/locallb/pool/create" type="hidden"  />
+
+
+                <input id="linked_add_id" name="linked_add_id" value="" type="hidden"  />
+<input name="linked_add_id_before" value="" type="hidden"  />
+
+
+                <input id="linkedadd_params" name="linkedadd_params" value="" type="hidden"  />
+<input name="linkedadd_params_before" value="" type="hidden"  />
+
+
+		        <!-- Form Hiddens -->
+                <!-- standard_form_hiddens dot jsp [BEGIN] -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <input name="exit_page" value="/tmui/locallb/pool/list.jsp" type="hidden"  />
+<input name="exit_page_before" value="/tmui/locallb/pool/list.jsp" type="hidden"  />
+
+
+
+        <input name="form_page" value="/tmui/locallb/pool/create.jsp" type="hidden"  />
+<input name="form_page_before" value="/tmui/locallb/pool/create.jsp" type="hidden"  />
+
+
+
+<!-- standard_form_hiddens dot jsp [END] -->
+
+
+                    
+                    
+                                        <!-- standard_advanced_basic_configuration_table dot jsp -->
+
+
+
+
+
+
+
+
+
+<!-- standard_functions.inc -->
+
+
+
+
+
+
+
+
+
+
+<!-- PageRenderer Setup -->
+
+
+
+            <!-- Configuration Table -->
+            <div class="section" id="div_configuration_table" style="">
+
+            <table id="/tmui/locallb/pool/create.jsp?.configuration_table" class="configuration" border="0" cellspacing="0" cellpadding="0">
+
+                <thead>
+                    <tr class="tablehead">
+                        <td colspan="2">
+                            <div class="title">Configuration:</div>
+                            <div class="buttons">&nbsp;</div>
+                            <script language="JavaScript" type="text/JavaScript">
+                                toggleAdvancedProperties('create','/tmui/locallb/pool/create.jsp?.configuration_table')
+                            </script>
+                        </td>
+                    </tr>
+                </thead>
+
+                <tbody id="resources"></tbody>
+
+                  <!-- ROW LOOPING HERE -->
+
+                <!-- Repeated Section -->
+                <tr id="pool_name" display="basic" 
+                	style="" defaultDisplay="true">
+                    <td class="label required">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Name
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="large" type="text" size="" id="" partition="F5_CURRENT_PARTITION" maxlength="" style="" name="name" onChange="" value="" onFocus=""  />
+<input name="name_before" value="" type="hidden"  />
+<input name="name_required" value="1" type="hidden"  />
+
+                            
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+                <!-- Repeated Section -->
+                <tr id="desc_row" display="basic" 
+                	style="" defaultDisplay="true">
+                    <td class="label">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Description
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="xxlarge" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="description" value="" onFocus=""  />
+<input name="description_before" value="" type="hidden"  />
+
+                            
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+                <tbody  id="pool_configuration_table_body"
+                        display="basic"
+                        style=""
+                        defaultDisplay="true">
+            
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_monitors" display="basic" 
+                        	style="" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Health Monitors
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <script language="JavaScript" type="text/JavaScript">
+                                    var rightName = "available_monitor_select";
+                                    var leftName = "monitor_rule";
+                                </script>
+
+                                <table border="0" cellspacing="0" cellpadding="0" class="managelist" id="monitor_manage_list" defaultdisplay="true" style="">
+                                    <tr>
+                                        <td class="head">Active</td>
+                                        <td>&nbsp;</td>
+                                        <td class="head">Available</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="list">
+                                            <select id="monitor_rule" sortPaths="true" onBlur="" onClick="" partition="F5_CURRENT_PARTITION" submit="all" onChange="" name="monitor_rule" onMouseDown="" class=" " onFocus="" groupPaths="true" multiple="multiple" size="5" >
+
+                                            
+                                            
+
+
+
+
+
+
+
+
+
+                                            </select>
+<input name="monitor_rule_before" value="null" type="hidden"  />
+
+                                        </td>
+                                        <td class="movebuttons">
+                                            
+                                                    <input id="monitor_rule_button" onClick="pageChange=true; moveSelectedOptions(this.form,&#39;available_monitor_select&#39;,&#39;monitor_rule&#39;);" partition="F5_CURRENT_PARTITION" name="monitor_rule_button" value=" &#60;&#60; " type="button"  />
+<input name="monitor_rule_button_before" value=" &#60;&#60; " type="hidden"  />
+
+                                                
+                                            
+                                                    <input id="available_monitor_select_button" onClick="pageChange=true; moveSelectedOptions(this.form,&#39;monitor_rule&#39;,&#39;available_monitor_select&#39;);" partition="F5_CURRENT_PARTITION" name="available_monitor_select_button" value=" >> " type="button"  />
+<input name="available_monitor_select_button_before" value=" >> " type="hidden"  />
+
+                                                
+                                        </td>
+                                        <td class="list">
+                                            <select id="available_monitor_select" sortPaths="true" partition="F5_CURRENT_PARTITION" submit="all" name="available_monitor_select" class=" " multiple="multiple" groupPaths="true" size="5" >
+
+                                                
+                                                
+
+
+
+
+
+
+
+                        <optgroup id="available_monitor_select/Common" label="/Common">
+                        
+                <option value="/Common/gateway_icmp" >
+
+                gateway_icmp
+                
+                <option value="/Common/http" >
+
+                http
+                
+                <option value="/Common/http_60" >
+
+                http_60
+                
+                <option value="/Common/http_head_f5" >
+
+                http_head_f5
+                
+                <option value="/Common/https" >
+
+                https
+                
+                <option value="/Common/https_443" >
+
+                https_443
+                
+                <option value="/Common/https_head_f5" >
+
+                https_head_f5
+                
+                <option value="/Common/inband" >
+
+                inband
+                
+                <option value="/Common/tcp" >
+
+                tcp
+                
+                <option value="/Common/tcp_half_open" >
+
+                tcp_half_open
+                
+                <option value="/Common/udp" >
+
+                udp
+                
+                    </optgroup>
+                
+
+
+                                            </select>
+<input name="available_monitor_select_before" value="null" type="hidden"  />
+
+                                        </td>
+                                    </tr>
+                                    
+                                </table>
+                            
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_availablity_requirement" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Availability Requirement
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="availability_select" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="availability_select" onChange="if (this.value == &#39;atleast&#39;) { showObj(&#39;minimummonitors&#39;); } else { hideObj(&#39;minimummonitors&#39;); };" onMouseDown="" class=" " onFocus="" size="1" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="all" >
+
+                        All
+
+                    
+                        <option value="atleast" >
+
+                        At Least...
+
+                    
+
+
+                                </select>
+<input name="availability_select_before" value="all" type="hidden"  />
+
+                                
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="minimummonitors" maxlength="5" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="" name="minimummonitors" value="1" onFocus=""  />
+<input name="minimummonitors_before" value="1" type="hidden"  />
+<input name="minimummonitors_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="minimummonitors_required" value="1" type="hidden"  />
+
+                            
+                                Health Monitor(s)
+                            
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_snat" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Allow SNAT
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="disallow_snat" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="disallow_snat" onChange="" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="yes" >
+
+                        Yes
+
+                    
+                        <option value="no" >
+
+                        No
+
+                    
+
+
+                                </select>
+<input name="disallow_snat_before" value="yes" type="hidden"  />
+
+                                
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_nat" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Allow NAT
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="disallow_nat" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="disallow_nat" onChange="" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="yes" >
+
+                        Yes
+
+                    
+                        <option value="no" >
+
+                        No
+
+                    
+
+
+                                </select>
+<input name="disallow_nat_before" value="yes" type="hidden"  />
+
+                                
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_rebind" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Action On Service Down
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="action_on_service_down" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="action_on_service_down" onChange="" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="0" >
+
+                        None
+
+                    
+                        <option value="1" >
+
+                        Reject
+
+                    
+                        <option value="2" >
+
+                        Drop
+
+                    
+                        <option value="3" >
+
+                        Reselect
+
+                    
+
+
+                                </select>
+<input name="action_on_service_down_before" value="0" type="hidden"  />
+
+                                
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_slow_ramp_time" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Slow Ramp Time
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="medium" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="slow_ramp_time" value="10" onFocus=""  />
+<input name="slow_ramp_time_before" value="10" type="hidden"  />
+<input name="slow_ramp_time_validation" value="com.f5.form.U32Validator" type="hidden"  />
+<input name="slow_ramp_time_required" value="1" type="hidden"  />
+
+                            
+                                    seconds
+                                
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_iptos_to_client" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                IP ToS to Client
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="ip_tos_to_client_select" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="ip_tos_to_client_select" onChange="if (this.value == &#39;specify&#39;) {    findObj(&#39;ip_tos_to_client&#39;).value = &#39;&#39;;    showObj(&#39;ip_tos_to_client&#39;);}else if (this.value == &#39;mimic&#39;) {    hideObj(&#39;ip_tos_to_client&#39;);    findObj(&#39;ip_tos_to_client&#39;).value = 65534;}else {    hideObj(&#39;ip_tos_to_client&#39;);    findObj(&#39;ip_tos_to_client&#39;).value = 65535;}" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="specify" >
+
+                        Specify...
+
+                    
+                        <option selected value="pass" >
+
+                        Pass Through
+
+                    
+                        <option value="mimic" >
+
+                        Mimic
+
+                    
+
+
+                                </select>
+<input name="ip_tos_to_client_select_before" value="pass" type="hidden"  />
+
+                                
+                                <input onBlur="" onClick="" submit="always" onKeyPress="" class="medium" type="text" size="" id="ip_tos_to_client" maxlength="" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="" name="ip_tos_to_client" value="65535" onFocus=""  />
+<input name="ip_tos_to_client_before" value="65535" type="hidden"  />
+<input name="ip_tos_to_client_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="ip_tos_to_client_required" value="1" type="hidden"  />
+
+                            </td>
+
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_iptos_to_server" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                IP ToS to Server
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="ip_tos_to_server_select" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="ip_tos_to_server_select" onChange="if (this.value == &#39;specify&#39;) {    findObj(&#39;ip_tos_to_server&#39;).value = &#39;&#39;;    showObj(&#39;ip_tos_to_server&#39;);}else if (this.value == &#39;mimic&#39;) {    hideObj(&#39;ip_tos_to_server&#39;);    findObj(&#39;ip_tos_to_server&#39;).value = 65534;}else {    hideObj(&#39;ip_tos_to_server&#39;);    findObj(&#39;ip_tos_to_server&#39;).value = 65535;}" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="specify" >
+
+                        Specify...
+
+                    
+                        <option selected value="pass" >
+
+                        Pass Through
+
+                    
+                        <option value="mimic" >
+
+                        Mimic
+
+                    
+
+
+                                </select>
+<input name="ip_tos_to_server_select_before" value="pass" type="hidden"  />
+
+                                
+                                <input onBlur="" onClick="" submit="always" onKeyPress="" class="medium" type="text" size="" id="ip_tos_to_server" maxlength="" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="" name="ip_tos_to_server" value="65535" onFocus=""  />
+<input name="ip_tos_to_server_before" value="65535" type="hidden"  />
+<input name="ip_tos_to_server_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="ip_tos_to_server_required" value="1" type="hidden"  />
+
+                            </td>
+
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_linkqos_to_client" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Link QoS to Client
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="link_qos_to_client_select" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="link_qos_to_client_select" onChange="if (this.value == &#39;specify&#39;) {    findObj(&#39;link_qos_to_client&#39;).value = &#39;&#39;;    showObj(&#39;link_qos_to_client&#39;);}else {    hideObj(&#39;link_qos_to_client&#39;);    findObj(&#39;link_qos_to_client&#39;).value = 65535;}" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="specify" >
+
+                        Specify...
+
+                    
+                        <option selected value="pass" >
+
+                        Pass Through
+
+                    
+
+
+                                </select>
+<input name="link_qos_to_client_select_before" value="pass" type="hidden"  />
+
+                                
+                                <input onBlur="" onClick="" submit="always" onKeyPress="" class="medium" type="text" size="" id="link_qos_to_client" maxlength="" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="" name="link_qos_to_client" value="65535" onFocus=""  />
+<input name="link_qos_to_client_before" value="65535" type="hidden"  />
+<input name="link_qos_to_client_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="link_qos_to_client_required" value="1" type="hidden"  />
+
+                            </td>
+
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="pool_linkqos_to_server" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Link QoS to Server
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="link_qos_to_server_select" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="link_qos_to_server_select" onChange="if (this.value == &#39;specify&#39;) {    findObj(&#39;link_qos_to_server&#39;).value = &#39;&#39;;    showObj(&#39;link_qos_to_server&#39;);}else {    hideObj(&#39;link_qos_to_server&#39;);    findObj(&#39;link_qos_to_server&#39;).value = 65535;}" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="specify" >
+
+                        Specify...
+
+                    
+                        <option selected value="pass" >
+
+                        Pass Through
+
+                    
+
+
+                                </select>
+<input name="link_qos_to_server_select_before" value="pass" type="hidden"  />
+
+                                
+                                <input onBlur="" onClick="" submit="always" onKeyPress="" class="medium" type="text" size="" id="link_qos_to_server" maxlength="" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="" name="link_qos_to_server" value="65535" onFocus=""  />
+<input name="link_qos_to_server_before" value="65535" type="hidden"  />
+<input name="link_qos_to_server_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="link_qos_to_server_required" value="1" type="hidden"  />
+
+                            </td>
+
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+
+                        <!-- Repeated Section -->
+                        <tr id="reselect_tries" display="advanced" 
+                        	style="display: none;" defaultDisplay="true">
+                            <td class="label">
+                                
+                                            <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Reselect Tries
+                            
+
+                                        
+                            </td>
+                            <td class="settings">
+                                
+
+
+
+
+
+
+
+
+                                
+                                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="medium" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="reselect_tries" value="0" onFocus=""  />
+<input name="reselect_tries_before" value="0" type="hidden"  />
+<input name="reselect_tries_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="reselect_tries_required" value="1" type="hidden"  />
+
+                            
+
+                                            
+                            </td>
+                        </tr>
+                        <!-- Repeated Section -->
+                    
+                </tbody>
+            
+                <!-- Repeated Section -->
+                <tr id="queue_enable_row" display="advanced" 
+                	style="display: none;" defaultDisplay="true">
+                    <td class="label">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Enable Request Queueing
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="queue_on_connection_limit" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="queue_on_connection_limit" onChange="" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="yes" >
+
+                        Yes
+
+                    
+                        <option selected value="no" >
+
+                        No
+
+                    
+
+
+                                </select>
+<input name="queue_on_connection_limit_before" value="no" type="hidden"  />
+
+                                
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+                <!-- Repeated Section -->
+                <tr id="queue_depth_row" display="advanced" 
+                	style="display: none;" defaultDisplay="true">
+                    <td class="label">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Request Queue Depth
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="queue_depth_limit" value="0" onFocus=""  />
+<input name="queue_depth_limit_before" value="0" type="hidden"  />
+
+                            
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+                <!-- Repeated Section -->
+                <tr id="queue_timeout_row" display="advanced" 
+                	style="display: none;" defaultDisplay="true">
+                    <td class="label">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Request Queue Timeout
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="queue_time_limit" value="0" onFocus=""  />
+<input name="queue_time_limit_before" value="0" type="hidden"  />
+
+                            
+                                ms
+                            </td>
+
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+                <!-- Repeated Section -->
+                <tr id="profile_row" display="advanced" 
+                	style="display: none;" defaultDisplay="true">
+                    <td class="label">
+                        
+                                    <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                IP Encapsulation
+                            
+
+                                
+	                </td>
+	                <td class="settings">
+                        
+
+
+
+
+
+
+
+
+                        
+	                                <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="profile_name" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="profile_name" onChange="" onMouseDown="" onFocus="" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="None" >
+
+                        None
+
+                    
+                        <option value="/Common/gre" >
+
+                        gre
+
+                    
+                        <option value="/Common/nvgre" >
+
+                        nvgre
+
+                    
+                        <option value="/Common/dslite" >
+
+                        dslite
+
+                    
+                        <option value="/Common/ip4ip4" >
+
+                        ip4ip4
+
+                    
+                        <option value="/Common/ip4ip6" >
+
+                        ip4ip6
+
+                    
+                        <option value="/Common/ip6ip4" >
+
+                        ip6ip4
+
+                    
+                        <option value="/Common/ip6ip6" >
+
+                        ip6ip6
+
+                    
+                        <option value="/Common/ipip" >
+
+                        ipip
+
+                    
+
+
+                                </select>
+<input name="profile_name_before" value="None" type="hidden"  />
+
+                                
+
+                                
+                    </td>
+                </tr>
+	            <!-- Repeated Section -->
+                
+
+	            </table>
+                <script language="JavaScript" type="text/JavaScript">
+                    toggleAdvancedProperties('init','/tmui/locallb/pool/create.jsp?.configuration_table');
+                </script>
+
+
+
+                </div>
+
+
+
+                                    
+                                        <!-- standard_configuration_table dot jsp -->
+
+
+
+
+
+
+
+
+
+
+<!-- standard_functions.inc -->
+
+
+
+
+
+
+
+
+
+
+<!-- PageRenderer Setup -->
+
+
+
+
+
+            <!-- General Table -->
+            
+
+            <div class="section" id="div_resources_table" style="">
+
+            <table class="configuration" id="resources_table" border="0" cellspacing="0" cellpadding="0">
+            
+            
+                <thead>
+                    <tr class="tablehead">
+                        <td colspan="2">
+                            <div class="title">Resources</div>
+                            <div class="buttons">&nbsp;</div>
+                        </td>
+                    </tr>
+                </thead>
+            
+
+    <!-- ROW LOOPING HERE -->
+    
+                    <tr id="pool_lbmode" display="basic" style="">
+                    
+                        <td class="label">
+                    
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Load Balancing Method
+                            
+
+                                    
+                        </td>
+                        <td class="settings">
+                            
+
+
+
+
+
+
+
+
+                            
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="lb_mode" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="lb_mode" onChange="loadBalancingMethodChanged(this,[1,10,18],&#39;pool_ratio_row&#39;,[15],&#39;pool_conn_limit_row&#39;);showHideIgnorePersisted(this,[4,9,3,8,1,5],&#39;pool_ignore_persisted_weight&#39;);" onMouseDown="" class="xlarge" onFocus="" size="1" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="0" >
+
+                        Round Robin
+
+                    
+                        <option value="1" >
+
+                        Ratio (member)
+
+                    
+                        <option value="2" >
+
+                        Least Connections (member)
+
+                    
+                        <option value="3" >
+
+                        Observed (member)
+
+                    
+                        <option value="4" >
+
+                        Predictive (member)
+
+                    
+                        <option value="5" >
+
+                        Ratio (node)
+
+                    
+                        <option value="6" >
+
+                        Least Connections (node)
+
+                    
+                        <option value="7" >
+
+                        Fastest (node)
+
+                    
+                        <option value="8" >
+
+                        Observed (node)
+
+                    
+                        <option value="9" >
+
+                        Predictive (node)
+
+                    
+                        <option value="10" >
+
+                        Dynamic Ratio (node)
+
+                    
+                        <option value="11" >
+
+                        Fastest (application)
+
+                    
+                        <option value="12" >
+
+                        Least Sessions
+
+                    
+                        <option value="13" >
+
+                        Dynamic Ratio (member)
+
+                    
+                        <option value="15" >
+
+                        Weighted Least Connections (member)
+
+                    
+                        <option value="16" >
+
+                        Weighted Least Connections (node)
+
+                    
+                        <option value="17" >
+
+                        Ratio (session)
+
+                    
+                        <option value="18" >
+
+                        Ratio Least Connections (member)
+
+                    
+                        <option value="19" >
+
+                        Ratio Least Connections (node)
+
+                    
+
+
+                                </select>
+<input name="lb_mode_before" value="null" type="hidden"  />
+
+                                
+
+                                    
+                        </td>
+                    </tr>
+                
+                    <tr id="pool_ignore_persisted_weight" display="basic" style="display: none;">
+                    
+                        <td class="label">
+                    
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Ignore Persisted Weight
+                            
+
+                                    
+                        </td>
+                        <td class="settings">
+                            
+
+
+
+
+
+
+
+
+                            
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="" type="checkbox" size="" id="" partition="F5_CURRENT_PARTITION" maxlength="" style="" name="ignore_persisted_weight" onChange="" value="enabled" onFocus=""  />
+<input name="ignore_persisted_weight_before" value="unchecked" type="hidden"  />
+
+                            
+                                    
+                                
+
+                                    
+                        </td>
+                    </tr>
+                
+                    <tr id="pool_priorityloadbalancing" display="basic" style="">
+                    
+                        <td class="label">
+                    
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                Priority Group Activation
+                            
+
+                                    
+                        </td>
+                        <td class="settings">
+                            
+
+
+
+
+
+
+
+
+                            
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="min_active_members_SELECT" onBlur="" sortPaths="true" onClick="" partition="F5_CURRENT_PARTITION" style="" name="min_active_members_SELECT" onChange="if (this.value == &#39;enabled&#39;) { showObj(&#39;pool_active_members_div&#39;);  showObj(&#39;pool_priority_row&#39;);} else { hideObj(&#39;pool_active_members_div&#39;); hideObj(&#39;pool_priority_row&#39;); };" onMouseDown="" class="medium" onFocus="" size="1" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option selected value="disabled" >
+
+                        Disabled
+
+                    
+                        <option value="enabled" >
+
+                        Less than...
+
+                    
+
+
+                                </select>
+<input name="min_active_members_SELECT_before" value="disabled" type="hidden"  />
+
+                                	<span id='pool_active_members_div' style="display:  none;">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="medium" type="text" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="min_active_members" value="0" onFocus=""  />
+<input name="min_active_members_before" value="0" type="hidden"  />
+<input name="min_active_members_validation" value="com.f5.form.U16Validator" type="hidden"  />
+<input name="min_active_members_required" value="1" type="hidden"  />
+
+                            
+                                    Available Member(s)
+                                	</span>
+</td>
+
+
+                                    
+                        </td>
+                    </tr>
+                
+                    <tr id="pool_member_row" display="basic" style="">
+                    
+                        <td class="label">
+                    
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+
+                                New Members
+                            
+
+                                    
+                        </td>
+                        <td class="settings">
+                            
+
+
+
+
+
+
+
+
+                            
+                                        <!-- standard_configuration_table_engine.inc -->
+
+
+
+
+
+
+
+
+
+
+
+	<table id="pool_member_format_table" style="display:;" border="0" cellspacing="0" cellpadding="0">
+		<tr id="pool_add_edit_member" style="display:;">
+			<td>
+				<table id="pool_add_edit_member_table" style="display:;" border="0" cellspacing="0" cellpadding="0">
+					<tr id="member_address_selection" style="display:;">
+						<td valign="middle">
+							&nbsp;
+						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="hideObj(&#39;pool_member_node_select&#39;);showObj(&#39;node_name_row&#39;);showObj(&#39;pool_address&#39;);node_name.value=&#39;&#39;;pool_address.value=&#39;&#39;" submit="" onKeyPress="" class="" type="radio" size="" id="member_address_radio_address" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="member_address_radio" value="address" onFocus="" checked  />
+<input name="member_address_radio_before" value="checked" type="hidden"  />
+
+                            
+                                    <label for="member_address_radio_address">New Node</label>
+                                
+                                <input onBlur="" onClick="hideObj(&#39;node_name_row&#39;);hideObj(&#39;pool_address&#39;);showObj(&#39;pool_member_node_select&#39;);var node_info=pool_member_node_select.value.split(&#39; &#39;);node_name.value=node_info[0];pool_address.value=node_info[1]" submit="" onKeyPress="" class="" type="radio" size="" id="member_address_radio_node" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="member_address_radio" value="node" onFocus=""  />
+<input name="member_address_radio_before" value="unchecked" type="hidden"  />
+
+                            
+                                    <label for="member_address_radio_node">Node List</label>
+                                						</td>
+					</tr>
+					<tr id="node_name_row" style="display:;">
+						<td valign="middle">
+
+                                Node Name:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="large" type="text" size="" id="node_name" maxlength="256" partition="F5_CURRENT_PARTITION" style="" onChange="" name="node_name" value="" onFocus=""  />
+<input name="node_name_before" value="" type="hidden"  />
+
+                            
+                                (Optional)
+                            						</td>
+					</tr>
+					<tr id="pool_address_row" style="display:;">
+						<td valign="middle">
+
+                                Address:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="large" type="text" size="" id="pool_address" maxlength="256" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_address" value="" onFocus=""  />
+<input name="pool_address_before" value="" type="hidden"  />
+
+                            
+                                <select id="pool_member_node_select" sortPaths="true" onBlur="" onClick="" partition="F5_CURRENT_PARTITION" style="display: none;" onChange="var node_info=this.value.split(&#39; &#39;);node_name.value=node_info[0];pool_address.value=node_info[1]" name="pool_member_node_select" onMouseDown="" class=" " onFocus="" groupPaths="true" size="1" >
+
+
+                                
+
+
+
+
+
+
+
+                        <optgroup id="pool_member_node_select/Common" label="/Common">
+                        
+                <option value="/Common/10.2.72.139 10.2.72.139" >
+
+                10.2.72.139 (10.2.72.139)
+                
+                <option value="/Common/10.2.72.239 10.2.72.239" >
+
+                10.2.72.239 (10.2.72.239)
+                
+                <option value="/Common/10.2.72.99 10.2.72.99" >
+
+                10.2.72.99 (10.2.72.99)
+                
+                    </optgroup>
+                
+
+
+                                </select>
+<input name="pool_member_node_select_before" value="null" type="hidden"  />
+
+                                						</td>
+					</tr>
+					<tr id="pool_service_row" style="display:;">
+						<td valign="middle">
+
+                                Service Port:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="updateSelectInputPair(event.type,this.form, &#39;pool_service_select&#39;,&#39;pool_port&#39;,false)" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="pool_port" maxlength="6" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_port" value="" onFocus=""  />
+<input name="pool_port_before" value="" type="hidden"  />
+
+                            
+                                <select id="pool_service_select" sortPaths="true" onBlur="" onClick="" partition="F5_CURRENT_PARTITION" style="" name="pool_service_select" onChange="updateSelectInputPair(event.type,this.form, &#39;pool_service_select&#39;,&#39;pool_port&#39;,false)" onMouseDown="" class=" " onFocus="" size="1" >
+
+
+                                
+
+
+
+
+
+
+
+                        <option value="" >
+
+                        Select...
+
+                    
+                        <option value="*" >
+
+                        * All Services
+
+                    
+                        <option value="21" >
+
+                        FTP
+
+                    
+                        <option value="80" >
+
+                        HTTP
+
+                    
+                        <option value="443" >
+
+                        HTTPS
+
+                    
+                        <option value="23" >
+
+                        TELNET
+
+                    
+                        <option value="1723" >
+
+                        PPTP
+
+                    
+                        <option value="25" >
+
+                        SMTP
+
+                    
+                        <option value="161" >
+
+                        SNMP
+
+                    
+                        <option value="162" >
+
+                        SNMP-TRAP
+
+                    
+                        <option value="22" >
+
+                        SSH
+
+                    
+
+
+                                </select>
+<input name="pool_service_select_before" value="null" type="hidden"  />
+
+                                						</td>
+					</tr>
+					<tr id="pool_ratio_row" style="display:none;">
+						<td valign="middle">
+
+                                Ratio:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="pool_ratio" maxlength="5" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_ratio" value="1" onFocus=""  />
+<input name="pool_ratio_before" value="1" type="hidden"  />
+
+                            						</td>
+					</tr>
+					<tr id="pool_priority_row" style="display:none;">
+						<td valign="middle">
+
+                                Priority:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="pool_priority" maxlength="5" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_priority" value="0" onFocus=""  />
+<input name="pool_priority_before" value="0" type="hidden"  />
+
+                            
+                                    (optional)
+                                						</td>
+					</tr>
+					<tr id="pool_conn_limit_row" style="display:none;">
+						<td valign="middle">
+
+                                Connection Limit:
+                            						</td>
+						<td valign="middle">
+
+                                <input onBlur="" onClick="" submit="" onKeyPress="" class="small" type="text" size="" id="pool_conn_limit" maxlength="10" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_conn_limit" value="0" onFocus=""  />
+<input name="pool_conn_limit_before" value="0" type="hidden"  />
+
+                            						</td>
+					</tr>
+					<tr id="pool_add_button" style="display:;">
+						<td valign="middle">
+
+                                <input onBlur="" onClick="addPoolMember(this.form,&#39;pool_member&#39;,&#39;member_address_radio&#39;,&#39;node_name&#39;,&#39;pool_address&#39;,&#39;pool_port&#39;,&#39;pool_ratio&#39;,&#39;pool_priority&#39;,&#39;pool_conn_limit&#39;);" submit="" onKeyPress="" class="" type="button" size="" id="" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_add_button" value="   Add   " onFocus=""  />
+<input name="pool_add_button_before" value="   Add   " type="hidden"  />
+
+                            						</td>
+					</tr>
+				</td>
+			</table>
+		</tr>
+		<tr id="pool_current_members" style="display:;">
+			<td>
+				<table id="pool_current_member_table" style="display:;" border="0" cellspacing="0" cellpadding="0">
+					<tr id="pool_current_members_select_row" style="display:;">
+						<td valign="middle">
+
+                                <input name="pool_member_validation" value="com.f5.tmui.validator.PoolMemberValidator" type="hidden"  />
+<select onBlur="" onClick="" submit="all" class="xlarge" size="5" sortPaths="true" id="pool_member" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_member" onMouseDown="" onFocus="" multiple="multiple" >
+
+
+                                
+
+
+
+
+
+
+
+
+
+                                </select>
+<input name="pool_member_before" value="null" type="hidden"  />
+
+                                						</td>
+					</tr>
+					<tr id="pool_current_members_buttons_row" style="display:;">
+						<td valign="middle">
+
+                                <input onBlur="" onClick="editPoolMember(this.form,&#39;pool_member&#39;, &#39;member_address_radio&#39;,&#39;node_name&#39;,&#39;pool_address&#39;,&#39;pool_member_node_select&#39;,&#39;pool_port&#39;, &#39;pool_ratio&#39;, &#39;pool_priority&#39;, &#39;pool_conn_limit&#39;)" submit="" onKeyPress="" class="" type="button" size="" id="pool_current_members_button_delete" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_current_members_button_delete" value="  Edit  " onFocus=""  />
+<input name="pool_current_members_button_delete_before" value="  Edit  " type="hidden"  />
+
+                            
+                                <input onBlur="" onClick="deleteListEntry(this.form,&#39;pool_member&#39;)" submit="" onKeyPress="" class="" type="button" size="" id="pool_current_members_button_delete" maxlength="" partition="F5_CURRENT_PARTITION" style="" onChange="" name="pool_current_members_button_delete" value="  Delete  " onFocus=""  />
+<input name="pool_current_members_button_delete_before" value="  Delete  " type="hidden"  />
+
+                            						</td>
+					</tr>
+				</td>
+			</table>
+		</tr>
+	</td>
+</table>
+
+
+                                    
+                        </td>
+                    </tr>
+                
+
+            </table>
+
+    
+    </div>
+    
+
+
+                                    
+
+                    <!-- Buttons -->
+                    <!-- standard_buttons dot jsp [BEGIN] -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Main Buttons Table -->
+            <table class="tablefoot" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td>
+                        <div class="buttons">
+                            
+
+                                    <input id="exit_button" onClick="" partition="F5_CURRENT_PARTITION" onKeyPress="" style="" name="exit_button" value="Cancel" type="submit"  />
+<input name="exit_button_before" value="Cancel" type="hidden"  />
+
+                                    
+
+                                    <input id="repeat" onClick="" partition="F5_CURRENT_PARTITION" onKeyPress="" style="" name="repeat" value="Repeat" type="submit"  />
+<input name="repeat_before" value="Repeat" type="hidden"  />
+
+                                    
+
+                                    <input id="finished" onClick="" partition="F5_CURRENT_PARTITION" onKeyPress="" style="" name="finished" value="Finished" type="submit"  />
+<input name="finished_before" value="Finished" type="hidden"  />
+
+                                    
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        
+
+<!-- standard_buttons dot jsp [END] -->
+
+
+                </FORM>
+
+            </div>
+            <!-- End Content Div -->
+
+            
+
+
+<!-- standard_configuration_tables_body_layout dot jsp [END] -->
+
+
+
+
+<!-- Body -->
+
+
+<!-- xui_message dot jsp [START] -->
+
+<!-- xui_message dot jsp [END] -->
+
+<!-- standard_layout dot jsp [END] -->
+
+        
+        
+        <script type="text/javascript">
+            // Call the method from the logged_in_checker.js file to do all the checking.
+
+            // Why is this at the bottom of the page? It used to be at the top, but that caused the server-side request
+            // to be made twice (even though only one HTTP request was being sent). Not sure why this was happening, but
+            // it must have had something to do with redirecting the browser away on the client side while the server
+            // was still rendering the response. Maybe some wacky Tomcat error handling? Not sure. In any case, moving
+            // the checking code down to the bottom seems to fix it. We could probably also call it during the document's
+            // onLoad event. This is a possible future to-do.
+
+            doUserLoggedInChecking("/tmui/Control/jspmap/tmui/locallb/pool/create.jsp");
+        </script>
+    
+    </body>
+</html>
+
+
+
