@@ -66,21 +66,29 @@ $virt = array ( "",
 		)
 	);
 
-$fail = array ( "",
+$vrrp_instance = array ( "",
 		array (
-			"failover"		=> "",
-			"address"		=> "",
-			"active"		=> "",
-			"vip_nmask"		=> "",
-			"port"			=> "",
-			"timeout"		=> "",
-			"heartbeat"		=> "",
-			"send"			=> "",
-			"expect"		=> "",
-			"start_cmd"		=> "",
-			"stop_cmd"		=> "",
-			"send_program"		=> "",
-			"expect_program"	=> ""
+			"state"				=> "",
+			"interface"			=> "",
+			"dont_track_primary"		=> "",
+			"track_interface"		=> "",
+			"mcast_src_ip"			=> "",
+			"lvs_sync_daemon_interface"	=> "",
+			"garp_master_delay"		=> "",
+			"virtual_router_id"		=> "",
+			"priority"			=> "",
+			"advert_int"			=> "",
+			"authentication"		=> "",
+			"virtual_ipaddress"		=> "",
+			"virtual_routes"		=> "",
+			"nopreempt"			=> "",
+			"preempt_delay"			=> "",
+			"debug"				=> "",
+			"notify_master"			=> "",
+			"notify_backup"			=> "",
+			"notify_fault"			=> "",
+			"notify"			=> "",
+			"smtp_alert"			=> "",
 		)
 	);
 
@@ -131,7 +139,7 @@ function parse($name, $datum) {
 	global $fd;
 	global $prim;
 	global $virt;
-	global $fail;
+	global $vrrp_instance;
 	global $serv;
 	global $service;
 	global $monitor_service;
@@ -147,7 +155,7 @@ function parse($name, $datum) {
 	static $server_count = 0;
 	static $virt_count = 0;
 	static $ip_count = 0;
-	static $fail_count = 0;
+	static $vrrp_instance_count = 0;
 	
 
 	if ($debug) {
@@ -160,6 +168,9 @@ function parse($name, $datum) {
 		if ($name == "global_defs"
 		    or $name == "notification_email"
 		    or $name == "static_ipaddress"
+		    or $name == "authentication"
+		    or $name == "virtual_ipaddress"
+		    or $name == "virtual_routes"
 		    or $name == "TCP_CHECK"
 		    or $name == "HTTP_GET"
 		    or $name == "SSL_GET"
@@ -257,8 +268,8 @@ function parse($name, $datum) {
 			case "virtual_server"				:	/* new virtual server definitition */
 									$service="lvs"; echo $service;
 									break;
-			case "failover"				:	/* new failover definitition */
-									$service="fos"; echo $service;
+			case "vrrp_instance"				:	/* new failover definitition */
+									$service="vrrp_instance"; echo $service;
 									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
@@ -348,77 +359,55 @@ function parse($name, $datum) {
 				break;
 
 
-			case "failover"		:	$fail_count++;
-							$service="fos";
-							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for failover service </I><B>\$fail[$fail_count]</B></FONT><BR>"; };
-							$fail[$fail_count]['failover']				= $datum;
+			case "vrrp_instance"	:	$vrrp_instance_count++;
+							$service="vrrp_instance";
+							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for failover service </I><B>\$vrrp_instance[$vrrp_instance_count]</B></FONT><BR>"; };
+                                                        if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]     = $datum;
+
 							break;
-			case "start_cmd"	:	if ($service == "fos") $fail[$fail_count]['start_cmd'] 	= $datum;
+			case "state"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['state'] = $datum;
+						  	break;
+			case "interface"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['interface'] = $datum;
 							break;
-			case "stop_cmd"		:	if ($service == "fos") $fail[$fail_count]['stop_cmd']	= $datum;
+			case "dont_track_primary"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['dont_track_primary'] = $datum;
 							break;
-			case "address"		:	if ($service == "fos") {
-								$fail[$fail_count]['address']			= $datum;
-							} else {
-								$virt[$virt_count]['address']			= $datum;
-							}
+			case "track_interface"	:	if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['track_interface'] = $datum;
 							break;
-			case "active"		:	if ($service == "fos") {
-								$fail[$fail_count]['active']			= $datum;
-							} else {
-								$virt[$virt_count]['active']			= $datum;
-							}
+			case "mcast_src_ip"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['mcast_src_ip']	= $datum;
 							break;
-			case "port"		:	if ($service == "fos") {
-								$fail[$fail_count]['port']			= $datum;
-							} else {
-								$virt[$virt_count]['port'] 			= $datum;
-							}
+			case "lvs_sync_daemon_interface" : if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['lvs_sync_daemon_interface'] = $datum;
+								break;
+			case "garp_master_delay"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['garp_master_delay'] = $datum;
 							break;
-			case "heartbeat"	:	if ($service == "fos") {
-								$fail[$fail_count]['heartbeat']			= $datum;
-							} /* else { $virt[$virt_count]['heartbeat'] = $datum; } */
+			case "virtual_router_id"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['virtual_router_id'] = $datum;
 							break;
-			case "send"		:	if ($service == "fos") {
-								$fail[$fail_count]['send']			= $datum;
-							} else {
-								$virt[$virt_count]['send'] 			= $datum;
-							}
+			case "priority"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['priority'] = $datum;
 							break;
-			case "expect"		:	if ($service == "fos") {
-								$fail[$fail_count]['expect']			= $datum;
-							} else {
-								$virt[$virt_count]['expect']			= $datum;
-							}
+			case "advert_int"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['advert_int'] = $datum;
 							break;
-			case "use_regex"	:	if ($service == "lvs") {
-								$virt[$virt_count]['use_regex']			= $datum;
-							}
+			case "nopreempt"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['nopreempt'] = $datum;
 							break;
-			case "send_program"	:	if ($service == "fos") {
-								$fail[$fail_count]['send_program']		= $datum;
-							} else {
-								$virt[$virt_count]['send_program']		= $datum;
-							}
+			case "preempt_delay"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['preempt_delay'] = $datum;
 							break;
-			case "expect_program"	:	if ($service == "fos") {
-								$fail[$fail_count]['expect_program']		= $datum;
-							} else {
-								$virt[$virt_count]['expect_program']		= $datum;
-							}
+			case "debug"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['debug'] = $datum;
 							break;
-			case "timeout"		:	if ($service == "fos") {
-								$fail[$fail_count]['timeout']			= $datum;
-							} else {
-								$virt[$virt_count]['timeout']			= $datum;
-							}
+			case "notify_master"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_master'] = $datum;
 							break;
-			case "vip_nmask"	:	if ($service == "fos") {
-								 $fail[$fail_count]['vip_nmask']			= $datum;
-							} else {
-								$virt[$virt_count]['vip_nmask']			= $datum;
-							}
+			case "notify_backup"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_backup'] = $datum;
 							break;
+			case "notify"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify'] = $datum;
+					 	  	break;
+			case "notify_fault"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_fault']	= $datum;
+					          	break;
+			case "smtp_alert_fault"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['smtp_alert_fault'] = $datum;
+							break;
+			case "authentication"		: /* ignore here for vrrp_instance */ 
+							break;
+			case "virtual_ipaddress"	: /* ignore here for vrrp_instance */ 
+							break;
+			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
+							break;
+
 
 			case "virtual_server"		:	$virt_count++;
 							$service = "lvs";
@@ -497,6 +486,17 @@ function parse($name, $datum) {
                                         "</B></FONT><BR>"; };
                                        $global_defs['notification_email']       = $global_defs['notification_email'] .  " $name";
                                                         break;
+
+			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = $name; 
+							break;
+			case "auth_type"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication']['auth_type'] = $datum; 
+							break;
+			case "auth_pass"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication']['auth_pass'] = $datum; 
+							break;
+			case "virtual_ipaddress"	:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['virtual_ipaddress'] = $name; 
+							break;
+			case "virtual_routes"	:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['virtual_routes'] = $name; 
+							break;
 
 									
 			case ""			:	break;
@@ -864,7 +864,7 @@ function print_arrays() {
 	/* debugging function only */
 	global $prim;
 	global $virt;
-	global $fail;
+	global $vrrp_instance;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -915,19 +915,19 @@ function print_arrays() {
 
 	$loop1 = $loop2 = 0;
 
-	while ($fail[++$loop1]['failover'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+	while ($vrrp_instance[++$loop1]['failover'] != "" ) { /* NOTE: must use *pre*incrempent not post */
 	echo "<P><B>Failover</B>";
-		echo "<BR>Failover [$loop1] [failover] = "	. $fail[$loop1]['failover'];
-		echo "<BR>Failover [$loop1] [active] = "	. $fail[$loop1]['active'];
-		echo "<BR>Failover [$loop1] [port] = "		. $fail[$loop1]['port'];
-		echo "<BR>Failover [$loop1] [timeout] = "	. $fail[$loop1]['timeout'];
-		echo "<BR>Failover [$loop1] [heartbeat] = "	. $fail[$loop1]['heartbeat'];
-		echo "<BR>Failover [$loop1] [send] = "		. $fail[$loop1]['send'];
-		echo "<BR>Failover [$loop1] [expect] = "	. $fail[$loop1]['expect'];
-		echo "<BR>Failover [$loop1] [send_program] = "	. $fail[$loop1]['send_program'];
-		echo "<BR>Failover [$loop1] [expect_program] = ". $fail[$loop1]['expect_program'];
-		echo "<BR>Failover [$loop1] [start_cmd] = "	. $fail[$loop1]['start_cmd'];
-		echo "<BR>Failover [$loop1] [stop_cmd] = "	. $fail[$loop1]['stop_cmd'];
+		echo "<BR>Failover [$loop1] [failover] = "	. $vrrp_instance[$loop1]['failover'];
+		echo "<BR>Failover [$loop1] [active] = "	. $vrrp_instance[$loop1]['active'];
+		echo "<BR>Failover [$loop1] [port] = "		. $vrrp_instance[$loop1]['port'];
+		echo "<BR>Failover [$loop1] [timeout] = "	. $vrrp_instance[$loop1]['timeout'];
+		echo "<BR>Failover [$loop1] [heartbeat] = "	. $vrrp_instance[$loop1]['heartbeat'];
+		echo "<BR>Failover [$loop1] [send] = "		. $vrrp_instance[$loop1]['send'];
+		echo "<BR>Failover [$loop1] [expect] = "	. $vrrp_instance[$loop1]['expect'];
+		echo "<BR>Failover [$loop1] [send_program] = "	. $vrrp_instance[$loop1]['send_program'];
+		echo "<BR>Failover [$loop1] [expect_program] = ". $vrrp_instance[$loop1]['expect_program'];
+		echo "<BR>Failover [$loop1] [start_cmd] = "	. $vrrp_instance[$loop1]['start_cmd'];
+		echo "<BR>Failover [$loop1] [stop_cmd] = "	. $vrrp_instance[$loop1]['stop_cmd'];
 
 	}
 	
@@ -1013,7 +1013,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $fd;
 	global $prim;
 	global $virt;
-	global $fail;
+	global $vrrp_instance;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -1277,81 +1277,81 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	}
 
 
-	while ( $fail[$loop1]['failover'] != "" ) {
+	while ( $vrrp_instance[$loop1]['failover'] != "" ) {
 		if ((($loop1 == $delete_item ) && ($level == "1")) && ($prim['service'] == "fos")) {  $loop1++; $loop2 = 1; } else {
 			if ($debug) { echo "<P><B>Failover</B><BR>"; };	
 
-			if (isset($fail[$loop1]['failover']) &&
-			    $fail[$loop1]['failover'] != "") {
-				fputs ($fd, "failover "				. $fail[$loop1]['failover']	. " {\n", 80);
-				if ($debug) { echo "failover "			. $fail[$loop1]['failover']	. " {<BR>"; };
+			if (isset($vrrp_instance[$loop1]['failover']) &&
+			    $vrrp_instance[$loop1]['failover'] != "") {
+				fputs ($fd, "failover "				. $vrrp_instance[$loop1]['failover']	. " {\n", 80);
+				if ($debug) { echo "failover "			. $vrrp_instance[$loop1]['failover']	. " {<BR>"; };
 			}
 
-			if (isset($fail[$loop1]['address']) &&
-			    $fail[$loop1]['address'] != "") {
-				fputs ($fd, "$gap1 address = "			. $fail[$loop1]['address']	. "\n", 80);
-				if ($debug) { echo "$egap1 address = "		. $fail[$loop1]['address']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['address']) &&
+			    $vrrp_instance[$loop1]['address'] != "") {
+				fputs ($fd, "$gap1 address = "			. $vrrp_instance[$loop1]['address']	. "\n", 80);
+				if ($debug) { echo "$egap1 address = "		. $vrrp_instance[$loop1]['address']	. "<BR>"; };
 			}
 			
-			if (isset($fail[$loop1]['vip_nmask']) &&
-			    $fail[$loop1]['vip_nmask'] != "") {
-				fputs ($fd, "$gap1 vip_nmask = "		. $fail[$loop1]['vip_nmask']	. "\n", 80);
-				if ($debug) { echo "$egap1 vip_nmask = "	. $fail[$loop1]['vip_nmask']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['vip_nmask']) &&
+			    $vrrp_instance[$loop1]['vip_nmask'] != "") {
+				fputs ($fd, "$gap1 vip_nmask = "		. $vrrp_instance[$loop1]['vip_nmask']	. "\n", 80);
+				if ($debug) { echo "$egap1 vip_nmask = "	. $vrrp_instance[$loop1]['vip_nmask']	. "<BR>"; };
 			}
-			if (isset($fail[$loop1]['active']) &&
-			    $fail[$loop1]['active'] != "") {
-				fputs ($fd, "$gap1 active = "			. $fail[$loop1]['active']	. "\n", 80);
-				if ($debug) { echo "$egap1 active = "		. $fail[$loop1]['active']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['active']) &&
+			    $vrrp_instance[$loop1]['active'] != "") {
+				fputs ($fd, "$gap1 active = "			. $vrrp_instance[$loop1]['active']	. "\n", 80);
+				if ($debug) { echo "$egap1 active = "		. $vrrp_instance[$loop1]['active']	. "<BR>"; };
 			}
-			if (isset($fail[$loop1]['port']) &&
-			    $fail[$loop1]['port'] != "") {
-				fputs ($fd, "$gap1 port = "			. $fail[$loop1]['port']		. "\n", 80);
-				if ($debug) { echo "$egap1 port = "		. $fail[$loop1]['port']		. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['port']) &&
+			    $vrrp_instance[$loop1]['port'] != "") {
+				fputs ($fd, "$gap1 port = "			. $vrrp_instance[$loop1]['port']		. "\n", 80);
+				if ($debug) { echo "$egap1 port = "		. $vrrp_instance[$loop1]['port']		. "<BR>"; };
 			}
-			if (isset($fail[$loop1]['timeout']) &&
-			    $fail[$loop1]['timeout'] != "") {
-				fputs ($fd, "$gap1 timeout = "			. $fail[$loop1]['timeout']	. "\n", 80);
-				if ($debug) { echo "$egap1 timeout = "		. $fail[$loop1]['timeout']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['timeout']) &&
+			    $vrrp_instance[$loop1]['timeout'] != "") {
+				fputs ($fd, "$gap1 timeout = "			. $vrrp_instance[$loop1]['timeout']	. "\n", 80);
+				if ($debug) { echo "$egap1 timeout = "		. $vrrp_instance[$loop1]['timeout']	. "<BR>"; };
 			}
-			if (isset($fail[$loop1]['heartbeat']) &&
-			    $fail[$loop1]['heartbeat'] != "") {
-				fputs ($fd, "$gap1 heartbeat = "		. $fail[$loop1]['heartbeat']	. "\n", 80);
-				if ($debug) { echo "$egap1 heartbeat = "	. $fail[$loop1]['heartbeat']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['heartbeat']) &&
+			    $vrrp_instance[$loop1]['heartbeat'] != "") {
+				fputs ($fd, "$gap1 heartbeat = "		. $vrrp_instance[$loop1]['heartbeat']	. "\n", 80);
+				if ($debug) { echo "$egap1 heartbeat = "	. $vrrp_instance[$loop1]['heartbeat']	. "<BR>"; };
 			}
-			if (isset($fail[$loop1]['send']) &&
-			    $fail[$loop1]['send'] != "") {
-				fputs ($fd, "$gap1 send = "			. $fail[$loop1]['send']		. "\n", 80);
-				if ($debug) { echo "$egap1 send = "		. $fail[$loop1]['send']		. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['send']) &&
+			    $vrrp_instance[$loop1]['send'] != "") {
+				fputs ($fd, "$gap1 send = "			. $vrrp_instance[$loop1]['send']		. "\n", 80);
+				if ($debug) { echo "$egap1 send = "		. $vrrp_instance[$loop1]['send']		. "<BR>"; };
 			}
 
-			if (isset($fail[$loop1]['expect']) &&
-			    $fail[$loop1]['expect'] != "") {
-				fputs ($fd, "$gap1 expect = "			. $fail[$loop1]['expect']	. "\n", 80);
-				if ($debug) { echo "$egap1 expect = "		. $fail[$loop1]['expect']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['expect']) &&
+			    $vrrp_instance[$loop1]['expect'] != "") {
+				fputs ($fd, "$gap1 expect = "			. $vrrp_instance[$loop1]['expect']	. "\n", 80);
+				if ($debug) { echo "$egap1 expect = "		. $vrrp_instance[$loop1]['expect']	. "<BR>"; };
 			}
 			
-			if (isset($fail[$loop1]['send_program']) &&
-			    $fail[$loop1]['send_program'] != "") {
-				fputs ($fd, "$gap1 send_program = "		. $fail[$loop1]['send_program']	. "\n", 80);
-				if ($debug) { echo "$egap1 send_program = "	. $fail[$loop1]['send_program']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['send_program']) &&
+			    $vrrp_instance[$loop1]['send_program'] != "") {
+				fputs ($fd, "$gap1 send_program = "		. $vrrp_instance[$loop1]['send_program']	. "\n", 80);
+				if ($debug) { echo "$egap1 send_program = "	. $vrrp_instance[$loop1]['send_program']	. "<BR>"; };
 			}
 
-			if (isset($fail[$loop1]['expect_program']) &&
-			    $fail[$loop1]['expect_program'] != "") {
-				fputs ($fd, "$gap1 expect_program = "		. $fail[$loop1]['expect_program']. "\n", 80);
-				if ($debug) { echo "$egap1 expect_program = "	. $fail[$loop1]['expect_program']. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['expect_program']) &&
+			    $vrrp_instance[$loop1]['expect_program'] != "") {
+				fputs ($fd, "$gap1 expect_program = "		. $vrrp_instance[$loop1]['expect_program']. "\n", 80);
+				if ($debug) { echo "$egap1 expect_program = "	. $vrrp_instance[$loop1]['expect_program']. "<BR>"; };
 			}
 
-			if (isset($fail[$loop1]['start_cmd']) &&
-			    $fail[$loop1]['start_cmd'] != "") {
-				fputs ($fd, "$gap1 start_cmd = "		. $fail[$loop1]['start_cmd']	. "\n", 80);
-				if ($debug) { echo "$egap1 start_cmd = "	. $fail[$loop1]['start_cmd']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['start_cmd']) &&
+			    $vrrp_instance[$loop1]['start_cmd'] != "") {
+				fputs ($fd, "$gap1 start_cmd = "		. $vrrp_instance[$loop1]['start_cmd']	. "\n", 80);
+				if ($debug) { echo "$egap1 start_cmd = "	. $vrrp_instance[$loop1]['start_cmd']	. "<BR>"; };
 			}
 
-			if (isset($fail[$loop1]['stop_cmd']) &&
-			    $fail[$loop1]['stop_cmd'] != "") {
-				fputs ($fd, "$gap1 stop_cmd = "			. $fail[$loop1]['stop_cmd']	. "\n", 80);
-				if ($debug) { echo "$egap1 stop_cmd = "		. $fail[$loop1]['stop_cmd']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop1]['stop_cmd']) &&
+			    $vrrp_instance[$loop1]['stop_cmd'] != "") {
+				fputs ($fd, "$gap1 stop_cmd = "			. $vrrp_instance[$loop1]['stop_cmd']	. "\n", 80);
+				if ($debug) { echo "$egap1 stop_cmd = "		. $vrrp_instance[$loop1]['stop_cmd']	. "<BR>"; };
 			}
 				
 			fputs ($fd,"}\n", 80);
@@ -1772,25 +1772,25 @@ function open_file($mode) {
 
 function add_failover() {
 
-	global $fail;
+	global $vrrp_instance;
 	$loop2 = 1;	
 
 	/* find end of existing data */
-	while ($fail[$loop2]['failover'] != "" ) { $loop2++; }
+	while ($vrrp_instance[$loop2]['failover'] != "" ) { $loop2++; }
 	
-	$fail[$loop2]['failover']	= "[server_name]";
-	$fail[$loop2]['address']	= "0.0.0.0 eth0:1";
-	$fail[$loop2]['vip_nmask']	= "255.255.255.0";
-	$fail[$loop2]['active']		= "0";
-	$fail[$loop2]['timeout']	= "6";
-	$fail[$loop2]['port']		= "80";
-	$fail[$loop2]['heartbeat']	= "";
-	$fail[$loop2]['send']		= "\"GET / HTTP/1.0\\r\\n\\r\\n\"";
-	$fail[$loop2]['expect']		= "\"HTTP\"";	
-	$fail[$loop2]['send_program']	= "";
-	$fail[$loop2]['expect_program']	= "";
-	$fail[$loop2]['start_cmd']	= "\"/etc/rc.d/init.d/httpd start\"";
-	$fail[$loop2]['stop_cmd']	= "\"/etc/rc.d/init.d/httpd stop\"";
+	$vrrp_instance[$loop2]['failover']	= "[server_name]";
+	$vrrp_instance[$loop2]['address']	= "0.0.0.0 eth0:1";
+	$vrrp_instance[$loop2]['vip_nmask']	= "255.255.255.0";
+	$vrrp_instance[$loop2]['active']		= "0";
+	$vrrp_instance[$loop2]['timeout']	= "6";
+	$vrrp_instance[$loop2]['port']		= "80";
+	$vrrp_instance[$loop2]['heartbeat']	= "";
+	$vrrp_instance[$loop2]['send']		= "\"GET / HTTP/1.0\\r\\n\\r\\n\"";
+	$vrrp_instance[$loop2]['expect']		= "\"HTTP\"";	
+	$vrrp_instance[$loop2]['send_program']	= "";
+	$vrrp_instance[$loop2]['expect_program']	= "";
+	$vrrp_instance[$loop2]['start_cmd']	= "\"/etc/rc.d/init.d/httpd start\"";
+	$vrrp_instance[$loop2]['stop_cmd']	= "\"/etc/rc.d/init.d/httpd stop\"";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
