@@ -333,7 +333,7 @@ A.logolink      {
 		<TBODY id="misc_check">
 			<TR>
 			 	<TD>External Monitor Path: </TD>
-			 	<TD><INPUT TYPE="TEXT" NAME="misc_path" VALUE=<?php echo $serv[$selected_host][$selected]['monitor']['misc_path'] ?>></TD>
+			 	<TD><INPUT TYPE="TEXT" NAME="misc_path" VALUE=<?php echo htmlentities($serv[$selected_host][$selected]['monitor']['misc_path'], ENT_QUOTES) ?>></TD>
 			</TR>
 			<TR>
 			 	<TD>External Monitor Timeout: </TD>

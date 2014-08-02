@@ -147,6 +147,7 @@ function parse($name, $datum) {
 	global $global_defs;
 	global $static_ipaddress;
 	global $local_address_group;
+	global $ip_of;
 
 	static $email_regex = '[\w\-]+\@[\w\-]+\.[\w\-]+';
 	static $ipmask_regex = '\d+\.\d+\.\d+\.\d+\/\d+';
@@ -157,8 +158,6 @@ function parse($name, $datum) {
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
-	static $virtual_ipaddress_count = 0;
-	static $virtual_routes_count = 0;
 	
 
 	if ($debug) {
@@ -451,35 +450,33 @@ function parse($name, $datum) {
 							break;
 			case "auth_pass"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['auth_pass'] = $datum; 
 							break;
-			case "virtual_ipaddress"	:  if ($service == "vrrp_instance") $ip_of = "virtual_ipaddress"; 
+			case "virtual_ipaddress"	:  if ($service == "vrrp_instance") { 
+								$ip_of = "virtual_ipaddress";
+								$vrrp_instance[$vrrp_instance_count]['virtual_ipaddress'] = array();
+							   }
 							break;
 
-			case "virtual_routes"	:  if ($service == "vrrp_instance") $ip_of = "virtual_routes"; 
+			case "virtual_routes"	:  if ($service == "vrrp_instance") { 
+								$ip_of = "virtual_routes";
+								$vrrp_instance[$vrrp_instance_count]['virtual_routes'] = array(); 
+						    }
 							break;
 
 			case (preg_match("/$ipmask_regex/", $name) ? true : false )	:	
 				if ($name != "" ) { //http://stackoverflow.com/questions/4043741/regexp-in-switch-statement
 						    //This only works when $name evaluates to true. If $name == '' this will yield wrong results. -1 
 					if ($debug) { 
-						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_instance ip address </I><B>\$static_ipaddress[$ip_count]</B></FONT><BR>"; 
+						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_instance ip address </I><B></B></FONT><BR>"; 
 					};
 					if($service == "vrrp_instance") {
-						$ipmask = explode('/', $name);
-						$ip = $ipmask[0];
-						$mask = $ipmask[1];
-						$deveth = explode(" ", $datum);
-						$dev = $deveth[1];
-						if ($ip_of == "virtual_ipaddress") {
-						    $virtual_ipaddress_count++;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_ipaddress_count]['ip'] = $ip;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_ipaddress_count]['mask'] = $mask;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_ipaddress_count]['dev'] = $dev;
-						} else if ($ip_of == "virtual_routes") {
-						    $virtual_routes_count++;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_routes_count]['ip'] = $ip;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_routes_count]['mask'] = $mask;
-						    $vrrp_instance[$vrrp_instance_count][$ip_of][$virtual_routes_count]['dev'] = $dev;
-						}
+					   if($ip_of == "virtual_ipaddress") {
+						    $vrrp_instance[$vrrp_instance_count]['virtual_ipaddress'][] = $name . " " . $datum;
+					   } else if ($ip_of == "virtual_routes") {
+						    $vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
+						    if ($debug) {
+								echo "$name $datum<BR>";
+						    }
+					   }
 					}
 				}
 				break;
@@ -763,12 +760,13 @@ function read_config() {
 					
 			}
 
-//			if (!empty($pieces[3])) { $datum = $pieces[2] . " " . $pieces[3] ; }
+			//if (!empty($pieces[3])) { $datum = $pieces[2] . " " . $pieces[3] ; }
 
-			if (!empty($pieces[4])) { /* must be a send or expect string */
+			if (!empty($pieces[4]) ) { // must be a send or expect string 
 				$datum = strstr($buffer, "\"");
 				$test = $datum;
 			}
+
 		}
 		parse($name, $datum);
 	}
@@ -882,7 +880,7 @@ function print_arrays() {
 	echo "<P><B>Local address group</B>";
 	echo "<BR>" .  var_dump($local_address_group);
 
-	$loop1 = $loop2 = 0;
+	$loop1 = $loop2 =  0;
 
 	while ($vrrp_instance[++$loop1]['vrrp_instance'] != "" ) { /* NOTE: must use *pre*incrempent not post */
 	echo "<P><B>vrrp_instance</B>";
@@ -908,15 +906,21 @@ function print_arrays() {
 		echo "<BR>vrrp_instance [$loop1] [auth_type] = "	. $vrrp_instance[$loop1]['auth_type'];
 		echo "<BR>vrrp_instance [$loop1] [auth_pass] = "	. $vrrp_instance[$loop1]['auth_pass'];
 
-                if ($ip_of == "virtual_ipaddress" or $ip_of == "virtual_routes" ) {
-		    while ( $vrrp_instance[$loop1][$ip_of][++$loop2]['ip'] != "" ) {
-		        echo "<BR>vrrp_instance [$loop1] [$ip_of] [$loop2] [ip] = "	. $vrrp_instance[$loop1][$ip_of][$loop2]['ip'];
-		        echo "<BR>vrrp_instance [$loop1] [$ip_of] [$loop2] [ip] = "	. $vrrp_instance[$loop1][$ip_of][$loop2]['mask'];
-		        echo "<BR>vrrp_instance [$loop1] [$ip_of] [$loop2] [ip] = "	. $vrrp_instance[$loop1][$ip_of][$loop2]['dev'];
-		    }
-                }
+		echo "<P><B>vrrp_instance virtual_ipaddress</B>";
+		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['virtual_ipaddress']);
+
+		echo "<P><B>vrrp_instance virtual_routes</B>";
+		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['virtual_routes']);
+
+                foreach ($vrrp_instance[$loop1]['virtual_ipaddress'] as $ip) {
+				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
+		}
+                foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
+				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
+		}
 
 	}
+	
 	
 	$loop1 = $loop2 = 0;
 	
