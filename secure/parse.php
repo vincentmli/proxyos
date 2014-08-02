@@ -740,8 +740,8 @@ function read_config() {
 				echo "pieces[2] = [$pieces[2]]<BR>";
 				echo "pieces[3] = [$pieces[3]]<BR>";
 			}
-*/
 
+*/
 			$name = $pieces[0];
 			if (strstr($buffer,"=")) {
 				if (isset($pieces[2]))
@@ -761,11 +761,12 @@ function read_config() {
 			}
 
 			//if (!empty($pieces[3])) { $datum = $pieces[2] . " " . $pieces[3] ; }
-
+/*
 			if (!empty($pieces[4]) ) { // must be a send or expect string 
 				$datum = strstr($buffer, "\"");
 				$test = $datum;
 			}
+*/
 
 		}
 		parse($name, $datum);
