@@ -481,6 +481,10 @@ function parse($name, $datum) {
 				}
 				break;
 
+			case "src"	:  if ($service == "vrrp_instance" and $ip_of == "virtual_routes")  
+					   	$vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
+				break;
+
 									
 			case ""			:	break;
 			default			:	if ($debug) { echo "<FONT COLOR=\"BLUE\">Level2 - garbage [$name] (ignored line [$buffer])</FONT><BR>"; }
@@ -746,6 +750,13 @@ function read_config() {
 			if (strstr($buffer,"=")) {
 				if (isset($pieces[2]))
 					$datum = $pieces[2];
+			}
+			else if ( $pieces[0] == "src"
+				  or $pieces[1] == "via"
+				  or $pieces[1] == "gw" ) { //virtual_routes
+			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
+				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
+				
 			}
 			else if (isset($pieces[2]) and $pieces[1] == "dev") {
                                         $datum = $pieces[1] . " " . $pieces[2];
@@ -1255,6 +1266,34 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($fd,"$gap1 }\n", 80);
 				if ($debug) { echo "$egap1 }<BR>"; }
 
+			}
+
+			if (isset($vrrp_instance[$loop1]['virtual_ipaddress']) &&
+			    $vrrp_instance[$loop1]['virtual_ipaddress'] != "") {
+				fputs ($fd, "$gap1 virtual_ipaddress "		. " {\n", 80);
+				if ($debug) { echo "$egap1 virtual_ipaddress "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop1]['virtual_ipaddress'] as $ip) {
+					fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+					if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
+			if (isset($vrrp_instance[$loop1]['virtual_routes']) &&
+			    $vrrp_instance[$loop1]['virtual_routes'] != "") {
+				fputs ($fd, "$gap1 virtual_routes "		. " {\n", 80);
+				if ($debug) { echo "$egap1 virtual_routes "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
+					fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+					if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
 			}
 				
 			fputs ($fd,"}\n", 80);
