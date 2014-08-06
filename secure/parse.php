@@ -1031,6 +1031,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop1 = $loop2 = 1;
 	$loop3 = $loop4 = 1;
 	$loop5 = $loop6 = 1;
+	$loop7 = $loop8 = 1;
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1153,114 +1154,114 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	}
 
 
-	while ( $vrrp_instance[$loop1]['vrrp_instance'] != "" ) {
-		if ((($loop1 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop1++; $loop2 = 1; } else {
+	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 1; } else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
-			if (isset($vrrp_instance[$loop1]['vrrp_instance']) &&
-			    $vrrp_instance[$loop1]['vrrp_instance'] != "") {
-				fputs ($fd, "vrrp_instance "				. $vrrp_instance[$loop1]['vrrp_instance']	. " {\n", 80);
-				if ($debug) { echo "vrrp_instance "			. $vrrp_instance[$loop1]['vrrp_instance']	. " {<BR>"; };
+			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
+			    $vrrp_instance[$loop7]['vrrp_instance'] != "") {
+				fputs ($fd, "vrrp_instance "				. $vrrp_instance[$loop7]['vrrp_instance']	. " {\n", 80);
+				if ($debug) { echo "vrrp_instance "			. $vrrp_instance[$loop7]['vrrp_instance']	. " {<BR>"; };
 			}
 
-			if (isset($vrrp_instance[$loop1]['state']) &&
-			    $vrrp_instance[$loop1]['state'] != "") {
-				fputs ($fd, "$gap1 state "			. $vrrp_instance[$loop1]['state']	. "\n", 80);
-				if ($debug) { echo "$egap1 state "		. $vrrp_instance[$loop1]['state']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['state']) &&
+			    $vrrp_instance[$loop7]['state'] != "") {
+				fputs ($fd, "$gap1 state "			. $vrrp_instance[$loop7]['state']	. "\n", 80);
+				if ($debug) { echo "$egap1 state "		. $vrrp_instance[$loop7]['state']	. "<BR>"; };
 			}
 			
-			if (isset($vrrp_instance[$loop1]['interface']) &&
-			    $vrrp_instance[$loop1]['interface'] != "") {
-				fputs ($fd, "$gap1 interface "		. $vrrp_instance[$loop1]['interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 interface "	. $vrrp_instance[$loop1]['interface']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['interface']) &&
+			    $vrrp_instance[$loop7]['interface'] != "") {
+				fputs ($fd, "$gap1 interface "		. $vrrp_instance[$loop7]['interface']	. "\n", 80);
+				if ($debug) { echo "$egap1 interface "	. $vrrp_instance[$loop7]['interface']	. "<BR>"; };
 			}
 
-			if (isset($vrrp_instance[$loop1]['dont_track_primary']) &&
-			    $vrrp_instance[$loop1]['dont_track_primary'] != "") {
-				fputs ($fd, "$gap1 dont_track_primary "		. $vrrp_instance[$loop1]['dont_track_primary']	. "\n", 80);
-				if ($debug) { echo "$egap1 dont_track_primary "	. $vrrp_instance[$loop1]['dont_track_primary']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['dont_track_primary']) &&
+			    $vrrp_instance[$loop7]['dont_track_primary'] != "") {
+				fputs ($fd, "$gap1 dont_track_primary "		. $vrrp_instance[$loop7]['dont_track_primary']	. "\n", 80);
+				if ($debug) { echo "$egap1 dont_track_primary "	. $vrrp_instance[$loop7]['dont_track_primary']	. "<BR>"; };
 			}
 
-			if (isset($vrrp_instance[$loop1]['track_interface']) &&
-			    $vrrp_instance[$loop1]['track_interface'] != "") {
-				fputs ($fd, "$gap1 track_interface "		. $vrrp_instance[$loop1]['track_interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 track_interface "	. $vrrp_instance[$loop1]['track_interface']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['track_interface']) &&
+			    $vrrp_instance[$loop7]['track_interface'] != "") {
+				fputs ($fd, "$gap1 track_interface "		. $vrrp_instance[$loop7]['track_interface']	. "\n", 80);
+				if ($debug) { echo "$egap1 track_interface "	. $vrrp_instance[$loop7]['track_interface']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['mcast_src_ip']) &&
-			    $vrrp_instance[$loop1]['mcast_src_ip'] != "") {
-				fputs ($fd, "$gap1 mcast_src_ip "		. $vrrp_instance[$loop1]['mcast_src_ip']	. "\n", 80);
-				if ($debug) { echo "$egap1 mcast_src_ip "	. $vrrp_instance[$loop1]['mcast_src_ip']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['mcast_src_ip']) &&
+			    $vrrp_instance[$loop7]['mcast_src_ip'] != "") {
+				fputs ($fd, "$gap1 mcast_src_ip "		. $vrrp_instance[$loop7]['mcast_src_ip']	. "\n", 80);
+				if ($debug) { echo "$egap1 mcast_src_ip "	. $vrrp_instance[$loop7]['mcast_src_ip']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['lvs_sync_daemon_interface']) &&
-			    $vrrp_instance[$loop1]['lvs_sync_daemon_interface'] != "") {
-				fputs ($fd, "$gap1 lvs_sync_daemon_interface "		. $vrrp_instance[$loop1]['lvs_sync_daemon_interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 lvs_sync_daemon_interface "	. $vrrp_instance[$loop1]['lvs_sync_daemon_interface']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['lvs_sync_daemon_interface']) &&
+			    $vrrp_instance[$loop7]['lvs_sync_daemon_interface'] != "") {
+				fputs ($fd, "$gap1 lvs_sync_daemon_interface "		. $vrrp_instance[$loop7]['lvs_sync_daemon_interface']	. "\n", 80);
+				if ($debug) { echo "$egap1 lvs_sync_daemon_interface "	. $vrrp_instance[$loop7]['lvs_sync_daemon_interface']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['garp_master_delay']) &&
-			    $vrrp_instance[$loop1]['garp_master_delay'] != "") {
-				fputs ($fd, "$gap1 garp_master_delay "		. $vrrp_instance[$loop1]['garp_master_delay']	. "\n", 80);
-				if ($debug) { echo "$egap1 garp_master_delay "	. $vrrp_instance[$loop1]['garp_master_delay']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['garp_master_delay']) &&
+			    $vrrp_instance[$loop7]['garp_master_delay'] != "") {
+				fputs ($fd, "$gap1 garp_master_delay "		. $vrrp_instance[$loop7]['garp_master_delay']	. "\n", 80);
+				if ($debug) { echo "$egap1 garp_master_delay "	. $vrrp_instance[$loop7]['garp_master_delay']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['virtual_router_id']) &&
-			    $vrrp_instance[$loop1]['virtual_router_id'] != "") {
-				fputs ($fd, "$gap1 virtual_router_id "		. $vrrp_instance[$loop1]['virtual_router_id']	. "\n", 80);
-				if ($debug) { echo "$egap1 virtual_router_id "	. $vrrp_instance[$loop1]['virtual_router_id']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['virtual_router_id']) &&
+			    $vrrp_instance[$loop7]['virtual_router_id'] != "") {
+				fputs ($fd, "$gap1 virtual_router_id "		. $vrrp_instance[$loop7]['virtual_router_id']	. "\n", 80);
+				if ($debug) { echo "$egap1 virtual_router_id "	. $vrrp_instance[$loop7]['virtual_router_id']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['priority']) &&
-			    $vrrp_instance[$loop1]['priority'] != "") {
-				fputs ($fd, "$gap1 priority "		. $vrrp_instance[$loop1]['priority']	. "\n", 80);
-				if ($debug) { echo "$egap1 priority "	. $vrrp_instance[$loop1]['priority']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['priority']) &&
+			    $vrrp_instance[$loop7]['priority'] != "") {
+				fputs ($fd, "$gap1 priority "		. $vrrp_instance[$loop7]['priority']	. "\n", 80);
+				if ($debug) { echo "$egap1 priority "	. $vrrp_instance[$loop7]['priority']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['advert_int']) &&
-			    $vrrp_instance[$loop1]['advert_int'] != "") {
-				fputs ($fd, "$gap1 advert_int "		. $vrrp_instance[$loop1]['advert_int']	. "\n", 80);
-				if ($debug) { echo "$egap1 advert_int "	. $vrrp_instance[$loop1]['advert_int']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['advert_int']) &&
+			    $vrrp_instance[$loop7]['advert_int'] != "") {
+				fputs ($fd, "$gap1 advert_int "		. $vrrp_instance[$loop7]['advert_int']	. "\n", 80);
+				if ($debug) { echo "$egap1 advert_int "	. $vrrp_instance[$loop7]['advert_int']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['nopreempt']) &&
-			    $vrrp_instance[$loop1]['nopreempt'] != "") {
-				fputs ($fd, "$gap1 nopreempt "		. $vrrp_instance[$loop1]['nopreempt']	. "\n", 80);
-				if ($debug) { echo "$egap1 nopreempt "	. $vrrp_instance[$loop1]['nopreempt']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['nopreempt']) &&
+			    $vrrp_instance[$loop7]['nopreempt'] != "") {
+				fputs ($fd, "$gap1 nopreempt "		. $vrrp_instance[$loop7]['nopreempt']	. "\n", 80);
+				if ($debug) { echo "$egap1 nopreempt "	. $vrrp_instance[$loop7]['nopreempt']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['preempt_delay']) &&
-			    $vrrp_instance[$loop1]['preempt_delay'] != "") {
-				fputs ($fd, "$gap1 preempt_delay "		. $vrrp_instance[$loop1]['preempt_delay']	. "\n", 80);
-				if ($debug) { echo "$egap1 preempt_delay "	. $vrrp_instance[$loop1]['preempt_delay']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['preempt_delay']) &&
+			    $vrrp_instance[$loop7]['preempt_delay'] != "") {
+				fputs ($fd, "$gap1 preempt_delay "		. $vrrp_instance[$loop7]['preempt_delay']	. "\n", 80);
+				if ($debug) { echo "$egap1 preempt_delay "	. $vrrp_instance[$loop7]['preempt_delay']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['debug']) &&
-			    $vrrp_instance[$loop1]['debug'] != "") {
-				fputs ($fd, "$gap1 debug "		. $vrrp_instance[$loop1]['debug']	. "\n", 80);
-				if ($debug) { echo "$egap1 debug "	. $vrrp_instance[$loop1]['debug']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['debug']) &&
+			    $vrrp_instance[$loop7]['debug'] != "") {
+				fputs ($fd, "$gap1 debug "		. $vrrp_instance[$loop7]['debug']	. "\n", 80);
+				if ($debug) { echo "$egap1 debug "	. $vrrp_instance[$loop7]['debug']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['notify_master']) &&
-			    $vrrp_instance[$loop1]['notify_master'] != "") {
-				fputs ($fd, "$gap1 notify_master "		. $vrrp_instance[$loop1]['notify_master']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_master "	. $vrrp_instance[$loop1]['notify_master']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['notify_master']) &&
+			    $vrrp_instance[$loop7]['notify_master'] != "") {
+				fputs ($fd, "$gap1 notify_master "		. $vrrp_instance[$loop7]['notify_master']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_master "	. $vrrp_instance[$loop7]['notify_master']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['notify_backup']) &&
-			    $vrrp_instance[$loop1]['notify_backup'] != "") {
-				fputs ($fd, "$gap1 notify_backup "		. $vrrp_instance[$loop1]['notify_backup']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_instance[$loop1]['notify_backup']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['notify_backup']) &&
+			    $vrrp_instance[$loop7]['notify_backup'] != "") {
+				fputs ($fd, "$gap1 notify_backup "		. $vrrp_instance[$loop7]['notify_backup']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_instance[$loop7]['notify_backup']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['smtp_alert_fault']) &&
-			    $vrrp_instance[$loop1]['smtp_alert_fault'] != "") {
-				fputs ($fd, "$gap1 smtp_alert_fault "		. $vrrp_instance[$loop1]['smtp_alert_fault']	. "\n", 80);
-				if ($debug) { echo "$egap1 smtp_alert_fault "	. $vrrp_instance[$loop1]['smtp_alert_fault']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['smtp_alert_fault']) &&
+			    $vrrp_instance[$loop7]['smtp_alert_fault'] != "") {
+				fputs ($fd, "$gap1 smtp_alert_fault "		. $vrrp_instance[$loop7]['smtp_alert_fault']	. "\n", 80);
+				if ($debug) { echo "$egap1 smtp_alert_fault "	. $vrrp_instance[$loop7]['smtp_alert_fault']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop1]['authentication']) &&
-			    $vrrp_instance[$loop1]['authentication'] != "") {
+			if (isset($vrrp_instance[$loop7]['authentication']) &&
+			    $vrrp_instance[$loop7]['authentication'] != "") {
 
 				fputs ($fd, "$gap1 authentication "		. " {\n", 80);
 				if ($debug) { echo "$egap1 authentication "	. " {<BR>"; };
 
-				if (isset($vrrp_instance[$loop1]['auth_type']) &&
-			    		$vrrp_instance[$loop1]['auth_type'] != "") {
-					fputs ($fd, "$gap2 auth_type "		. $vrrp_instance[$loop1]['auth_type']	. "\n", 80);
-					if ($debug) { echo "$egap2 auth_type "	. $vrrp_instance[$loop1]['auth_type']	. "<BR>"; };
+				if (isset($vrrp_instance[$loop7]['auth_type']) &&
+			    		$vrrp_instance[$loop7]['auth_type'] != "") {
+					fputs ($fd, "$gap2 auth_type "		. $vrrp_instance[$loop7]['auth_type']	. "\n", 80);
+					if ($debug) { echo "$egap2 auth_type "	. $vrrp_instance[$loop7]['auth_type']	. "<BR>"; };
 				}
-				if (isset($vrrp_instance[$loop1]['auth_pass']) &&
-			    		$vrrp_instance[$loop1]['auth_pass'] != "") {
-					fputs ($fd, "$gap2 auth_pass "		. $vrrp_instance[$loop1]['auth_pass']	. "\n", 80);
-					if ($debug) { echo "$egap2 auth_pass "	. $vrrp_instance[$loop1]['auth_pass']	. "<BR>"; };
+				if (isset($vrrp_instance[$loop7]['auth_pass']) &&
+			    		$vrrp_instance[$loop7]['auth_pass'] != "") {
+					fputs ($fd, "$gap2 auth_pass "		. $vrrp_instance[$loop7]['auth_pass']	. "\n", 80);
+					if ($debug) { echo "$egap2 auth_pass "	. $vrrp_instance[$loop7]['auth_pass']	. "<BR>"; };
 				}
 
 				fputs ($fd,"$gap1 }\n", 80);
@@ -1268,26 +1269,34 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 			}
 
-			if (isset($vrrp_instance[$loop1]['virtual_ipaddress']) &&
-			    $vrrp_instance[$loop1]['virtual_ipaddress'] != "") {
+			if (isset($vrrp_instance[$loop7]['virtual_ipaddress']) &&
+			    $vrrp_instance[$loop7]['virtual_ipaddress'] != "") {
 				fputs ($fd, "$gap1 virtual_ipaddress "		. " {\n", 80);
 				if ($debug) { echo "$egap1 virtual_ipaddress "	. " {<BR>"; };
 
-		                foreach ($vrrp_instance[$loop1]['virtual_ipaddress'] as $ip) {
-					fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
-					if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+		                foreach ($vrrp_instance[$loop7]['virtual_ipaddress'] as $ip) {
+
+                                	if (($loop8 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_ipaddress")) {
+                                        	$loop8++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+						$loop8++;
+					}
                 		}
 
 				fputs ($fd,"$gap1 }\n", 80);
 				if ($debug) { echo "$egap1 }<BR>"; }
 			}
 
-			if (isset($vrrp_instance[$loop1]['virtual_routes']) &&
-			    $vrrp_instance[$loop1]['virtual_routes'] != "") {
+			if (isset($vrrp_instance[$loop7]['virtual_routes']) &&
+			    $vrrp_instance[$loop7]['virtual_routes'] != "") {
 				fputs ($fd, "$gap1 virtual_routes "		. " {\n", 80);
 				if ($debug) { echo "$egap1 virtual_routes "	. " {<BR>"; };
 
-		                foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
+		                foreach ($vrrp_instance[$loop7]['virtual_routes'] as $ip) {
 					fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
 					if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
                 		}
@@ -1298,8 +1307,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				
 			fputs ($fd,"}\n", 80);
 
-			$loop1++;
-			$loop2 = 1;
+			$loop7++;
+			$loop8 = 1;
 			
 		}
 	}
@@ -1819,6 +1828,14 @@ function add_service($virt_idx) {
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */;
 
+}
+
+function add_vrrp_virtual_ipaddress($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['virtual_ipaddress'][] = "ip/netmask dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
 function CIDRtoMask($int) {

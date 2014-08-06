@@ -58,3 +58,16 @@ $(document).ready(function() {
    	   "invalid port"
    );
 });
+
+function delIPPort() {
+//remove selected index from selected
+    //    //see http://api.jquery.com/remove/
+}
+function addIPPort() {
+    var ip = $("#virtual_ipaddress_ip"); // see http://api.jquery.com/category/selectors/
+    var mask = $("#virtual_ipadress_mask");
+    //http://api.jquery.com/val/ and http://api.jquery.com/append/
+   $("#virtual_ipaddress").append("<option>" + ip.val() + "/" + mask.val() + "</option>"); 
+   mask.val("");
+   ip.val("");
+}

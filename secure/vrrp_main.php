@@ -1,18 +1,18 @@
 <?php
 	$selected_host="";
-	$virtual_service="";
+	$vrrp_service="";
 
 	if (isset($_POST['selected_host'])) {
         	$selected_host=$_POST['selected_host'];
 	}
-	if (isset($_POST['virtual_service'])) {
-		$virtual_service=$_POST['virtual_service'];
+	if (isset($_POST['vrrp_service'])) {
+		$vrrp_service=$_POST['vrrp_service'];
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ($virtual_service == "EDIT") {
+	if ($vrrp_service == "EDIT") {
 		/* Redirect browser to editing page */
-		header("Location: virtual_edit_virt.php?selected_host=$selected_host");
+		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -85,25 +85,25 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">VIRTUAL SERVERS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">VRRP INSTANCE</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
 <?php
-	$virtual_service = "";
-	if (isset($_POST['virtual_service'])) {
-		$virtual_service = $_POST['virtual_service'];
+	$vrrp_service = "";
+	if (isset($_POST['vrrp_service'])) {
+		$vrrp_service = $_POST['vrrp_service'];
 	}
 
-	if ($virtual_service == "ADD") {
+	if ($vrrp_service == "ADD") {
 		
-		add_virtual(); /* append new data */
+		add_vrrp(); /* append new data */
 		
 	}
-	if ($virtual_service == "DELETE" ) {
-		$delete_service = "virtual";
+	if ($vrrp_service == "DELETE" ) {
+		$delete_service = "vrrp";
 		/* if ($debug) { echo "About to delete entry number $selected_host<BR>"; } */
 		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"virtual_main.php\" NAME=\"Virtual\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
 		open_file("w+");
@@ -135,23 +135,20 @@ A.logolink      {
         </TR>
 </TABLE>
 
-<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="virtual_main.php">
+<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_main.php">
 
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
 		<TR>
 			<TD></TD>
-			       	<TD CLASS="title">IP</TD>
-			       	<TD CLASS="title">PORT</TD>
-  		              	<TD CLASS="title">SCHEDULER</TD>
-				<TD CLASS="title">FORWARD</TD>
-				<TD CLASS="title">SNAT</TD>
-                		<TD CLASS="title">PROTOCOL</TD>
+			       	<TD CLASS="title">VRRP NAME</TD>
+			       	<TD CLASS="title">STATE</TD>
+  		              	<TD CLASS="title">PRIORITY</TD>
 		</TR>
 
 <?php
 	$loop1 = 1;
 	
-	while (isset($virt[$loop1]['ip']) && $virt[$loop1]['ip'] != "") { /* for all virtual items... */
+	while (isset($vrrp_instance[$loop1]['vrrp_instance']) && $vrrp_instance[$loop1]['vrrp_instance'] != "") { /* for all virtual items... */
 
 		/* lhh - this CONFIRM is never made by any form
 		if ($virtual_action == "CONFIRM") { $virt[$loop1t]['protocol'] = $index; };
@@ -174,33 +171,15 @@ A.logolink      {
 	 		echo "</TD>";
 */
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=ip		SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['ip']	. ">";
-		echo $virt[$loop1]['ip']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=vrrp_instance		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['vrrp_instance']	. ">";
+		echo $vrrp_instance[$loop1]['vrrp_instance']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=port		SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['port']	. ">";
-		echo $virt[$loop1]['port']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=state		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['state']	. ">";
+		echo $vrrp_instance[$loop1]['state']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=lb_algo		SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['lb_algo']	. ">";
-		echo $virt[$loop1]['lb_algo']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=priority		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['priority']	. ">";
+		echo $vrrp_instance[$loop1]['priority']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=lb_kind		SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['lb_kind']	. ">";
-		echo $virt[$loop1]['lb_kind']	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=laddr_group_name	SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['laddr_group_name']	. ">";
-		echo $virt[$loop1]['laddr_group_name']	. "</TD>";
-
-
-		echo "<TD>";
-
-		switch ($virt[$loop1]['protocol']) {
-			case	""	:	$virt[$loop1]['protocol'] = "tcp"; break;
-			case	"tcp"	:	$virt[$loop1]['protocol'] = "tcp"; break;
-			case	"udp"	:	$virt[$loop1]['protocol'] = "udp"; break;
-			default		:	$virt[$loop1]['protocol'] = "tcp"; break;
-		}
-
-		echo $virt[$loop1]['protocol'];
-		echo "</TD>";
 		
 		echo "</TR>";
 		$loop1++;
@@ -216,10 +195,10 @@ A.logolink      {
 
 	<TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 	</TABLE>
 	<P>
@@ -227,7 +206,7 @@ A.logolink      {
 <?php // echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>" ?>
 
 <?php
-	if ($virtual_service != "DELETE") {
+	if ($vrrp_service != "DELETE") {
 		open_file("w+");
 		write_config("");
 	}
