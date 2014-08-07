@@ -1031,7 +1031,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop1 = $loop2 = 1;
 	$loop3 = $loop4 = 1;
 	$loop5 = $loop6 = 1;
-	$loop7 = $loop8 = 1;
+	$loop7  = 1;
+	$loop8  = 0;
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1155,7 +1156,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 1; } else {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; } else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
 			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
@@ -1308,7 +1309,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			fputs ($fd,"}\n", 80);
 
 			$loop7++;
-			$loop8 = 1;
+			$loop8 = 0;
 			
 		}
 	}

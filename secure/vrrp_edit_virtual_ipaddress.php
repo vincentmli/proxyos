@@ -42,7 +42,7 @@
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
 		echo "<HR><H2>Click <A HREF=\"vrrp_edit_virtual_ipaddress.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
-		write_config("2", $selected_host, $selected, $delete_service);
+		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
 

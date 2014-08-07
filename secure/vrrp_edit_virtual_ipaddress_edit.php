@@ -12,7 +12,7 @@
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
-	global $serv;
+	global $vrrp_instance;
 
 	require('parse.php');
 
@@ -143,15 +143,15 @@ A.logolink      {
 	<TABLE>
 		<TR>
 			<TD>IP: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="ip" VALUE=<?php echo $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected] ?>></TD>
+			<TD><INPUT TYPE="TEXT" NAME="ip" VALUE=<?php  $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); $ipnetmask = explode("/", $ips[0]); echo $ipnetmask[0];  ?>></TD>
 		</TR>
 		<TR>
 			<TD>NETMASK: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="netmask" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected]); $ipnetmask = explode("/", $ips[0]); echo $ipnetmask[1] ?>></TD>
+			<TD><INPUT TYPE="TEXT" NAME="netmask" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); $ipnetmask = explode("/", $ips[0]); echo $ipnetmask[1] ?>></TD>
 		</TR>
 		<TR>
 			<TD>INTERFACE: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="interface" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected]); echo $ips[2] ?>></TD>
+			<TD><INPUT TYPE="TEXT" NAME="interface" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); echo $ips[2] ?>></TD>
 		</TR>
 
 	</TABLE>
