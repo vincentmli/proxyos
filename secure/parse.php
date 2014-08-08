@@ -1032,7 +1032,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop3 = $loop4 = 1;
 	$loop5 = $loop6 = 1;
 	$loop7  = 1;
-	$loop8  = 0;
+	$loop8  = 0; //vrrp virtual_ipaddress
+	$loop9 = 0; //vrrp virtual_routes 
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1156,7 +1157,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; } else {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; } else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
 			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
@@ -1298,18 +1299,27 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				if ($debug) { echo "$egap1 virtual_routes "	. " {<BR>"; };
 
 		                foreach ($vrrp_instance[$loop7]['virtual_routes'] as $ip) {
-					fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
-					if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+
+                                	if (($loop9 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_routes")) {
+                                        	$loop9++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+						$loop9++;
+					}
                 		}
 
 				fputs ($fd,"$gap1 }\n", 80);
 				if ($debug) { echo "$egap1 }<BR>"; }
 			}
-				
+
 			fputs ($fd,"}\n", 80);
 
 			$loop7++;
 			$loop8 = 0;
+			$loop9 = 0;
 			
 		}
 	}
@@ -1722,27 +1732,17 @@ function open_file($mode) {
         rewind($fd); /* unnessecary but I'm paranoid */
 }
 
-function add_failover() {
+function add_vrrp() {
 
 	global $vrrp_instance;
 	$loop2 = 1;	
 
 	/* find end of existing data */
-	while ($vrrp_instance[$loop2]['failover'] != "" ) { $loop2++; }
+	while ($vrrp_instance[$loop2]['vrrp_instance'] != "" ) { $loop2++; }
 	
-	$vrrp_instance[$loop2]['failover']	= "[server_name]";
-	$vrrp_instance[$loop2]['address']	= "0.0.0.0 eth0:1";
-	$vrrp_instance[$loop2]['vip_nmask']	= "255.255.255.0";
-	$vrrp_instance[$loop2]['active']		= "0";
-	$vrrp_instance[$loop2]['timeout']	= "6";
-	$vrrp_instance[$loop2]['port']		= "80";
-	$vrrp_instance[$loop2]['heartbeat']	= "";
-	$vrrp_instance[$loop2]['send']		= "\"GET / HTTP/1.0\\r\\n\\r\\n\"";
-	$vrrp_instance[$loop2]['expect']		= "\"HTTP\"";	
-	$vrrp_instance[$loop2]['send_program']	= "";
-	$vrrp_instance[$loop2]['expect_program']	= "";
-	$vrrp_instance[$loop2]['start_cmd']	= "\"/etc/rc.d/init.d/httpd start\"";
-	$vrrp_instance[$loop2]['stop_cmd']	= "\"/etc/rc.d/init.d/httpd stop\"";
+	$vrrp_instance[$loop2]['vrrp_instance']	= "[vrrp_instance_name]";
+	$vrrp_instance[$loop2]['state']	= "MASTER|SLAVE";
+	$vrrp_instance[$loop2]['priority']	= "[priority]";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
@@ -1835,6 +1835,14 @@ function add_vrrp_virtual_ipaddress($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['virtual_ipaddress'][] = "ip/netmask dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_virtual_routes($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "srcip to network/netmask via gateway dev ethxxx";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
