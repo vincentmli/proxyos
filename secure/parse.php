@@ -1842,7 +1842,7 @@ function add_vrrp_virtual_ipaddress($vrrp_idx) {
 function add_vrrp_virtual_routes($vrrp_idx) {
 
 	global $vrrp_instance;
-	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "srcip to network/netmask via gateway dev ethxxx";
+	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "src ip to network/netmask via gateway dev ethxxx";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
