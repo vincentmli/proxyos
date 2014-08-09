@@ -23,7 +23,7 @@
 		$ip	=	$_GET['ip'];
 		$netmask	=	$_GET['netmask'];
 		$interface	=	$_GET['interface'];
-		$vrrp_instance[$selected_host]['virtual_ipaddress'][]		= "$ip/$netmask dev $interface";	
+		$vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]		= "$ip/$netmask dev $interface";	
 
 	}
 
@@ -93,7 +93,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT REAL SERVER</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -141,23 +141,32 @@ A.logolink      {
 
 
 	<TABLE>
-		<TR>
-			<TD>IP: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="ip" VALUE=<?php  $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); $ipnetmask = explode("/", $ips[0]); echo $ipnetmask[0];  ?>></TD>
-		</TR>
-		<TR>
-			<TD>NETMASK: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="netmask" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); $ipnetmask = explode("/", $ips[0]); echo $ipnetmask[1] ?>></TD>
-		</TR>
-		<TR>
-			<TD>INTERFACE: </TD>
-			<TD><INPUT TYPE="TEXT" NAME="interface" VALUE=<?php $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]); echo $ips[2] ?>></TD>
-		</TR>
 
-	</TABLE>
+	<?php	
+		$ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]);
+		$ipnetmask = explode("/", $ips[0]);
+		$ip = $ipnetmask[0];
+		$netmask = $ipnetmask[1];
+		$interface = $ips[2];
+
+		echo "<TR>";
+			echo "<TD>IP: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=ip VALUE=\""; echo $ip . "\""  . ">"; echo "</TD>";
+		echo "</TR>";
+
+		echo "<TR>";
+			echo "<TD>NETMASK: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=netmask VALUE=\""; echo $netmask . "\""  . ">"; echo "</TD>";
+		echo "</TR>";
+
+		echo "<TR>";
+			echo "<TD>INTERFACE: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=interface VALUE=\""; echo $interface . "\""  . ">"; echo "</TD>";
+		echo "</TR>";
+
+	echo "</TABLE>";
 
 	
-	<?php	
 		/* Welcome to the magic show */
 		echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>";
 		echo "<INPUT TYPE=HIDDEN NAME=selected VALUE=$selected >";

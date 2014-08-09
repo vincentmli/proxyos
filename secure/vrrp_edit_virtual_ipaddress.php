@@ -192,13 +192,13 @@ A.logolink      {
 		$netmask = $ipnetmask[1];
 		$interface = $ips[2];
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";		echo $ips[0]	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ips[0]	. ">";
 		echo $ip	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";		echo $netmask	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";	echo $netmask	. ">";
 		echo $netmask	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";		echo $interface	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
 		echo $interface	. "</TD>";
 
 		echo "</TR>";
