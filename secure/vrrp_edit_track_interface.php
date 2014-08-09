@@ -10,7 +10,7 @@
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "CANCEL")) {
+	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "CANCEL")) {
 		/* Redirect browser to editing page */
 		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
@@ -18,9 +18,9 @@
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "EDIT")) {
+	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_virtual_routes_edit.php?selected_host=$selected_host&selected=$selected");
+		header("Location: vrrp_edit_track_interface_edit.php?selected_host=$selected_host&selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -33,20 +33,20 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "ADD")) {
-		add_vrrp_virtual_routes($selected_host);
+	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "ADD")) {
+		add_vrrp_track_interface($selected_host);
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "DELETE")) {
-		$delete_service = "vrrp_virtual_routes";
+	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "DELETE")) {
+		$delete_service = "vrrp_track_interface";
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"vrrp_edit_virtual_routes.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"vrrp_edit_track_interface.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
 		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "(DE)ACTIVATE")) {
+	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "(DE)ACTIVATE")) {
 		switch ($serv[$selected_host][$selected]['active']) {
 			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
 			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
@@ -119,7 +119,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL ROUTES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK INTERFACE</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -134,7 +134,7 @@ A.logolink      {
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="static_ipaddress.php" NAME="Static ipaddress" CLASS="taboff"><B>STATIC IPADDRESS</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="local_address_group.php" NAME="Local address group" CLASS="taboff"><B>SNAT ADDRESS GROUP</B></A> </TD>
                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER" BGCOLOR="#FFFFFF"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
+                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
 </TABLE>
@@ -161,25 +161,18 @@ A.logolink      {
 
 		</TD>
 
-
-
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
 
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_routes.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_interface.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">SOURCE IP</TD>
-		<TD CLASS="title">DESTINATION NETWORK</TD>
-		<TD CLASS="title">NETMASK</TD>
-		<TD CLASS="title">GATEWAY</TD>
 		<TD CLASS="title">INTERFACE</TD>
-<?php //	<TD CLASS="title">NETMASK</TD> ?>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
@@ -191,40 +184,11 @@ A.logolink      {
 
 	$loop=1;
 
-//	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
-	foreach ($vrrp_instance[$selected_host]['virtual_routes'] as $ip) {
+	foreach ($vrrp_instance[$selected_host]['track_interface'] as $interface) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
-				
-		$ips = explode(" ", $ip);
-		if ($ips[0] == "src") {
-			$srcip = $ips[1];
-			$dst = explode("/", $ips[3]);
-			$network = $dst[0];
-			$netmask = $dst[1];
-			$gateway = $ips[5];
-			$interface = $ips[7];
-		} else {
-			$dst = explode("/", $ips[0]);
-			$network = $dst[0];
-			$netmask = $dst[1];
-			$gateway = $ips[2];
-			$interface = $ips[4];
-		}
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=srcip COLS=6 VALUE=";		echo $srcip	. ">";
-		echo $srcip	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=network COLS=6 VALUE=";		echo $network	. ">";
-		echo $network	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";		echo $netmask	. ">";
-		echo $netmask	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=gateway COLS=6 VALUE=";		echo $gateway	. ">";
-		echo $gateway	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";		echo $interface	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
 		echo $interface	. "</TD>";
 
 		echo "</TR>";
@@ -244,10 +208,10 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 
@@ -257,7 +221,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>

@@ -3,7 +3,7 @@
         $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_virtual_ipaddress.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: vrrp_edit_track_interface.php?selected_host=$selected_host&selected=$selected");		
 		exit;
 	}
 	
@@ -20,10 +20,9 @@
 		
 	if ($edit_action == "ACCEPT") {
 
-		$ip	=	$_GET['ip'];
-		$netmask	=	$_GET['netmask'];
 		$interface	=	$_GET['interface'];
-		$vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]		= "$ip/$netmask dev $interface";	
+		$vrrp_instance[$selected_host]['track_interface'][$selected-1]		= "$interface";	
+		echo $interface;
 
 	}
 
@@ -93,7 +92,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK INTERFACE</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -108,7 +107,7 @@ A.logolink      {
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="static_ipaddress.php" NAME="Static ipaddress" CLASS="taboff"><B>STATIC IPADDRESS</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="local_address_group.php" NAME="Local address group" CLASS="taboff"><B>SNAT ADDRESS GROUP</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER" BGCOLOR="#FFFFFF"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
+                <TD WIDTH="16.66%" ALIGN="CENTER" > <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
 </TABLE>
@@ -142,27 +141,13 @@ A.logolink      {
 <P>
 
 
-<FORM id="vrrp_virtual_ipaddress_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_ipaddress_edit.php">
+<FORM id="vrrp_track_interface_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_interface_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-		$ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]);
-		$ipnetmask = explode("/", $ips[0]);
-		$ip = $ipnetmask[0];
-		$netmask = $ipnetmask[1];
-		$interface = $ips[2];
-
-		echo "<TR>";
-			echo "<TD>IP: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=ip VALUE=\""; echo $ip . "\""  . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>NETMASK: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=netmask VALUE=\""; echo $netmask . "\""  . ">"; echo "</TD>";
-		echo "</TR>";
+		$interface =  $vrrp_instance[$selected_host]['track_interface'][$selected-1];
 
 		echo "<TR>";
 			echo "<TD>INTERFACE: </TD>";

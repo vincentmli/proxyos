@@ -148,10 +148,12 @@ function parse($name, $datum) {
 	global $static_ipaddress;
 	global $local_address_group;
 	global $ip_of;
+	global $is_track_interface;
 
 	static $email_regex = '[\w\-]+\@[\w\-]+\.[\w\-]+';
 	static $ipmask_regex = '\d+\.\d+\.\d+\.\d+\/\d+';
 	static $ip_regex = '\d+\.\d+\.\d+\.\d+';
+	static $interface_regex = 'eth*'; //may adjust to other interface naming
 	static $laddrgname;
 	static $level = 0 ;
 	static $server_count = 0;
@@ -173,6 +175,7 @@ function parse($name, $datum) {
 		    or $name == "authentication"
 		    or $name == "virtual_ipaddress"
 		    or $name == "virtual_routes"
+		    or $name == "track_interface"
 		    or $name == "TCP_CHECK"
 		    or $name == "HTTP_GET"
 		    or $name == "SSL_GET"
@@ -328,8 +331,6 @@ function parse($name, $datum) {
 							break;
 			case "dont_track_primary"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['dont_track_primary'] = $datum;
 							break;
-			case "track_interface"	:	if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['track_interface'] = $datum;
-							break;
 			case "mcast_src_ip"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['mcast_src_ip']	= $datum;
 							break;
 			case "lvs_sync_daemon_interface" : if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['lvs_sync_daemon_interface'] = $datum;
@@ -363,6 +364,8 @@ function parse($name, $datum) {
 			case "virtual_ipaddress"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
+							break;
+			case "track_interface"	: /* ignore here for vrrp_instance */ 
 							break;
 
 
@@ -485,6 +488,22 @@ function parse($name, $datum) {
 					   	$vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
 				break;
 
+			case "track_interface"	:  if ($service == "vrrp_instance") { 
+								$is_track_interface = "track_interface";
+								$vrrp_instance[$vrrp_instance_count]['track_interface'] = array(); 
+						    }
+							break;
+
+			case (preg_match("/$interface_regex/", $name) ? true : false )	:	
+				if ($name != "" ) {
+					if ($debug) { 
+						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_instance track interface </I><B></B></FONT><BR>"; 
+					};
+					if(($service == "vrrp_instance") && ($is_track_interface == "track_interface")) {
+						    $vrrp_instance[$vrrp_instance_count]['track_interface'][] = $name;
+					 } 
+				}
+				break;
 									
 			case ""			:	break;
 			default			:	if ($debug) { echo "<FONT COLOR=\"BLUE\">Level2 - garbage [$name] (ignored line [$buffer])</FONT><BR>"; }
@@ -727,7 +746,8 @@ function read_config() {
 		/* oh wow!.. trim()!!! I could hug somebody! */
 		$buffer = trim($buffer);
 
-		if (strlen ($buffer) > 4) { /* basically if not empty,.. however if (!empty($buffer) didn't work */
+		//BUG!!! strlen > 4 condition check cause vrrp track_interface like eth1 cause parsing write failure
+		if (strlen ($buffer) >= 2) { /* basically if not empty,.. however if (!empty($buffer) didn't work */
 			/* explode! oh boy! */
 			//$pieces = explode(" ", $buffer);
 			//reference http://fr2.php.net/manual/en/function.preg-split.php#92632 for following regex
@@ -900,7 +920,6 @@ function print_arrays() {
 		echo "<BR>vrrp_instance [$loop1] [state] = "	. $vrrp_instance[$loop1]['state'];
 		echo "<BR>vrrp_instance [$loop1] [interface] = "	. $vrrp_instance[$loop1]['interface'];
 		echo "<BR>vrrp_instance [$loop1] [dont_track_primary] = "	. $vrrp_instance[$loop1]['dont_track_primary'];
-		echo "<BR>vrrp_instance [$loop1] [track_interface] = "	. $vrrp_instance[$loop1]['track_interface'];
 		echo "<BR>vrrp_instance [$loop1] [mcast_src_ip] = "	. $vrrp_instance[$loop1]['mcast_src_ip'];
 		echo "<BR>vrrp_instance [$loop1] [lvs_sync_daemon_interface] = "	. $vrrp_instance[$loop1]['lvs_sync_daemon_interface'];
 		echo "<BR>vrrp_instance [$loop1] [garp_master_delay] = "	. $vrrp_instance[$loop1]['garp_master_delay'];
@@ -929,6 +948,13 @@ function print_arrays() {
 		}
                 foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
 				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
+		}
+
+		echo "<P><B>vrrp_instance track_interface</B>";
+		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['track_interface']);
+
+                foreach ($vrrp_instance[$loop1]['track_interface'] as $interface) {
+				if ($debug) { echo "$egap1" . $interface . "<BR>"; };
 		}
 
 	}
@@ -1034,6 +1060,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop7  = 1;
 	$loop8  = 0; //vrrp virtual_ipaddress
 	$loop9 = 0; //vrrp virtual_routes 
+	$loop10 = 0; //vrrp track interface 
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1157,7 +1184,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; } else {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0;} else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
 			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
@@ -1184,11 +1211,6 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				if ($debug) { echo "$egap1 dont_track_primary "	. $vrrp_instance[$loop7]['dont_track_primary']	. "<BR>"; };
 			}
 
-			if (isset($vrrp_instance[$loop7]['track_interface']) &&
-			    $vrrp_instance[$loop7]['track_interface'] != "") {
-				fputs ($fd, "$gap1 track_interface "		. $vrrp_instance[$loop7]['track_interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 track_interface "	. $vrrp_instance[$loop7]['track_interface']	. "<BR>"; };
-			}
 			if (isset($vrrp_instance[$loop7]['mcast_src_ip']) &&
 			    $vrrp_instance[$loop7]['mcast_src_ip'] != "") {
 				fputs ($fd, "$gap1 mcast_src_ip "		. $vrrp_instance[$loop7]['mcast_src_ip']	. "\n", 80);
@@ -1272,7 +1294,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			}
 
 			if (isset($vrrp_instance[$loop7]['virtual_ipaddress']) &&
-			    $vrrp_instance[$loop7]['virtual_ipaddress'] != "") {
+			    $vrrp_instance[$loop7]['virtual_ipaddress'] != ""  &&
+			    count($vrrp_instance[$loop7]['virtual_ipaddress']) > 0) {
 				fputs ($fd, "$gap1 virtual_ipaddress "		. " {\n", 80);
 				if ($debug) { echo "$egap1 virtual_ipaddress "	. " {<BR>"; };
 
@@ -1294,7 +1317,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			}
 
 			if (isset($vrrp_instance[$loop7]['virtual_routes']) &&
-			    $vrrp_instance[$loop7]['virtual_routes'] != "") {
+			    $vrrp_instance[$loop7]['virtual_routes'] != ""  &&
+			    count($vrrp_instance[$loop7]['virtual_routes']) > 0) {
 				fputs ($fd, "$gap1 virtual_routes "		. " {\n", 80);
 				if ($debug) { echo "$egap1 virtual_routes "	. " {<BR>"; };
 
@@ -1315,11 +1339,35 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				if ($debug) { echo "$egap1 }<BR>"; }
 			}
 
+			if (isset($vrrp_instance[$loop7]['track_interface'])
+			    && $vrrp_instance[$loop7]['track_interface'] != ""
+			    && count($vrrp_instance[$loop7]['track_interface']) > 0) {
+				fputs ($fd, "$gap1 track_interface "		. " {\n", 80);
+				if ($debug) { echo "$egap1 track_interface "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop7]['track_interface'] as $interface) {
+
+                                	if (($loop10 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_track_interface")) {
+                                        	$loop10++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $interface	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $interface	. "<BR>"; };
+						$loop10++;
+					}
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
 			fputs ($fd,"}\n", 80);
 
 			$loop7++;
 			$loop8 = 0;
 			$loop9 = 0;
+			$loop10 = 0;
 			
 		}
 	}
@@ -1843,6 +1891,14 @@ function add_vrrp_virtual_routes($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "src ip to network/netmask via gateway dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_track_interface($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['track_interface'][] = "ethxxx";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }

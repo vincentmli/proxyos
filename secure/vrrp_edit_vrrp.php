@@ -42,7 +42,6 @@
                 $vrrp_instance[$selected_host]['interface']			=	$_GET['interface'];
                 // $virt[$selected_host]['address']		=	$temp[0];
                 $vrrp_instance[$selected_host]['dont_track_primary']		=	$_GET['dont_track_primary'];
-                $vrrp_instance[$selected_host]['track_interface']		=	$_GET['track_interface'];
                 $vrrp_instance[$selected_host]['mcast_src_ip']		=	$_GET['mcast_src_ip'];
                 $vrrp_instance[$selected_host]['lvs_sync_daemon_interface']		=	$_GET['lvs_sync_daemon_interface'];
                 $vrrp_instance[$selected_host]['garp_master_delay']		=	$_GET['garp_master_delay'];
@@ -187,6 +186,8 @@ A.logolink      {
 		&nbsp;|&nbsp;
                 <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL ROUTES">VIRTUAL ROUTES</A>
 		&nbsp;|&nbsp;
+                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK INTERFACE</A>
+		&nbsp;|&nbsp;
 
 
         </TR>
@@ -210,10 +211,6 @@ A.logolink      {
 	<TR>
 		<TD>Do not track primary:</TD>
 		<TD><INPUT TYPE="TEXT" NAME="dont_track_primary" VALUE=<?php echo  $vrrp_instance[$selected_host]['dont_track_primary'] ?>></TD>
-	</TR>
-	<TR>
-		<TD>Track interface:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="track_interface" VALUE=<?php echo  $vrrp_instance[$selected_host]['track_interface'] ?>></TD>
 	</TR>
 	<TR>
 		<TD>Multicast source ip:</TD>
