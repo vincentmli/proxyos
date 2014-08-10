@@ -115,8 +115,6 @@ A.logolink      {
         <TR BGCOLOR="#666666">
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="static_ipaddress.php" NAME="Static ipaddress" CLASS="taboff"><B>STATIC IPADDRESS</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="local_address_group.php" NAME="Local address group" CLASS="taboff"><B>SNAT ADDRESS GROUP</B></A> </TD>
 		<TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER" BGCOLOR="#FFFFFF"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
 
@@ -127,11 +125,18 @@ A.logolink      {
 
 ?>
 
+
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
 		<A HREF="static_ipaddress_edit.php<?php if (!empty($selected_ip)) { echo "?selected_ip=$selected_ip"; } ?> " CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
+                &nbsp;|&nbsp;
+                <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
+                &nbsp;|&nbsp;
+                <A HREF="local_address_group.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
+                &nbsp;|&nbsp;
+		</TD>
         </TR>
 </TABLE>
 

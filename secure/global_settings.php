@@ -11,90 +11,9 @@
 
 	require('parse.php'); /* read in the config! Hurragh! */
 	$prim['service'] = "lvs";
-	
-	if (empty($_GET['nat_nmask'])) {
-		$NATRtrNmask	=	$prim['nat_nmask'];
-	} else {
-		$NATRtrNmask	=	$_GET['nat_nmask'];
-	}
 
 	if (isset($_GET['global_action']) &&
 	    $_GET['global_action'] == "ACCEPT") {
-		$prim['primary']			=	$_GET['PriLVSIP'];
-		$prim['primary_private']		=	$_GET['primary_private'];
-		
-		if (empty($prim['primary_private'])) {
-			$prim['backup_private'] = ""; 
-                }
-		
-                $network = $prim['network'];
-                switch ($network) {
-                        case "NAT"			:	$network="nat"; break;
-                        case "Direct Routing"		:	$network="direct"; break;
-                        case "Tunneling"		:	$network="tunnel"; break;
-                        default				:	break;
-                }
-        
-                $prim['network']		=	$network;
-        
-                if ($prim['network'] == "nat") {
-                        $prim['nat_router']	=	$_GET['NATRtrIP'] . " " . $_GET['NATRtrDev'];
-                } else {
-                        $prim['nat_router']	=	"";
-                }
-
-                if ($NATRtrNmask != "" ) {
-                        $prim['nat_nmask']	=	$NATRtrNmask;
-                } else {
-                        $NATRtrNmask		=	"255.255.255.0";
-		}
-	}
-
-	if ($debug_level == "" ) {
-		if ($prim['debug_level'] != "" ) {
-			$debug_level		=	$prim['debug_level'];
-		} else {
-			$debug_level		=	"NONE";
-			$prim['debug_level']	=	"NONE";
-		}
-	} else {
-		$prim['debug_level'] = $debug_level;
-	};
-
-	if ($prim['network'] == "") { $prim['network'] = "direct";}
-
-	$network = "";
-	if (isset($_GET['network'])) {
-		$network = $_GET['network'];
-	}
-	if ($network == "NAT") { 
-		$prim['network'] = "nat"; 
-		if (isset($_GET['NATRtrIP']) && isset($_GET['NATRtrDev'])) {
-			$prim['nat_router'] = $_GET['NATRtrIP'] . " " . $_GET['NATRtrDev']; 
-		}
-	}
-	if ($network == "Direct Routing") { 
-	    $prim['network'] = "direct"; 
-	    $prim['nat_router'] = ""; 
-	}
-	if ($network == "Tunneling") { 
-	    $prim['network'] = "tunnel"; 
-	    $prim['nat_router'] = ""; 
-	}
-	/* Make a semi sensible guess */
-	if ($prim['primary'] == "") {
-		$prim['primary'] = $_SERVER['SERVER_ADDR'];
-		$PriLVSIP = $_SERVER['SERVER_ADDR'];
-	}
-
-	if (isset($_GET['tcp_timeout'])) {
-		$prim['tcp_timeout'] = $_GET['tcp_timeout'];
-	}
-	if (isset($_GET['tcpfin_timeout'])) {
-		$prim['tcpfin_timeout'] = $_GET['tcpfin_timeout'];
-	}
-	if (isset($_GET['udp_timeout'])) {
-		$prim['udp_timeout'] = $_GET['udp_timeout'];
 	}
 
 	/* keepalived global defs */
@@ -189,13 +108,31 @@ A.logolink      {
         <TR BGCOLOR="#666666">
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="static_ipaddress.php" NAME="Static ipaddress" CLASS="taboff"><B>STATIC IPADDRESS</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="local_address_group.php" NAME="Local address group" CLASS="taboff"><B>SNAT ADDRESS GROUP</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
 </TABLE>
+
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR BGCOLOR="#EEEEEE">
+                <TD WIDTH="60%">EDIT:
+
+                <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="local_address_group.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
+                &nbsp;|&nbsp;
+
+                </TD>
+
+                <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
+        </TR>
+</TABLE>
+
 
 <P>
 <FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="global_settings.php">
@@ -206,40 +143,6 @@ A.logolink      {
         <TR>
                 <TD CLASS="title" COLSPAN="2">ENVIRONMENT</TD>
         </TR>
-
-	<!--
-	<TR>
-		<TD>Primary server public IP:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="PriLVSIP" SIZE=16 VALUE="<?php			
-			echo $prim['primary'];
-		?>"></TD>
-	</TR>
-	<TR>
-		<TD>Primary server private IP:<BR>(May be blank)</TD>
-		<TD><INPUT TYPE="TEXT" NAME="primary_private" SIZE=16 VALUE="<?php	
-			echo $prim['primary_private'];
-		?>"></TD>
-	</TR>
-	<TR>
-		<TD>TCP timeout (seconds):</TD>
-		<TD><INPUT TYPE="TEXT" NAME="tcp_timeout" SIZE=6 VALUE="<?php
-			echo $prim['tcp_timeout'];
-		?>"></TD>
-	</TR>
-	<TR>
-		<TD>TCP FIN timeout (seconds):</TD>
-		<TD><INPUT TYPE="TEXT" NAME="tcpfin_timeout" SIZE=6 VALUE="<?php
-			echo $prim['tcpfin_timeout'];
-		?>"></TD>
-	</TR>
-
-	<TR>
-		<TD>UDP timeout (seconds):</TD>
-		<TD><INPUT TYPE="TEXT" NAME="udp_timeout" SIZE=6 VALUE="<?php
-			echo $prim['udp_timeout'];
-		?>"></TD>
-	</TR>
-	-->
 
 	<TR>
 		<TD>Notification email :</TD>
@@ -272,58 +175,6 @@ A.logolink      {
 		?>"></TD>
 	</TR>
 
-	<?php if ($prim['service'] != "fos") { ?>
-	<!--TR>
-		<TD>Use network type:<BR>(Current type is: <B><?php echo $prim['network']; ?></B> ) </TD>
-		<TD><INPUT TYPE="SUBMIT" NAME="network" SIZE=16 VALUE="NAT"><BR>
-		<INPUT TYPE="SUBMIT" NAME="network" SIZE=16 VALUE="Direct Routing"><BR>
-		<INPUT TYPE="SUBMIT" NAME="network" SIZE=16 VALUE="Tunneling"><BR>
-	</TR-->
-	<?php if ($prim['network'] == "nat" ) { ?>
-	 <TR>
-		<TD>NAT Router IP:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="NATRtrIP" SIZE=16 VALUE="<?php
-			$ip = explode(" ", $prim['nat_router']);
-			echo $ip[0];
-			// echo $prim['...???? WHAT??
-		?>"></TD>
-	</TR>
-	<TR>
-		<TD>NAT Router netmask:</TD>
-		<TD>
-			<SELECT NAME="nat_nmask">
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.255") { echo "SELECTED"; } ?>> 255.255.255.255
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.252") { echo "SELECTED"; } ?>> 255.255.255.252
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.248") { echo "SELECTED"; } ?>> 255.255.255.248
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.240") { echo "SELECTED"; } ?>> 255.255.255.240
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.224") { echo "SELECTED"; } ?>> 255.255.255.224
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.192") { echo "SELECTED"; } ?>> 255.255.255.192
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.128") { echo "SELECTED"; } ?>> 255.255.255.128
-				<OPTION <?php if ($NATRtrNmask == "255.255.255.0")   { echo "SELECTED"; } ?>> 255.255.255.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.254.0")   { echo "SELECTED"; } ?>> 255.255.254.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.252.0")   { echo "SELECTED"; } ?>> 255.255.252.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.248.0")   { echo "SELECTED"; } ?>> 255.255.248.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.240.0")   { echo "SELECTED"; } ?>> 255.255.240.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.224.0")   { echo "SELECTED"; } ?>> 255.255.224.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.192.0")   { echo "SELECTED"; } ?>> 255.255.192.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.128.0")   { echo "SELECTED"; } ?>> 255.255.128.0
-				<OPTION <?php if ($NATRtrNmask == "255.255.0.0")     { echo "SELECTED"; } ?>> 255.255.0.0
-
-			</SELECT>
-		</TD>
-	</TR>
-	<TR>
-		<TD>NAT Router device:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="NATRtrDev" SIZE=8 VALUE="<?php
-			$dev = explode(" ", $prim['nat_router']);
-			if (isset($dev[1]))
-				echo $dev[1];
-			// echo $prim['..??
-	?>"></TD>
-	</TR>
-
-	<?php } ?>
-	<?php } ?>
 </TABLE>
 <HR>
 

@@ -1164,6 +1164,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	if ($debug) { echo "<P><B>Local Address Group</B><BR>"; };
 
 	foreach ($local_address_group as $laddrgname => $ips ) {
+	    if(count($local_address_group[$laddrgname]) > 0 ) {
 		fputs ($fd, "local_address_group $laddrgname"		. " " . "{\n", 80);
 		if ($debug) { echo "local_address group $laddrgname"	. " " . "{<BR>"; };
                 foreach ($ips as $ip) {
@@ -1180,6 +1181,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		}
 		fputs ($fd,"}\n", 80);
 		if ($debug) { echo "}<BR>"; };
+           }
 	}
 
 
