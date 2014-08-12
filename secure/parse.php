@@ -92,6 +92,18 @@ $vrrp_instance = array ( "",
 		)
 	);
 
+$vrrp_sync_group = array ( "",
+		array (
+			"group"				=> "",
+			"notify_master"			=> "",
+			"notify_backup"			=> "",
+			"notify_fault"			=> "",
+			"notify"			=> "",
+			"smtp_alert"			=> "",
+		)
+	);
+
+
 $prim = array (
 		"serial_no"			=> "",
 		"primary"			=> "",
@@ -141,6 +153,7 @@ function parse($name, $datum) {
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_sync_group;
 	global $serv;
 	global $service;
 	global $monitor_service;
@@ -149,17 +162,20 @@ function parse($name, $datum) {
 	global $local_address_group;
 	global $ip_of;
 	global $is_track_interface;
+	global $is_group;
 
 	static $email_regex = '[\w\-]+\@[\w\-]+\.[\w\-]+';
 	static $ipmask_regex = '\d+\.\d+\.\d+\.\d+\/\d+';
 	static $ip_regex = '\d+\.\d+\.\d+\.\d+';
 	static $interface_regex = 'eth*'; //may adjust to other interface naming
+	static $sync_group_regex = '\w*'; //vrrp sync group name
 	static $laddrgname;
 	static $level = 0 ;
 	static $server_count = 0;
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
+	static $vrrp_sync_group_count = 0;
 	
 
 	if ($debug) {
@@ -239,6 +255,9 @@ function parse($name, $datum) {
 									break;
 			case "vrrp_instance"				:	/* new failover definitition */
 									$service="vrrp_instance"; echo $service;
+									break;
+			case "vrrp_sync_group"				:	/* new failover definitition */
+									$service="vrrp_sync_group"; echo $service;
 									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
@@ -366,6 +385,26 @@ function parse($name, $datum) {
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "track_interface"	: /* ignore here for vrrp_instance */ 
+							break;
+
+			case "vrrp_sync_group"	:	$vrrp_sync_group_count++;
+							$service="vrrp_sync_group";
+							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for failover service </I><B>\$vrrp_sync_group[$vrrp_sync_group_count]</B></FONT><BR>"; };
+                                                        if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['vrrp_sync_group']     = $datum;
+
+							break;
+
+			case "notify_master"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_master'] = $datum;
+							break;
+			case "notify_backup"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_backup'] = $datum;
+							break;
+			case "notify"			: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify'] = $datum;
+					 	  	break;
+			case "notify_fault"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_fault']	= $datum;
+					          	break;
+			case "smtp_alert"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['smtp_alert'] = $datum;
+							break;
+			case "group"		: 
 							break;
 
 
@@ -501,6 +540,23 @@ function parse($name, $datum) {
 					};
 					if(($service == "vrrp_instance") && ($is_track_interface == "track_interface")) {
 						    $vrrp_instance[$vrrp_instance_count]['track_interface'][] = $name;
+					 } 
+				}
+				break;
+
+			case "group"	:  if ($service == "vrrp_sync_group") { 
+								$is_group = "group";
+								$vrrp_sync_group[$vrrp_sync_group_count]['group'] = array(); 
+						    }
+							break;
+
+			case (preg_match("/$sync_group_regex/", $name) ? true : false )	:	
+				if ($name != "" ) {
+					if ($debug) { 
+						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_sync_group group </I><B></B></FONT><BR>"; 
+					};
+					if(($service == "vrrp_sync_group") && ($is_group == "group")) {
+						    $vrrp_sync_group[$vrrp_sync_group_count]['group'][] = $name;
 					 } 
 				}
 				break;
@@ -752,7 +808,11 @@ function read_config() {
 			//$pieces = explode(" ", $buffer);
 			//reference http://fr2.php.net/manual/en/function.preg-split.php#92632 for following regex
 			if ( strstr($buffer,"notify_fault" )
-			     or strstr($buffer,"misc_path" )) { //!!! if strings contains quote and space in quote use following regex!!!
+			     or strstr($buffer,"misc_path" )
+			     or strstr($buffer,"notify_master" )
+			     or strstr($buffer,"notify_backup" )
+			     or strstr($buffer,"notify" )
+				) { //!!! if strings contains quote and space in quote use following regex!!!
 				$pieces = preg_split("/[\s,]*(\"[^\"]+\")[\s,]*/", $buffer, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 			} else {
 				$pieces = preg_split('/\s+/', $buffer);
@@ -881,6 +941,7 @@ function print_arrays() {
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_sync_group;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -958,6 +1019,28 @@ function print_arrays() {
 		}
 
 	}
+
+	$loop1 = $loop2 =  0;
+
+	while ($vrrp_sync_group[++$loop1]['vrrp_sync_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+	echo "<P><B>vrrp_sync_group</B>";
+		echo "<BR>vrrp_sync_group [$loop1] [vrrp_sync_group] = "	. $vrrp_sync_group[$loop1]['vrrp_sync_group'];
+		echo "<BR>vrrp_sync_group [$loop1] [notify_master] = "	. $vrrp_sync_group[$loop1]['notify_master'];
+		echo "<BR>vrrp_sync_group [$loop1] [notify_backup] = "	. $vrrp_sync_group[$loop1]['notify_backup'];
+		echo "<BR>vrrp_sync_group [$loop1] [notify] = "	. $vrrp_sync_group[$loop1]['notify'];
+		echo "<BR>vrrp_sync_group [$loop1] [notify_fault] = "	. $vrrp_sync_group[$loop1]['notify_fault'];
+		echo "<BR>vrrp_sync_group [$loop1] [smtp_alert] = "	. $vrrp_sync_group[$loop1]['smtp_alert'];
+
+
+		echo "<P><B>vrrp_sync_group group</B>";
+		echo "<BR>" .  var_dump($vrrp_sync_group[$loop1]['group']);
+
+                foreach ($vrrp_sync_group[$loop1]['group'] as $group) {
+				if ($debug) { echo "$egap1" . $group . "<BR>"; };
+		}
+
+	}
+	
 	
 	
 	$loop1 = $loop2 = 0;
@@ -1043,6 +1126,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_sync_group;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -1061,6 +1145,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop8  = 0; //vrrp virtual_ipaddress
 	$loop9 = 0; //vrrp virtual_routes 
 	$loop10 = 0; //vrrp track interface 
+	$loop11  = 1; //vrrp sync group
+	$loop12  = 0; //vrrp sync group group
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1370,6 +1456,64 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			$loop8 = 0;
 			$loop9 = 0;
 			$loop10 = 0;
+			
+		}
+	}
+
+	while ( $vrrp_sync_group[$loop11]['vrrp_sync_group'] != "" ) {
+		if ((($loop11 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_sync_group")) {  $loop11++; $loop12 = 0;} else {
+			if ($debug) { echo "<P><B>vrrp_sync_group</B><BR>"; };	
+
+			if (isset($vrrp_sync_group[$loop11]['vrrp_sync_group']) &&
+			    $vrrp_sync_group[$loop11]['vrrp_sync_group'] != "") {
+				fputs ($fd, "vrrp_sync_group "				. $vrrp_sync_group[$loop11]['vrrp_sync_group']	. " {\n", 80);
+				if ($debug) { echo "vrrp_sync_group "			. $vrrp_sync_group[$loop11]['vrrp_sync_group']	. " {<BR>"; };
+			}
+
+			if (isset($vrrp_sync_group[$loop11]['notify_master']) &&
+			    $vrrp_sync_group[$loop11]['notify_master'] != "") {
+				fputs ($fd, "$gap1 notify_master "		. $vrrp_sync_group[$loop11]['notify_master']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_master "	. $vrrp_sync_group[$loop11]['notify_master']	. "<BR>"; };
+			}
+			if (isset($vrrp_sync_group[$loop11]['notify_backup']) &&
+			    $vrrp_sync_group[$loop11]['notify_backup'] != "") {
+				fputs ($fd, "$gap1 notify_backup "		. $vrrp_sync_group[$loop11]['notify_backup']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_sync_group[$loop11]['notify_backup']	. "<BR>"; };
+			}
+			if (isset($vrrp_sync_group[$loop11]['smtp_alert']) &&
+			    $vrrp_sync_group[$loop11]['smtp_alert'] != "") {
+				fputs ($fd, "$gap1 smtp_alert "		. $vrrp_sync_group[$loop11]['smtp_alert']	. "\n", 80);
+				if ($debug) { echo "$egap1 smtp_alert "	. $vrrp_sync_group[$loop11]['smtp_alert']	. "<BR>"; };
+			}
+
+
+			if (isset($vrrp_sync_group[$loop11]['group'])
+			    && $vrrp_sync_group[$loop11]['group'] != ""
+			    && count($vrrp_sync_group[$loop11]['group']) > 0) {
+				fputs ($fd, "$gap1 group "		. " {\n", 80);
+				if ($debug) { echo "$egap1 group "	. " {<BR>"; };
+
+		                foreach ($vrrp_sync_group[$loop11]['group'] as $group) {
+
+                                	if (($loop12 == $delete_item) && ($loop11 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_group")) {
+                                        	$loop12++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $group	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $group	. "<BR>"; };
+						$loop12++;
+					}
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
+			fputs ($fd,"}\n", 80);
+
+			$loop11++;
+			$loop12 = 0;
 			
 		}
 	}
@@ -1797,6 +1941,19 @@ function add_vrrp() {
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
+function add_vrrp_sync_group() {
+
+	global $vrrp_sync_group;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while ($vrrp_sync_group[$loop2]['vrrp_sync_group'] != "" ) { $loop2++; }
+	
+	$vrrp_sync_group[$loop2]['vrrp_sync_group']	= "[vrrp_sync_group_name]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
 function add_virtual() {
 
 	global $virt;
@@ -1901,6 +2058,14 @@ function add_vrrp_track_interface($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['track_interface'][] = "ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_sync_group_group($vrrp_sync_group_idx) {
+
+	global $vrrp_sync_group;
+	$vrrp_sync_group[$vrrp_sync_group_idx]['group'][] = "vrrp_instance_name";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
