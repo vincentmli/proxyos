@@ -192,6 +192,7 @@ function parse($name, $datum) {
 		    or $name == "virtual_ipaddress"
 		    or $name == "virtual_routes"
 		    or $name == "track_interface"
+		    or $name == "group"
 		    or $name == "TCP_CHECK"
 		    or $name == "HTTP_GET"
 		    or $name == "SSL_GET"
@@ -253,12 +254,12 @@ function parse($name, $datum) {
 			case "virtual_server"				:	/* new virtual server definitition */
 									$service="lvs"; echo $service;
 									break;
-			case "vrrp_instance"				:	/* new failover definitition */
-									$service="vrrp_instance"; echo $service;
+/*
+			case "vrrp_instance"				: $service="vrrp_instance"; echo $service;
 									break;
-			case "vrrp_sync_group"				:	/* new failover definitition */
-									$service="vrrp_sync_group"; echo $service;
+			case "vrrp_sync_group"				: $service="vrrp_sync_group"; echo $service;
 									break;
+*/
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
 
@@ -368,15 +369,35 @@ function parse($name, $datum) {
 							break;
 			case "debug"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['debug'] = $datum;
 							break;
-			case "notify_master"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_master'] = $datum;
+			case "notify_master"		: if ($service == "vrrp_instance") {
+								$vrrp_instance[$vrrp_instance_count]['notify_master'] = $datum;
+							  } else if ($service == "vrrp_sync_group") {
+							  	$vrrp_sync_group[$vrrp_sync_group_count]['notify_master'] = $datum;	
+							  }
 							break;
-			case "notify_backup"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_backup'] = $datum;
+			case "notify_backup"		: if ($service == "vrrp_instance") {
+								$vrrp_instance[$vrrp_instance_count]['notify_backup'] = $datum;
+							  } else if ($service == "vrrp_sync_group") {
+								$vrrp_sync_group[$vrrp_sync_group_count]['notify_backup'] = $datum;
+							  }
 							break;
-			case "notify"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify'] = $datum;
-					 	  	break;
-			case "notify_fault"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['notify_fault']	= $datum;
-					          	break;
-			case "smtp_alert_fault"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['smtp_alert_fault'] = $datum;
+			case "notify"		: if ($service == "vrrp_instance") {
+								$vrrp_instance[$vrrp_instance_count]['notify'] = $datum;
+							  } else  if ($service == "vrrp_sync_group") {
+								$vrrp_sync_group[$vrrp_sync_group_count]['notify'] = $datum;
+							  }
+							break;
+			case "notify_fault"		: if ($service == "vrrp_instance") {
+								$vrrp_instance[$vrrp_instance_count]['notify_fault'] = $datum;
+							  } else  if ($service == "vrrp_sync_group") {
+								$vrrp_sync_group[$vrrp_sync_group_count]['notify_fault'] = $datum;
+							  }
+							break;
+			case "smtp_alert"		: if ($service == "vrrp_instance") {
+								$vrrp_instance[$vrrp_instance_count]['smtp_alert'] = $datum;
+							  } else if ($service == "vrrp_sync_group") {
+								$vrrp_sync_group[$vrrp_sync_group_count]['smtp_alert'] = $datum;
+							  }
 							break;
 			case "authentication"		: 
 							break;
@@ -394,16 +415,6 @@ function parse($name, $datum) {
 
 							break;
 
-			case "notify_master"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_master'] = $datum;
-							break;
-			case "notify_backup"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_backup'] = $datum;
-							break;
-			case "notify"			: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify'] = $datum;
-					 	  	break;
-			case "notify_fault"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['notify_fault']	= $datum;
-					          	break;
-			case "smtp_alert"		: if ($service == "vrrp_sync_group") $vrrp_sync_group[$vrrp_sync_group_count]['smtp_alert'] = $datum;
-							break;
 			case "group"		: 
 							break;
 
@@ -448,6 +459,7 @@ function parse($name, $datum) {
 			case "real_server"		:	/* ignored (compatibility) */
 							break;
 			case ""			:	break;
+
 			default			:	if ($debug) { echo "<FONT COLOR=\"BLUE\">Level 1 - garbage [$name] (ignored line [$buffer])</FONT><BR>"; }
 							break;
 		}
@@ -994,7 +1006,7 @@ function print_arrays() {
 		echo "<BR>vrrp_instance [$loop1] [notify_backup] = "	. $vrrp_instance[$loop1]['notify_backup'];
 		echo "<BR>vrrp_instance [$loop1] [notify] = "	. $vrrp_instance[$loop1]['notify'];
 		echo "<BR>vrrp_instance [$loop1] [notify_fault] = "	. $vrrp_instance[$loop1]['notify_fault'];
-		echo "<BR>vrrp_instance [$loop1] [smtp_alert_fault] = "	. $vrrp_instance[$loop1]['smtp_alert_fault'];
+		echo "<BR>vrrp_instance [$loop1] [smtp_alert] = "	. $vrrp_instance[$loop1]['smtp_alert'];
 		echo "<BR>vrrp_instance [$loop1] [auth_type] = "	. $vrrp_instance[$loop1]['auth_type'];
 		echo "<BR>vrrp_instance [$loop1] [auth_pass] = "	. $vrrp_instance[$loop1]['auth_pass'];
 
@@ -1354,10 +1366,20 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($fd, "$gap1 notify_backup "		. $vrrp_instance[$loop7]['notify_backup']	. "\n", 80);
 				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_instance[$loop7]['notify_backup']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop7]['smtp_alert_fault']) &&
-			    $vrrp_instance[$loop7]['smtp_alert_fault'] != "") {
-				fputs ($fd, "$gap1 smtp_alert_fault "		. $vrrp_instance[$loop7]['smtp_alert_fault']	. "\n", 80);
-				if ($debug) { echo "$egap1 smtp_alert_fault "	. $vrrp_instance[$loop7]['smtp_alert_fault']	. "<BR>"; };
+			if (isset($vrrp_instance[$loop7]['notify_fault']) &&
+			    $vrrp_instance[$loop7]['notify_fault'] != "") {
+				fputs ($fd, "$gap1 notify_fault "		. $vrrp_instance[$loop7]['notify_fault']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_fault "	. $vrrp_instance[$loop7]['notify_fault']	. "<BR>"; };
+			}
+			if (isset($vrrp_instance[$loop7]['notify']) &&
+			    $vrrp_instance[$loop7]['notify'] != "") {
+				fputs ($fd, "$gap1 notify "		. $vrrp_instance[$loop7]['notify']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify "	. $vrrp_instance[$loop7]['notify']	. "<BR>"; };
+			}
+			if (isset($vrrp_instance[$loop7]['smtp_alert']) &&
+			    $vrrp_instance[$loop7]['smtp_alert'] != "") {
+				fputs ($fd, "$gap1 smtp_alert "		. $vrrp_instance[$loop7]['smtp_alert']	. "\n", 80);
+				if ($debug) { echo "$egap1 smtp_alert "	. $vrrp_instance[$loop7]['smtp_alert']	. "<BR>"; };
 			}
 			if (isset($vrrp_instance[$loop7]['authentication']) &&
 			    $vrrp_instance[$loop7]['authentication'] != "") {
@@ -1451,6 +1473,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			}
 
 			fputs ($fd,"}\n", 80);
+			if ($debug) { echo "}<BR>"; }
 
 			$loop7++;
 			$loop8 = 0;
@@ -1480,6 +1503,16 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($fd, "$gap1 notify_backup "		. $vrrp_sync_group[$loop11]['notify_backup']	. "\n", 80);
 				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_sync_group[$loop11]['notify_backup']	. "<BR>"; };
 			}
+			if (isset($vrrp_sync_group[$loop11]['notify_fault']) &&
+			    $vrrp_sync_group[$loop11]['notify_fault'] != "") {
+				fputs ($fd, "$gap1 notify_fault "		. $vrrp_sync_group[$loop11]['notify_fault']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify_fault "	. $vrrp_sync_group[$loop11]['notify_fault']	. "<BR>"; };
+			}
+			if (isset($vrrp_sync_group[$loop11]['notify']) &&
+			    $vrrp_sync_group[$loop11]['notify'] != "") {
+				fputs ($fd, "$gap1 notify "		. $vrrp_sync_group[$loop11]['notify']	. "\n", 80);
+				if ($debug) { echo "$egap1 notify "	. $vrrp_sync_group[$loop11]['notify']	. "<BR>"; };
+			}
 			if (isset($vrrp_sync_group[$loop11]['smtp_alert']) &&
 			    $vrrp_sync_group[$loop11]['smtp_alert'] != "") {
 				fputs ($fd, "$gap1 smtp_alert "		. $vrrp_sync_group[$loop11]['smtp_alert']	. "\n", 80);
@@ -1495,7 +1528,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 		                foreach ($vrrp_sync_group[$loop11]['group'] as $group) {
 
-                                	if (($loop12 == $delete_item) && ($loop11 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_group")) {
+                                	if (($loop12 == $delete_item) && ($loop11 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_sync_group_group")) {
                                         	$loop12++;
 
                         		}
@@ -1511,6 +1544,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			}
 
 			fputs ($fd,"}\n", 80);
+			if ($debug) { echo "}<BR>"; }
 
 			$loop11++;
 			$loop12 = 0;

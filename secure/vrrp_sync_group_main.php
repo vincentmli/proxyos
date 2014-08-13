@@ -1,18 +1,18 @@
 <?php
 	$selected_host="";
-	$vrrp_service="";
+	$vrrp_sync_group_service="";
 
 	if (isset($_POST['selected_host'])) {
         	$selected_host=$_POST['selected_host'];
 	}
-	if (isset($_POST['vrrp_service'])) {
-		$vrrp_service=$_POST['vrrp_service'];
+	if (isset($_POST['vrrp_sync_group_service'])) {
+		$vrrp_sync_group_service=$_POST['vrrp_sync_group_service'];
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ($vrrp_service == "EDIT") {
+	if ($vrrp_sync_group_service == "EDIT") {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
+		header("Location: vrrp_sync_group_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -85,27 +85,27 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">VRRP INSTANCE</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">VRRP SYNC GROUP</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
 <?php
-	$vrrp_service = "";
-	if (isset($_POST['vrrp_service'])) {
-		$vrrp_service = $_POST['vrrp_service'];
+	$vrrp_sync_group_service = "";
+	if (isset($_POST['vrrp_sync_group_service'])) {
+		$vrrp_sync_group_service = $_POST['vrrp_sync_group_service'];
 	}
 
-	if ($vrrp_service == "ADD") {
+	if ($vrrp_sync_group_service == "ADD") {
 		
-		add_vrrp(); /* append new data */
+		add_vrrp_sync_group(); /* append new data */
 		
 	}
-	if ($vrrp_service == "DELETE" ) {
-		$delete_service = "vrrp_instance";
+	if ($vrrp_sync_group_service == "DELETE" ) {
+		$delete_service = "vrrp_sync_group";
 		/* if ($debug) { echo "About to delete entry number $selected_host<BR>"; } */
-		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"vrrp_main.php\" NAME=\"Virtual\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
+		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"vrrp_sync_group_main.php\" NAME=\"Virtual\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
 		open_file("w+");
 		write_config("1", "", $selected_host, $delete_service);
 		exit;
@@ -134,20 +134,18 @@ A.logolink      {
         </TR>
 </TABLE>
 
-<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_main.php">
+<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_sync_group_main.php">
 
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
 		<TR>
 			<TD></TD>
-			       	<TD CLASS="title">VRRP NAME</TD>
-			       	<TD CLASS="title">STATE</TD>
-  		              	<TD CLASS="title">PRIORITY</TD>
+			       	<TD CLASS="title">VRRP SYNC GROUP NAME</TD>
 		</TR>
 
 <?php
 	$loop1 = 1;
 	
-	while (isset($vrrp_instance[$loop1]['vrrp_instance']) && $vrrp_instance[$loop1]['vrrp_instance'] != "") { /* for all virtual items... */
+	while (isset($vrrp_sync_group[$loop1]['vrrp_sync_group']) && $vrrp_sync_group[$loop1]['vrrp_sync_group'] != "") { /* for all virtual items... */
 
 		/* lhh - this CONFIRM is never made by any form
 		if ($virtual_action == "CONFIRM") { $virt[$loop1t]['protocol'] = $index; };
@@ -170,16 +168,9 @@ A.logolink      {
 	 		echo "</TD>";
 */
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=vrrp_instance		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['vrrp_instance']	. ">";
-		echo $vrrp_instance[$loop1]['vrrp_instance']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=vrrp_sync_group		SIZE=16	COLS=10	VALUE="	. $vrrp_sync_group[$loop1]['vrrp_sync_group']	. ">";
+		echo $vrrp_sync_group[$loop1]['vrrp_sync_group']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=state		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['state']	. ">";
-		echo $vrrp_instance[$loop1]['state']	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=priority		SIZE=16	COLS=10	VALUE="	. $vrrp_instance[$loop1]['priority']	. ">";
-		echo $vrrp_instance[$loop1]['priority']	. "</TD>";
-
-		
 		echo "</TR>";
 		$loop1++;
 	}
@@ -194,10 +185,10 @@ A.logolink      {
 
 	<TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_service" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_service" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_service" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_service" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_service" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 	</TABLE>
 	<P>
@@ -205,7 +196,7 @@ A.logolink      {
 <?php // echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>" ?>
 
 <?php
-	if ($vrrp_service != "DELETE") {
+	if ($vrrp_sync_group_service != "DELETE") {
 		open_file("w+");
 		write_config("");
 	}

@@ -3,7 +3,7 @@
         $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_virtual_ipaddress.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: vrrp_sync_group_edit_group.php?selected_host=$selected_host&selected=$selected");		
 		exit;
 	}
 	
@@ -12,7 +12,7 @@
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
-	global $vrrp_instance;
+	global $vrrp_sync_group;
 
 	require('parse.php');
 
@@ -20,10 +20,8 @@
 		
 	if ($edit_action == "ACCEPT") {
 
-		$ip	=	$_GET['ip'];
-		$netmask	=	$_GET['netmask'];
-		$interface	=	$_GET['interface'];
-		$vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]		= "$ip/$netmask dev $interface";	
+		$group	=	$_GET['group'];
+		$vrrp_sync_group[$selected_host]['group'][$selected-1]		= "$group";	
 
 	}
 
@@ -93,7 +91,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP SYNC GROUP GROUP</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -106,8 +104,8 @@ A.logolink      {
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
-		<TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP sync group" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
+                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
+                <TD WIDTH="16.66%" ALIGN="CENTER" > <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
 </TABLE>
@@ -121,16 +119,10 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP INSTANCE">VRRP INSTANCE</A>
+		<A HREF="vrrp_sync_group_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP INSTANCE">VRRP SYNC GROUP</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS">VRRP VIRTUAL IPADDRESS</A>
-		&nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
-		&nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">VRRP TRACK INTERFACE</A>
+                <A HREF="vrrp_sync_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP SYNC GROUP GROUP">VRRP SYNC GROUP GROUP</A>
                 &nbsp;|&nbsp;
 
 		</TD>
@@ -141,31 +133,17 @@ A.logolink      {
 <P>
 
 
-<FORM id="vrrp_virtual_ipaddress_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_ipaddress_edit.php">
+<FORM id="vrrp_sync_group_group_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_sync_group_edit_group_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-		$ips = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]);
-		$ipnetmask = explode("/", $ips[0]);
-		$ip = $ipnetmask[0];
-		$netmask = $ipnetmask[1];
-		$interface = $ips[2];
+		$group =  $vrrp_sync_group[$selected_host]['group'][$selected-1];
 
 		echo "<TR>";
-			echo "<TD>IP: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=ip VALUE=\""; echo $ip . "\""  . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>NETMASK: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=netmask VALUE=\""; echo $netmask . "\""  . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>INTERFACE: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=interface VALUE=\""; echo $interface . "\""  . ">"; echo "</TD>";
+			echo "<TD>GROUP: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=group VALUE=\""; echo $group . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 	echo "</TABLE>";

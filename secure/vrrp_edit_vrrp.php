@@ -53,7 +53,9 @@
                 $vrrp_instance[$selected_host]['debug']		=	$_GET['debug'];
                 $vrrp_instance[$selected_host]['notify_master']		=	$_GET['notify_master'];
                 $vrrp_instance[$selected_host]['notify_backup']		=	$_GET['notify_backup'];
-                $vrrp_instance[$selected_host]['smtp_alert_fault']		=	$_GET['smtp_alert_fault'];
+                $vrrp_instance[$selected_host]['notify_fault']		=	$_GET['notify_fault'];
+                $vrrp_instance[$selected_host]['notify']		=	$_GET['notify'];
+                $vrrp_instance[$selected_host]['smtp_alert']		=	$_GET['smtp_alert'];
                 $vrrp_instance[$selected_host]['auth_type']		=	$_GET['auth_type'];
                 $vrrp_instance[$selected_host]['auth_pass']		=	$_GET['auth_pass'];
 	}
@@ -150,6 +152,7 @@ A.logolink      {
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
+		<TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP sync group" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER" BGCOLOR="#FFFFFF"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
@@ -248,15 +251,23 @@ A.logolink      {
 	</TR>
 	<TR>
 		<TD>Notify master:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="notify_master" VALUE=<?php echo  $vrrp_instance[$selected_host]['notify_master'] ?>></TD>
+		<TD><INPUT TYPE="TEXT" NAME="notify_master" VALUE="<?php echo  htmlspecialchars($vrrp_instance[$selected_host]['notify_master'], ENT_QUOTES) ?>"></TD>
 	</TR>
 	<TR>
 		<TD>Notify backup:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="notify_backup" VALUE=<?php echo  $vrrp_instance[$selected_host]['notify_backup'] ?>></TD>
+		<TD><INPUT TYPE="TEXT" NAME="notify_backup" VALUE="<?php echo  htmlspecialchars($vrrp_instance[$selected_host]['notify_backup'], ENT_QUOTES) ?>"></TD>
 	</TR>
 	<TR>
-		<TD>SMTP alert fault:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="smtp_alert_fault" VALUE=<?php echo  $vrrp_instance[$selected_host]['smtp_alert_fault'] ?>></TD>
+		<TD>Notify fault:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="notify_fault" VALUE="<?php echo  htmlspecialchars($vrrp_instance[$selected_host]['notify_fault'], ENT_QUOTES) ?>"></TD>
+	</TR>
+	<TR>
+		<TD>Notify:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="notify" VALUE="<?php echo  htmlspecialchars($vrrp_instance[$selected_host]['notify'], ENT_QUOTES) ?>"></TD>
+	</TR>
+	<TR>
+		<TD>SMTP alert:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="smtp_alert" VALUE="<?php echo  $vrrp_instance[$selected_host]['smtp_alert'] ?>"></TD>
 	</TR>
 	<TR>
 		<TD>Authentication type:</TD>

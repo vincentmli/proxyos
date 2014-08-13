@@ -10,17 +10,17 @@
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "CANCEL")) {
+	if ((isset($_GET['vrrp_sync_group_group'])) && ($_GET['vrrp_sync_group_group'] == "CANCEL")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
+		header("Location: vrrp_sync_group_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "EDIT")) {
+	if ((isset($_GET['vrrp_sync_group_group'])) && ($_GET['vrrp_sync_group_group'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_virtual_ipaddress_edit.php?selected_host=$selected_host&selected=$selected");
+		header("Location: vrrp_sync_group_edit_group_edit.php?selected_host=$selected_host&selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -33,20 +33,20 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "ADD")) {
-		add_vrrp_virtual_ipaddress($selected_host);
+	if ((isset($_GET['vrrp_sync_group_group'])) && ($_GET['vrrp_sync_group_group'] == "ADD")) {
+		add_vrrp_sync_group_group($selected_host);
 	}
 
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "DELETE")) {
-		$delete_service = "vrrp_virtual_ipaddress";
+	if ((isset($_GET['vrrp_sync_group_group'])) && ($_GET['vrrp_sync_group_group'] == "DELETE")) {
+		$delete_service = "vrrp_sync_group_group";
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"vrrp_edit_virtual_ipaddress.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"vrrp_sync_group_edit_group.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
 		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
 
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "(DE)ACTIVATE")) {
+	if ((isset($_GET['vrrp_sync_group_group'])) && ($_GET['vrrp_sync_group_group'] == "(DE)ACTIVATE")) {
 		switch ($serv[$selected_host][$selected]['active']) {
 			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
 			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
@@ -119,7 +119,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP SYNC GROUP GROUP</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -132,8 +132,8 @@ A.logolink      {
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
                 <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
-		<TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP sync group" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="tabon"><B>VIRTUAL SERVERS</B></A> </TD>
+               <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
+                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
 
         </TR>
 </TABLE>
@@ -146,16 +146,10 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP INSTANCE">VRRP INSTANCE</A>
+		<A HREF="vrrp_sync_group_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP SYNC GROUP">VRRP SYNC GROUP</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS">VRRP VIRTUAL IPADDRESS</A>
-		&nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
-		&nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">VRRP TRACK INTERFACE</A>
+                <A HREF="vrrp_sync_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP SYNC GROUP GROUP">VRRP SYNC GROUP GROUP</A>
                 &nbsp;|&nbsp;
 
 		</TD>
@@ -166,15 +160,12 @@ A.logolink      {
 
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_ipaddress.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_sync_group_edit_group.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">IP</TD>
-		<TD CLASS="title">NETMASK</TD>
-		<TD CLASS="title">INTERFACE</TD>
-<?php //	<TD CLASS="title">NETMASK</TD> ?>
+		<TD CLASS="title">GROUP</TD>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
@@ -186,25 +177,12 @@ A.logolink      {
 
 	$loop=1;
 
-//	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
-	foreach ($vrrp_instance[$selected_host]['virtual_ipaddress'] as $ip) {
+	foreach ($vrrp_sync_group[$selected_host]['group'] as $group) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
-				
-		$ips = explode(" ", $ip);
-		$ipnetmask = explode("/", $ips[0]);
-		$ip = $ipnetmask[0];
-		$netmask = $ipnetmask[1];
-		$interface = $ips[2];
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ips[0]	. ">";
-		echo $ip	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";	echo $netmask	. ">";
-		echo $netmask	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
-		echo $interface	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=group COLS=6 VALUE=";	echo $group	. ">";
+		echo $group	. "</TD>";
 
 		echo "</TR>";
 	
@@ -223,10 +201,10 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_group" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_group" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_group" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_group" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 
@@ -236,7 +214,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="vrrp_sync_group_group" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>
