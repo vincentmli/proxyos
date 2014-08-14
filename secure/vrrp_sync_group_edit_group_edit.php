@@ -98,17 +98,8 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
+<?php include 'menu.php'; ?>
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
-        <TR BGCOLOR="#666666">
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP INSTANCE</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER"> <A HREF="vrrp_sync_group_main.php" NAME="VRRP instance" CLASS="taboff"><B>VRRP SYNC GROUP</B></A> </TD>
-                <TD WIDTH="16.66%" ALIGN="CENTER" > <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
-
-        </TR>
-</TABLE>
 <?php
 	// echo "Query = $QUERY_STRING";
 
