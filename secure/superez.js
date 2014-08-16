@@ -19,14 +19,15 @@ $(document).ready(function() {
                     },
            },
    });
+/*
    $( "#virtual_form" ).validate({
            rules: {
                    ip: {
-                        required: true,
+                        required: false,
                         ipvalidation: true,
                    },
                    port: {
-                        required: true,
+                        required: false,
                         portvalidation: true,
                    },
            },
@@ -39,6 +40,7 @@ $(document).ready(function() {
                     },
            },
    });
+*/
    $.validator.addMethod("ipvalidation", function(value) {
                 var split = value.split('.');
                 if (split.length != 4)
@@ -58,6 +60,8 @@ $(document).ready(function() {
    	   "invalid port"
    );
 });
+//make exlusive virtual_server <ip port>  or <group vsg> or <fwmark int>
+
 
 function delIPPort() {
 //remove selected index from selected

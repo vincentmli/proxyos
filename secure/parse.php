@@ -422,9 +422,25 @@ function parse($name, $datum) {
 			case "virtual_server"		:	$virt_count++;
 							$service = "lvs";
 							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for virtual server service </I><B>\$virt[$virt_count]</B></FONT><BR>"; };
-							$ipport = explode(" ", $datum);
-							if ($service == "lvs") $virt[$virt_count]['ip']			= $ipport[0];
-							if ($service == "lvs") $virt[$virt_count]['port']		= $ipport[1];
+							if ($service == "lvs") {
+								$virt_value = explode(" ", $datum);
+								if ($virt_value[0] == "group") {
+									$virt[$virt_count]['group'] = $virt_value[1];
+									$virt[$virt_count]['ip'] = "";
+									$virt[$virt_count]['port'] = "";
+									$virt[$virt_count]['fwmark'] = "";
+								} else if ($virt_value[0] == "fwmark") {
+									$virt[$virt_count]['group'] = "";
+									$virt[$virt_count]['ip'] = "";
+									$virt[$virt_count]['port'] = "";
+									$virt[$virt_count]['fwmark'] = $virt_value[1];
+								} else {
+									$virt[$virt_count]['group'] = "";
+									$virt[$virt_count]['ip'] = $virt_value[0];
+									$virt[$virt_count]['port'] = $virt_value[1];
+									$virt[$virt_count]['fwmark'] = "";
+								}
+							}
 							break;
 			case "sorry_server"	:	if ($service == "lvs") $virt[$virt_count]['sorry_server']	= $datum;
 							break;
@@ -1059,6 +1075,8 @@ function print_arrays() {
 	
 while ($virt[++$loop1]['ip'] != "" ) { /* NOTE: must use *pre*increment not post */
 		echo "<P><B>Virtual</B>";
+		echo "<BR>Virtual [$loop1] [fwmark] "	. $virt[$loop1]['fwmark'];
+		echo "<BR>Virtual [$loop1] [group] "	. $virt[$loop1]['group'];
 		echo "<BR>Virtual [$loop1] [ip] "	. $virt[$loop1]['ip'];
 		echo "<BR>Virtual [$loop1] [port] "	. $virt[$loop1]['port'];
 	//	echo "<BR>Virtual [$loop1] [active] = "		. $virt[$loop1]['active'];
@@ -1552,8 +1570,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		}
 	}
 	
-	while (isset($virt[$loop3]['ip']) &&
-	       $virt[$loop3]['ip'] != "") { 
+	while ( (isset($virt[$loop3]['ip']) or isset($virt[$loop3]['group']) or isset($virt[$loop3]['fwmark']) ) && 
+		( $virt[$loop3]['ip'] != "" or $virt[$loop3]['group'] != "" or $virt[$loop3]['fwmark'] != "" ) ) { 
 		
 		if ((($loop3 == $delete_item ) && ($level == "1")) && ($delete_service == "virtual")) {
 			$loop3++;
@@ -1565,7 +1583,15 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			    && $virt[$loop3]['ip'] != ""  && $virt[$loop3]['port'] != "") {
 				fputs ($fd, "virtual_server "	. $virt[$loop3]['ip'] . " " . $virt[$loop3]['port'] . " {\n", 80);
 				if ($debug) { echo "virtual_server " . $virt[$loop3]['ip'] . " " . $virt[$loop3]['port'] . " {<BR>"; };
-			}
+			} 
+			else if (isset($virt[$loop3]['group']) && $virt[$loop3]['group'] != "" ) {
+				fputs ($fd, "virtual_server "	. "group" . " " . $virt[$loop3]['group'] . " {\n", 80);
+				if ($debug) { echo "virtual_server " . "group" . " " . $virt[$loop3]['group'] . " {<BR>"; };
+			} 
+			else if (isset($virt[$loop3]['fwmark']) && $virt[$loop3]['fwmark'] != "" ) {
+				fputs ($fd, "virtual_server "	. "fwmark" . " " . $virt[$loop3]['fwmark'] . " {\n", 80);
+				if ($debug) { echo "virtual_server " . "fwmark" . " " . $virt[$loop3]['fwmark'] . " {<BR>"; };
+			} 
 
 			if (isset($virt[$loop3]['delay_loop']) &&
 			    $virt[$loop3]['delay_loop'] != "") {
@@ -1930,7 +1956,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 					if ($debug) { echo "$egap1 }<BR>"; }
 				}
 				
-			}
+			} //end server loop
+
 			fputs ($fd,"}\n", 80);
 			if ($debug) { echo "}<BR>"; };
 
@@ -1939,7 +1966,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			
 		}
 
-	}
+	} // end virtual server loop
 	fclose($fd);
 	backup_lvs();
 	if ($debug) { echo "<HR>"; }
@@ -2001,6 +2028,8 @@ function add_virtual() {
 
 	$virt[$loop2]['ip']	= "[ip]";
 	$virt[$loop2]['port']	= "[port]";
+	$virt[$loop2]['group']	= "[group]";
+	$virt[$loop2]['fwmark']	= "[fwmark]";
 	$virt[$loop2]['delay_loop']	= "5";
 	$virt[$loop2]['lb_algo']		= "wrr";
 	$virt[$loop2]['lb_kind']		= "FNAT";

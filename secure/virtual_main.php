@@ -133,6 +133,8 @@ A.logolink      {
 			<TD></TD>
 			       	<TD CLASS="title">IP</TD>
 			       	<TD CLASS="title">PORT</TD>
+			       	<TD CLASS="title">GROUP</TD>
+			       	<TD CLASS="title">FWMARK</TD>
   		              	<TD CLASS="title">SCHEDULER</TD>
 				<TD CLASS="title">FORWARD</TD>
 				<TD CLASS="title">SNAT</TD>
@@ -142,7 +144,9 @@ A.logolink      {
 <?php
 	$loop1 = 1;
 	
-	while (isset($virt[$loop1]['ip']) && $virt[$loop1]['ip'] != "") { /* for all virtual items... */
+	while ( (isset($virt[$loop1]['ip']) && $virt[$loop1]['ip'] != "" ) 
+		 or (isset($virt[$loop1]['group']) && $virt[$loop1]['group'] != "") 
+		 or (isset($virt[$loop1]['fwmark']) && $virt[$loop1]['fwmark'] != "") ) { /* for all virtual items... */
 
 		/* lhh - this CONFIRM is never made by any form
 		if ($virtual_action == "CONFIRM") { $virt[$loop1t]['protocol'] = $index; };
@@ -168,10 +172,16 @@ A.logolink      {
 		echo "<TD><INPUT TYPE=HIDDEN 	NAME=ip		SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['ip']	. ">";
 		echo $virt[$loop1]['ip']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=port		SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['port']	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=port	SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['port']	. ">";
 		echo $virt[$loop1]['port']	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=lb_algo		SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['lb_algo']	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=group	SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['group'] . ">";
+		echo $virt[$loop1]['group']	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=fwmark	SIZE=16	COLS=10	VALUE="	. $virt[$loop1]['fwmark'] . ">";
+		echo $virt[$loop1]['fwmark']	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=lb_algo		SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['lb_algo'] . ">";
 		echo $virt[$loop1]['lb_algo']	. "</TD>";
 
 		echo "<TD><INPUT TYPE=HIDDEN 	NAME=lb_kind		SIZE=16	COLS=10	VALUE="	. $$virt[$loop1]['lb_kind']	. ">";

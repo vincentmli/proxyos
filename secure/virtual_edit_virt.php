@@ -39,6 +39,8 @@
 
 		$virt[$selected_host]['ip'] 	= $_GET['ip']; 
 		$virt[$selected_host]['port'] 	= $_GET['port']; 
+		$virt[$selected_host]['group'] 	= $_GET['group']; 
+		$virt[$selected_host]['fwmark'] 	= $_GET['fwmark']; 
                 $virt[$selected_host]['delay_loop']			=	$_GET['delay_loop'];
                 // $virt[$selected_host]['address']		=	$temp[0];
                 $virt[$selected_host]['protocol']		=	$_GET['protocol'];
@@ -83,6 +85,15 @@
 <script language="javascript" type="text/javascript" src="jquery-1.11.0.js"></script>
 <script language="javascript" type="text/javascript" src="jquery.validate.js"></script>
 <script language="javascript" type="text/javascript" src="superez.js"></script>
+<!--script>
+function checkit(){
+$("#zero-out :input").each(function() {
+ $(this).keydown(function() {
+   $("#zero-out :input").not(this).val("");
+ });
+});
+}
+</script-->
 
 <TITLE>Piranha (Virtual Servers - Editing virtual server)</TITLE>
 
@@ -178,22 +189,30 @@ A.logolink      {
                 <A HREF="virtual_edit_real.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="REAL SERVER">REAL SERVER</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="virtual_edit_services.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="MONITORING SCRIPTS">MONITORING SCRIPTS</A></TD>
-
         </TR>
 </TABLE>
 <?php } ?>
 
 <FORM METHOD="GET" id="virtual_form" ENCTYPE="application/x-www-form-urlencoded" ACTION="virtual_edit_virt.php">
 <TABLE>
+
 	<TR>
 		<TD>IP:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="ip" VALUE= <?php echo $virt[$selected_host]['ip'] ; ?>></TD>
+		<TD><INPUT TYPE="TEXT"  NAME="ip" id="ip" VALUE= <?php echo $virt[$selected_host]['ip'] ; ?>></TD>
+	</TR>
+	<TR>
+		<TD>Group:</TD>
+		<TD><INPUT TYPE="TEXT"  NAME="group" id="group" VALUE= <?php echo $virt[$selected_host]['group'] ; ?>></TD>
+	</TR>
+	<TR>
+		<TD>FWmark:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="fwmark" id="fwmark" VALUE= <?php echo $virt[$selected_host]['fwmark'] ; ?>></TD>
 	</TR>
 	<TR>
 		<TD>Port:</TD>
 		<TD><INPUT TYPE="TEXT" NAME="port" VALUE= <?php echo $virt[$selected_host]['port'] ; ?>></TD>
 	</TR>
+
 	<TR>
 		<TD>Health Check Interval:</TD>
 		<TD><INPUT TYPE="TEXT" NAME="delay_loop" VALUE=<?php echo  $virt[$selected_host]['delay_loop'] ?>></TD>
