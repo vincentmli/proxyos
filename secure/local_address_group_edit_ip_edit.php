@@ -91,7 +91,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT LOCAL ADDRESS GROUP IP</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT SNAT ADDRESS GROUP IP</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -110,10 +110,13 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 
-                <A HREF="local_address_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="LOCAL ADDRESS GROUP">LOCAL ADDRESS GROUP</A>
+                <A HREF="local_address_group_main.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
                 &nbsp;|&nbsp;
 
-                <A HREF="local_address_group_edit_ip.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="LOCAL ADDRESS GROUP IP">LOCAL ADDRESS GROUP IP</A>
+                <A HREF="local_address_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="SNAT ADDRESS GROUP NAME">SNAT ADDRESS GROUP NAME</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="local_address_group_edit_ip.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="SNAT ADDRESS GROUP IP">SNAT ADDRESS GROUP IP</A>
                 &nbsp;|&nbsp;
 
 

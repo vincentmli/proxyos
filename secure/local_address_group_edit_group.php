@@ -105,7 +105,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-            <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT LOCAL ADDRESS GROUP</FONT><BR>&nbsp;</TD>
+            <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT SNAT ADDRESS GROUP NAME</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -136,7 +136,9 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="local_address_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="local address group">LOCAL ADDRESS GROUP</A>
+		<A HREF="local_address_group_main.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="local address group">SNAT ADDRESS GROUP</A>
+		&nbsp;|&nbsp;
+		<A HREF="local_address_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="local address group">SNAT ADDRESS GROUP NAME</A>
 		&nbsp;|&nbsp;
 
                 <A HREF="local_address_group_edit_ip.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="IP">IP</A>
@@ -151,7 +153,7 @@ A.logolink      {
 <FORM METHOD="GET" id="local_address_group_form" ENCTYPE="application/x-www-form-urlencoded" ACTION="local_address_group_edit_group.php">
 <TABLE>
 	<TR>
-		<TD>Local address group name:</TD>
+		<TD>Snat address group name:</TD>
 		<TD><INPUT TYPE="TEXT" NAME="local_address_group" VALUE= <?php echo $local_address_group[$selected_host]['local_address_group'] ; ?>></TD>
 	</TR>
 

@@ -85,7 +85,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">LOCAL ADDRESS GROUP</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">SNAT ADDRESS GROUP</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -125,6 +125,26 @@ A.logolink      {
 ?>
 
 <?php include 'menu.php'; ?>
+
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR BGCOLOR="#EEEEEE">
+                <TD WIDTH="60%">EDIT:
+
+                <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
+                &nbsp;|&nbsp;
+
+                </TD>
+
+                <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
+        </TR>
+</TABLE>
+
 
 <FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="local_address_group_main.php">
 
