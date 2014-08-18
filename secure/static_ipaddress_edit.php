@@ -126,7 +126,7 @@ A.logolink      {
                 &nbsp;|&nbsp;
                 <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
                 &nbsp;|&nbsp;
-                <A HREF="local_address_group.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
+                <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
                 &nbsp;|&nbsp;
 		</TD>
         </TR>

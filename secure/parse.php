@@ -40,7 +40,6 @@ $static_ipaddress = array ( "",
 			)
 	);
 
-$local_address_group = array ();
 
 $virt = array ( "",
 		array (
@@ -103,6 +102,15 @@ $vrrp_sync_group = array ( "",
 		)
 	);
 
+$virt_server_group = array ( "",
+		array (
+		)
+	);
+
+$local_address_group = array ( "",
+		array (
+		)
+	);
 
 $prim = array (
 		"serial_no"			=> "",
@@ -154,6 +162,7 @@ function parse($name, $datum) {
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_sync_group;
+	global $virt_server_group;
 	global $serv;
 	global $service;
 	global $monitor_service;
@@ -167,6 +176,8 @@ function parse($name, $datum) {
 	static $email_regex = '[\w\-]+\@[\w\-]+\.[\w\-]+';
 	static $ipmask_regex = '\d+\.\d+\.\d+\.\d+\/\d+';
 	static $ip_regex = '\d+\.\d+\.\d+\.\d+';
+	static $iprange_regex = '^\d+\.';
+	static $port_regex = '\d+';
 	static $interface_regex = 'eth*'; //may adjust to other interface naming
 	static $sync_group_regex = '\w*'; //vrrp sync group name
 	static $laddrgname;
@@ -176,6 +187,8 @@ function parse($name, $datum) {
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
 	static $vrrp_sync_group_count = 0;
+	static $virt_server_group_count = 0;
+	static $local_address_group_count = 0;
 	
 
 	if ($debug) {
@@ -248,8 +261,8 @@ function parse($name, $datum) {
 			case "static_ipaddress"			:	/* static ip definitition */
 									$service="static_ipaddress"; echo $service;
 									break;
-			case "local_address_group"			:/* local address group definitition */
-									$service="local_address_group"; echo $service;
+//			case "local_address_group"			:/* local address group definitition */
+//									$service="local_address_group"; echo $service;
 									break;
 			case "virtual_server"				:	/* new virtual server definitition */
 									$service="lvs"; echo $service;
@@ -260,6 +273,8 @@ function parse($name, $datum) {
 			case "vrrp_sync_group"				: $service="vrrp_sync_group"; echo $service;
 									break;
 */
+//			case "virt_server_group"			: $service="virt_server_group"; echo $service;
+//									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
 
@@ -319,15 +334,7 @@ function parse($name, $datum) {
 					}
 				}
 				break;
-
-			case "local_address_group"		: 	$service = "local_address_group";
-						  		if ($service == "local_address_group") {
-									$laddrgname = $datum;
-									$local_address_group[$laddrgname]	= array();
-								}
-								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of local address group definition </I><B>$service</B></FONT><BR>"; };
-								break;
-
+/*
 			case (preg_match("/$ip_regex/", $name) ? true : false )	:	
 				if ($name != "" ) { 
 					$service = "local_address_group";
@@ -337,6 +344,7 @@ function parse($name, $datum) {
 					};
 				}
 				break;
+*/
 
 
 			case "vrrp_instance"	:	$vrrp_instance_count++;
@@ -474,6 +482,44 @@ function parse($name, $datum) {
 							break;							
 			case "real_server"		:	/* ignored (compatibility) */
 							break;
+
+			case "virtual_server_group"	:	$virt_server_group_count++;
+							$service="virt_server_group";
+							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for virtual server group </I><B>\$virt_server_group[$virt_server_group_count]</B></FONT><BR>"; };
+                                                        if ($service == "virt_server_group") $virt_server_group[$virt_server_group_count]['virt_server_group']     = $datum;
+
+							break;
+
+			case "local_address_group"	:	$local_address_group_count++;
+							$service="local_address_group";
+							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for local address group </I><B>\$local_address_group[$local_address_group_count]</B></FONT><BR>"; };
+                                                        if ($service == "local_address_group") $local_address_group[$local_address_group_count]['local_address_group']     = $datum;
+							
+
+							break;
+
+			case (preg_match("/$iprange_regex/", $name) ? true : false )	:	
+				if ($name != "" ) { 
+					if ($service == "virt_server_group") {
+						$virt_server_group[$virt_server_group_count]['iprange'][] = "$name" . " " . "$datum";
+						if ($debug) { 
+							echo "<FONT COLOR=\"yellow\"><I>Asked for virtual server group address</I><B>" . $name . " " . $datum . "</B></FONT><BR>"; 
+						};
+					} else if ($service == "local_address_group") {
+	                                        $local_address_group[$local_address_group_count]['ip'][] = "$name";
+       		                                if ($debug) {
+                	                                echo "<FONT COLOR=\"yellow\"><I>Asked for local address group</I><B>" . $name . "</B></FONT><BR>";
+							echo "<BR>" .  var_dump($local_address_group[$local_address_group_count]['ip']);
+                       		                };
+
+					}
+				}
+							break;
+
+			case "fwmark" 		:
+					if($service == "virt_server_group") $virt_server_group[$virt_server_group_count]['fwmark'][] = "$name"  . " " . "$datum";
+							break;
+
 			case ""			:	break;
 
 			default			:	if ($debug) { echo "<FONT COLOR=\"BLUE\">Level 1 - garbage [$name] (ignored line [$buffer])</FONT><BR>"; }
@@ -970,6 +1016,7 @@ function print_arrays() {
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_sync_group;
+	global $virt_server_group;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -998,8 +1045,20 @@ function print_arrays() {
 		echo "<BR>Static_ipaddress [$loop1] [dev] = "	. $static_ipaddress[$loop1]['dev'];
 	}
 
-	echo "<P><B>Local address group</B>";
-	echo "<BR>" .  var_dump($local_address_group);
+	$loop1 = $loop2 =  0;
+
+	while ($local_address_group[++$loop1]['local_address_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+	echo "<P><B>local_address_group</B>";
+		echo "<BR>local_address_group [$loop1] [local_address_group] = "	. $local_address_group[$loop1]['local_address_group'];
+
+		echo "<P><B>local_address_group ip </B>";
+		echo "<BR>" .  var_dump($local_address_group[$loop1]['ip']);
+
+                foreach ($local_address_group[$loop1]['ip'] as $ip) {
+				if ($debug) { echo "$egap1" . $ip. "<BR>"; };
+		}
+
+	}
 
 	$loop1 = $loop2 =  0;
 
@@ -1065,6 +1124,28 @@ function print_arrays() {
 
                 foreach ($vrrp_sync_group[$loop1]['group'] as $group) {
 				if ($debug) { echo "$egap1" . $group . "<BR>"; };
+		}
+
+	}
+
+	$loop1 = $loop2 =  0;
+
+	while ($virt_server_group[++$loop1]['virt_server_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+	echo "<P><B>virt_server_group</B>";
+		echo "<BR>virt_server_group [$loop1] [virt_server_group] = "	. $virt_server_group[$loop1]['virt_server_group'];
+
+		echo "<P><B>virt_server_group ip port range</B>";
+		echo "<BR>" .  var_dump($virt_server_group[$loop1]['iprange']);
+
+                foreach ($virt_server_group[$loop1]['iprange'] as $iprange) {
+				if ($debug) { echo "$egap1" . $iprange. "<BR>"; };
+		}
+
+		echo "<P><B>virt_server_group fwmark</B>";
+		echo "<BR>" .  var_dump($virt_server_group[$loop1]['fwmark']);
+
+                foreach ($virt_server_group[$loop1]['fwmark'] as $fwmark) {
+				if ($debug) { echo "$egap1" . $fwmark. "<BR>"; };
 		}
 
 	}
@@ -1157,6 +1238,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_sync_group;
+	global $virt_server_group;
 	global $serv;
 	global $debug;
 	global $global_defs;
@@ -1177,6 +1259,11 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop10 = 0; //vrrp track interface 
 	$loop11  = 1; //vrrp sync group
 	$loop12  = 0; //vrrp sync group group
+	$loop13 = 1; //virtual server group
+	$loop14 = 0; //virtual server group member ip range
+	$loop15 = 0; //virtual server group member fwmark 
+	$loop16 = 1; //local address group
+	$loop17 = 0; //local address group ip
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1276,30 +1363,46 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	fputs ($fd,"}\n", 80);
 	if ($debug) { echo "}<BR>"; };
 
+	while ( $local_address_group[$loop16]['local_address_group'] != "" ) {
+		if ((($loop16 == $delete_item ) && ($level == "1")) && ($delete_service == "local_address_group")) {  $loop16++; $loop17 = 0; } else {
+			if ($debug) { echo "<P><B>local_address_group</B><BR>"; };	
 
-	if ($debug) { echo "<P><B>Local Address Group</B><BR>"; };
-
-	foreach ($local_address_group as $laddrgname => $ips ) {
-	    if(count($local_address_group[$laddrgname]) > 0 ) {
-		fputs ($fd, "local_address_group $laddrgname"		. " " . "{\n", 80);
-		if ($debug) { echo "local_address group $laddrgname"	. " " . "{<BR>"; };
-                foreach ($ips as $ip) {
-	                if ((($loop6 == $delete_item ) && ($level == "1")) && ($delete_service == "local_address_group")) {
-                        	$loop6++;
-				continue;
+			if (isset($local_address_group[$loop16]['local_address_group']) &&
+			    $local_address_group[$loop16]['local_address_group'] != "") {
+				fputs ($fd, "local_address_group "				. $local_address_group[$loop16]['local_address_group']	. " {\n", 80);
+				if ($debug) { echo "local_address_group "			. $local_address_group[$loop16]['local_address_group']	. " {<BR>"; };
 			}
-                	else {
 
-				fputs ($fd, "$gap1" . $ip . "\n", 80);
-				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
-				$loop6++;
-                	}
+			if (isset($local_address_group[$loop16]['ip'])
+			    && $local_address_group[$loop16]['ip'] != ""
+			    && count($local_address_group[$loop16]['ip']) > 0) {
+
+		                foreach ($local_address_group[$loop16]['ip'] as $ip) {
+
+                                	if (($loop17 == $delete_item) && ($loop16 == $delete_virt) && ($level == "1") && ($delete_service == "local_address_group_ip")) {
+                                        	$loop17++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap1 "		. $ip	. "\n", 80);
+						if ($debug) { echo "$egap1 "	. $ip	. "<BR>"; };
+						$loop17++;
+					}
+                		}
+
+			}
+
+
+			fputs ($fd,"}\n", 80);
+			if ($debug) { echo "}<BR>"; }
+
+			$loop16++;
+			$loop17 = 0;
+			
 		}
-		fputs ($fd,"}\n", 80);
-		if ($debug) { echo "}<BR>"; };
-           }
 	}
-
+	
+	
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
 		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0;} else {
@@ -1569,6 +1672,65 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			
 		}
 	}
+
+	while ( $virt_server_group[$loop13]['virt_server_group'] != "" ) {
+		if ((($loop13 == $delete_item ) && ($level == "1")) && ($delete_service == "virt_server_group")) {  $loop13++; $loop14 = 0; $loop15 = 0;} else {
+			if ($debug) { echo "<P><B>virt_server_group</B><BR>"; };	
+
+			if (isset($virt_server_group[$loop13]['virt_server_group']) &&
+			    $virt_server_group[$loop13]['virt_server_group'] != "") {
+				fputs ($fd, "virtual_server_group "				. $virt_server_group[$loop13]['virt_server_group']	. " {\n", 80);
+				if ($debug) { echo "virtual_server_group "			. $virt_server_group[$loop13]['virt_server_group']	. " {<BR>"; };
+			}
+
+			if (isset($virt_server_group[$loop13]['iprange'])
+			    && $virt_server_group[$loop13]['iprange'] != ""
+			    && count($virt_server_group[$loop13]['iprange']) > 0) {
+
+		                foreach ($virt_server_group[$loop13]['iprange'] as $iprange) {
+
+                                	if (($loop14 == $delete_item) && ($loop13 == $delete_virt) && ($level == "1") && ($delete_service == "virt_server_group_iprange")) {
+                                        	$loop14++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap1 "		. $iprange	. "\n", 80);
+						if ($debug) { echo "$egap1 "	. $iprange	. "<BR>"; };
+						$loop14++;
+					}
+                		}
+
+			}
+
+			if (isset($virt_server_group[$loop13]['fwmark'])
+			    && $virt_server_group[$loop13]['fwmark'] != ""
+			    && count($virt_server_group[$loop13]['fwmark']) > 0) {
+
+		                foreach ($virt_server_group[$loop13]['fwmark'] as $fwmark) {
+
+                                	if (($loop15 == $delete_item) && ($loop13 == $delete_virt) && ($level == "1") && ($delete_service == "virt_server_group_fwmark")) {
+                                        	$loop15++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap1 "		. $fwmark	. "\n", 80);
+						if ($debug) { echo "$egap1 "	. $fwmark	. "<BR>"; };
+						$loop15++;
+					}
+                		}
+
+			}
+
+			fputs ($fd,"}\n", 80);
+			if ($debug) { echo "}<BR>"; }
+
+			$loop13++;
+			$loop14 = 0;
+			$loop15 = 0;
+			
+		}
+	}
+	
 	
 	while ( (isset($virt[$loop3]['ip']) or isset($virt[$loop3]['group']) or isset($virt[$loop3]['fwmark']) ) && 
 		( $virt[$loop3]['ip'] != "" or $virt[$loop3]['group'] != "" or $virt[$loop3]['fwmark'] != "" ) ) { 
@@ -2015,6 +2177,32 @@ function add_vrrp_sync_group() {
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
+function add_virt_server_group() {
+
+	global $virt_server_group;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while ($virt_server_group[$loop2]['virt_server_group'] != "" ) { $loop2++; }
+	
+	$virt_server_group[$loop2]['virt_server_group']	= "[virtual_server_group_name]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_local_address_group() {
+
+	global $local_address_group;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while ($local_address_group[$loop2]['local_address_group'] != "" ) { $loop2++; }
+	
+	$local_address_group[$loop2]['local_address_group']	= "[local_address_group_name]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
 function add_virtual() {
 
 	global $virt;
@@ -2069,17 +2257,6 @@ function add_staticip() {
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
-function add_local_address_group() {
-
-	global $local_address_group;
-	$loop2 = 1;	
-
-	$default_laddrgname = "snat group name";
-	$local_address_group[$default_laddrgname][]		= "snat ip";
-
-	open_file("w+"); write_config(""); /* umm save this quick to file */
-}
-
 function add_service($virt_idx) {
 
 	global $serv;
@@ -2129,6 +2306,30 @@ function add_vrrp_sync_group_group($vrrp_sync_group_idx) {
 
 	global $vrrp_sync_group;
 	$vrrp_sync_group[$vrrp_sync_group_idx]['group'][] = "vrrp_instance_name";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_virt_server_group_iprange($virt_server_group_idx) {
+
+	global $virt_server_group;
+	$virt_server_group[$virt_server_group_idx]['iprange'][] = "&lt;IPADDR RANGE&gt; &lt;PORT&gt;";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_virt_server_group_fwmark($virt_server_group_idx) {
+
+	global $virt_server_group;
+	$virt_server_group[$virt_server_group_idx]['fwmark'][] = "fwmark &lt;INT&gt;";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_local_address_group_ip($local_address_group_idx) {
+
+	global $local_address_group;
+	$local_address_group[$local_address_group_idx]['ip'][] = "&lt;IPADDR&gt;";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
