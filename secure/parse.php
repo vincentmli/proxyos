@@ -2313,7 +2313,7 @@ function add_vrrp_sync_group_group($vrrp_sync_group_idx) {
 function add_virt_server_group_iprange($virt_server_group_idx) {
 
 	global $virt_server_group;
-	$virt_server_group[$virt_server_group_idx]['iprange'][] = "&lt;IPADDR RANGE&gt; &lt;PORT&gt;";
+	$virt_server_group[$virt_server_group_idx]['iprange'][] = "&lt;IPADDRRANGE&gt; &lt;PORT&gt;";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
