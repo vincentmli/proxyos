@@ -118,7 +118,7 @@ A.logolink      {
                 &nbsp;|&nbsp;
 
                 <!--A HREF="local_address_group.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A-->
-                <A HREF="local_address_group_main.php" NAME="LOCAL ADDRESS GROUP LIST">LOCAL ADDRESS GROUP LIST</A>
+                <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
                 &nbsp;|&nbsp;
 
                 </TD>

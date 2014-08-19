@@ -40,6 +40,7 @@ $static_ipaddress = array ( "",
 			)
 	);
 
+$static_routes = array();
 
 $virt = array ( "",
 		array (
@@ -168,6 +169,7 @@ function parse($name, $datum) {
 	global $monitor_service;
 	global $global_defs;
 	global $static_ipaddress;
+	global $static_routes;
 	global $local_address_group;
 	global $ip_of;
 	global $is_track_interface;
@@ -201,6 +203,7 @@ function parse($name, $datum) {
 		if ($name == "global_defs"
 		    or $name == "notification_email"
 		    or $name == "static_ipaddress"
+		    or $name == "static_routes"
 		    or $name == "authentication"
 		    or $name == "virtual_ipaddress"
 		    or $name == "virtual_routes"
@@ -261,6 +264,9 @@ function parse($name, $datum) {
 			case "static_ipaddress"			:	/* static ip definitition */
 									$service="static_ipaddress"; echo $service;
 									break;
+			case "static_routes"			:	/* static ip definitition */
+									$service="static_routes"; echo $service;
+									break;
 //			case "local_address_group"			:/* local address group definitition */
 //									$service="local_address_group"; echo $service;
 									break;
@@ -314,9 +320,15 @@ function parse($name, $datum) {
 								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of static ip address definition </I><B>$service</B></FONT><BR>"; };
 								break;
 
+			case "static_routes"		: 	$service = "static_routes";
+						  		if ($service == "static_routes") $static_routes	= array();
+								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of static routes definition </I><B>$service</B></FONT><BR>"; };
+								break;
+
 			case (preg_match("/$ipmask_regex/", $name) ? true : false )	:	
 				if ($name != "" ) { //http://stackoverflow.com/questions/4043741/regexp-in-switch-statement
 						    //This only works when $name evaluates to true. If $name == '' this will yield wrong results. -1 
+				   if($service == "static_ipaddress") {
 					$ip_count++;
 					$service = "static_ipaddress";
 					if ($debug) { 
@@ -332,19 +344,15 @@ function parse($name, $datum) {
 						$static_ipaddress[$ip_count]['mask']       = $mask;
 						$static_ipaddress[$ip_count]['dev']       = $dev;
 					}
+				    } else if($service == "static_routes") {
+					$static_routes[] = "$name" . " " . "$datum";
+				    }
 				}
 				break;
-/*
-			case (preg_match("/$ip_regex/", $name) ? true : false )	:	
-				if ($name != "" ) { 
-					$service = "local_address_group";
-					$local_address_group[$laddrgname][] = $name;
-					if ($debug) { 
-						echo "<FONT COLOR=\"yellow\"><I>Asked for local address group</I><B>\$local_address_group[$laddrgname]</B></FONT><BR>"; 
-					};
-				}
+
+			case "src"	:  if ($service == "static_routes")  
+					   	$static_routes[] = "$name" . " " . "$datum";
 				break;
-*/
 
 
 			case "vrrp_instance"	:	$vrrp_instance_count++;
@@ -509,7 +517,6 @@ function parse($name, $datum) {
 	                                        $local_address_group[$local_address_group_count]['ip'][] = "$name";
        		                                if ($debug) {
                 	                                echo "<FONT COLOR=\"yellow\"><I>Asked for local address group</I><B>" . $name . "</B></FONT><BR>";
-							echo "<BR>" .  var_dump($local_address_group[$local_address_group_count]['ip']);
                        		                };
 
 					}
@@ -1021,6 +1028,7 @@ function print_arrays() {
 	global $debug;
 	global $global_defs;
 	global $static_ipaddress;
+	global $static_routes;
 	global $local_address_group;
 	global $ip_of;
 
@@ -1044,6 +1052,12 @@ function print_arrays() {
 		echo "<BR>Static_ipaddress [$loop1] [mask] = "	. $static_ipaddress[$loop1]['mask'];
 		echo "<BR>Static_ipaddress [$loop1] [dev] = "	. $static_ipaddress[$loop1]['dev'];
 	}
+
+	echo "<P><B>Static_routes</B><BR>";
+        foreach ($static_routes as $routes) {
+		if ($debug) { echo "$egap1" . $routes . "<BR>"; };
+	}
+
 
 	$loop1 = $loop2 =  0;
 
@@ -1243,6 +1257,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $debug;
 	global $global_defs;
 	global $static_ipaddress;
+	global $static_routes;
 	global $local_address_group;
 	global $ip_of;
 	
@@ -1264,6 +1279,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop15 = 0; //virtual server group member fwmark 
 	$loop16 = 1; //local address group
 	$loop17 = 0; //local address group ip
+	$loop18 = 0;
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1362,6 +1378,25 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 	fputs ($fd,"}\n", 80);
 	if ($debug) { echo "}<BR>"; };
+
+	if ($debug) { echo "<P><B>Static routes</B><BR>"; };
+
+	if (isset($static_routes) && count($static_routes) > 0) {
+		fputs ($fd, "static_routes "				. " {\n", 80);
+		if ($debug) { echo "static_routes "			. " {<BR>"; };
+		foreach ($static_routes as $route) {
+			if (($loop18 == $delete_item) && ($level == "1") && ($delete_service == "static_routes")) {
+				$loop18++;
+                        } else {
+				fputs ($fd, "$gap1 "            . $route   . "\n", 80);
+				if ($debug) { echo "$egap1 "    . $route   . "<BR>"; };
+				$loop18++;
+			}
+
+		}
+		fputs ($fd,"}\n", 80);
+		if ($debug) { echo "}<BR>"; }
+	}
 
 	while ( $local_address_group[$loop16]['local_address_group'] != "" ) {
 		if ((($loop16 == $delete_item ) && ($level == "1")) && ($delete_service == "local_address_group")) {  $loop16++; $loop17 = 0; } else {
@@ -2290,6 +2325,14 @@ function add_vrrp_virtual_routes($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "src ip to network/netmask via gateway dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_static_routes() {
+
+	global $static_routes;
+	$static_routes[] = "src ip to network/netmask via gateway dev ethxxx";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
