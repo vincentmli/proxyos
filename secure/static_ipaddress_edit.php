@@ -124,6 +124,8 @@ A.logolink      {
 		
 		<A HREF="static_ipaddress_edit.php<?php if (!empty($selected_ip)) { echo "?selected_ip=$selected_ip"; } ?> " CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
                 &nbsp;|&nbsp;
+                <A HREF="static_routes.php" CLASS="tabon" NAME="STATIC ROUTES">STATIC ROUTES</A>
+                &nbsp;|&nbsp;
                 <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
                 &nbsp;|&nbsp;
                 <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>

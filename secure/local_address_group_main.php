@@ -139,6 +139,10 @@ A.logolink      {
                 <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
                 &nbsp;|&nbsp;
 
+                <A HREF="static_routes.php" CLASS="tabon" NAME="STATIC ROUTES">STATIC ROUTES</A>
+                &nbsp;|&nbsp;
+
+
                 </TD>
 
                 <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->

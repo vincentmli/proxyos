@@ -187,20 +187,37 @@ A.logolink      {
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
 				
 		$ips = explode(" ", $ip);
-		if ($ips[0] == "src") {
-			$srcip = $ips[1];
-			$dst = explode("/", $ips[3]);
-			$network = $dst[0];
-			$netmask = $dst[1];
-			$gateway = $ips[5];
-			$interface = $ips[7];
-		} else {
-			$dst = explode("/", $ips[0]);
-			$network = $dst[0];
-			$netmask = $dst[1];
-			$gateway = $ips[2];
-			$interface = $ips[4];
-		}
+                if ($ips[0] == "src") {
+                        if ($ips[2] == "to") {
+                                $srcip = $ips[1];
+                                $dst = explode("/", $ips[3]);
+                                $network = $dst[0];
+                                $netmask = $dst[1];
+                                $gateway = $ips[5];
+                                $interface = $ips[7];
+                        } else {
+                                $srcip = $ips[1];
+                                $dst = explode("/", $ips[2]);
+                                $network = $dst[0];
+                                $netmask = $dst[1];
+                                $gateway = $ips[4];
+                                $interface = $ips[6];
+                        }
+                } else if ($ips[1] == "dev") {
+                        $srcip = "";
+                        $dst = explode("/", $ips[0]);
+                        $network = $dst[0];
+                        $netmask = $dst[1];
+                        $gateway = "";
+                        $interface = $ips[2];
+                } else {
+                        $srcip = "";
+                        $dst = explode("/", $ips[0]);
+                        $network = $dst[0];
+                        $netmask = $dst[1];
+                        $gateway = $ips[2];
+                        $interface = $ips[4];
+                }
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=srcip COLS=6 VALUE=";		echo $srcip	. ">";
 		echo $srcip	. "</TD>";

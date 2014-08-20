@@ -126,6 +126,9 @@ A.logolink      {
                 <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
                 &nbsp;|&nbsp;
 
+                <A HREF="static_routes.php" CLASS="tabon" NAME="STATIC ROUTES">STATIC ROUTES</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
                 &nbsp;|&nbsp;
 

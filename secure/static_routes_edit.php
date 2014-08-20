@@ -1,9 +1,8 @@
 <?php
         $edit_action = $_GET['edit_action'];
-        $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_virtual_routes.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: static_routes.php?selected=$selected");		
 		exit;
 	}
 	
@@ -12,7 +11,7 @@
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
-	global $vrrp_instance;
+	global $static_routes;
 
 	require('parse.php');
 
@@ -26,11 +25,11 @@
 		$gateway	=	$_GET['gateway'];
 		$interface	=	$_GET['interface'];
 		if ($srcip != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "src $srcip to $network/$netmask via $gateway dev $interface";	
-		} else if($gateway != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask via $gateway dev $interface";	
+			$static_routes[$selected-1]		= "src $srcip to $network/$netmask via $gateway dev $interface";	
+		} else if ($gateway != "") {
+			$static_routes[$selected-1]		= "$network/$netmask via $gateway dev $interface";	
 		} else {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask dev $interface";	
+			$static_routes[$selected-1]		= "$network/$netmask dev $interface";	
 		}
 
 	}
@@ -101,7 +100,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VIRTUAL ROUTES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT STATIC ROUTES</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -115,48 +114,64 @@ A.logolink      {
 
 ?>
 
-
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
-		
-		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP INSTANCE">VRRP INSTANCE</A>
-		&nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS">VRRP VIRTUAL IPADDRESS</A>
-		&nbsp;|&nbsp;
+                <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
+                &nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
-		&nbsp;|&nbsp;
+                <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
+                &nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">VRRP TRACK INTERFACE</A>
-		&nbsp;|&nbsp;
+                <A HREF="static_routes.php" CLASS="tabon" NAME="STATIC ROUTES">STATIC ROUTES</A>
+                &nbsp;|&nbsp;
 
-		</TD>
+                <A HREF="local_address_group_main.php" NAME="SNAT ADDRESS GROUP">SNAT ADDRESS GROUP</A>
+                &nbsp;|&nbsp;
 
-		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
+                </TD>
+                <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
+
 
 <P>
 
 
-<FORM id="vrrp_virtual_routes_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_routes_edit.php">
+<FORM id="static_routes_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="static_routes_edit.php">
 
 
 
 	<TABLE>
 
 	<?php	
-	        $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_routes'][$selected-1]);
+	        $ips = explode(" ", $static_routes[$selected-1]);
                 if ($ips[0] == "src") {
-                        $srcip = $ips[1];
-                        $dst = explode("/", $ips[3]);
+                        if ($ips[2] == "to") {
+                                $srcip = $ips[1];
+                                $dst = explode("/", $ips[3]);
+                                $network = $dst[0];
+                                $netmask = $dst[1];
+                                $gateway = $ips[5];
+                                $interface = $ips[7];
+                        } else {
+                                $srcip = $ips[1];
+                                $dst = explode("/", $ips[2]);
+                                $network = $dst[0];
+                                $netmask = $dst[1];
+                                $gateway = $ips[4];
+                                $interface = $ips[6];
+                        }
+                } else if ($ips[1] == "dev") {
+                        $srcip = "";
+                        $dst = explode("/", $ips[0]);
                         $network = $dst[0];
                         $netmask = $dst[1];
-                        $gateway = $ips[5];
-                        $interface = $ips[7];
+                        $gateway = "";
+                        $interface = $ips[2];
                 } else {
+                        $srcip = "";
                         $dst = explode("/", $ips[0]);
                         $network = $dst[0];
                         $netmask = $dst[1];
@@ -194,7 +209,6 @@ A.logolink      {
 
 	
 		/* Welcome to the magic show */
-		echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>";
 		echo "<INPUT TYPE=HIDDEN NAME=selected VALUE=$selected >";
 	?>
 <P>
