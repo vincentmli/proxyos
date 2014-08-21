@@ -1,36 +1,56 @@
 <?php
-	$selected_ip="";
-	$ip_service="";
+	$selected_host = "";
+	$selected = "";
 
-	if (isset($_POST['selected_ip'])) {
-        	$selected_ip=$_POST['selected_ip'];
+	if (isset($_GET['selected'])) {
+		$selected = $_GET['selected'];
 	}
-	if (isset($_POST['ip_service'])) {
-		$ip_service=$_POST['ip_service'];
+
+	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "CANCEL")) {
+		/* Redirect browser to editing page */
+		header("Location: static_ipaddress.php?selected_host=$selected");
+		/* Make sure that code below does not get executed when we redirect. */
+		exit;
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ($ip_service == "EDIT") {
+	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: static_ipaddress_edit.php?selected_ip=$selected_ip");
+		header("Location: static_ipaddress_edit.php?selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
 	
 	/* try and make this page non cacheable */
 	header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");             // Date in the past
-	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");// always modified
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
+	
+	require('parse.php');
 
-	require('parse.php'); /* read in the config! Hurragh! */
+	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "ADD")) {
+		add_static_ipaddress();
+	}
+
+	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "DELETE")) {
+		$delete_service = "static_ipaddress";
+		if ($debug) { echo "About to delete entry number $selected<BR>"; }
+		echo "<HR><H2>Click <A HREF=\"static_ipaddress.php?selected=$selected\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		open_file("w+");
+		write_config("1", "", $selected-1, $delete_service);
+		exit;
+	}
+
+	/* Umm,... just in case someone is dumb enuf to fiddle */
+	if (empty($selected)) { $selected=1; }
 
 ?>
 <HTML>
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict Level 3//EN">
 
 <HEAD>
-<TITLE>Piranha (Static IPaddress)</TITLE>
+<TITLE>Piranha (Virtual Servers - Editing real server)</TITLE>
 <STYLE TYPE="text/css">
 <!-- 
 
@@ -67,7 +87,7 @@ A.logolink      {
         
 .green  {
         color: 
-	}
+
 // -->
 </STYLE>
 
@@ -78,7 +98,7 @@ A.logolink      {
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
 	<TR BGCOLOR="#CC0000"> <TD CLASS="logo"> <B>KEEPALIVED</B> CONFIGURATION TOOL </TD>
 	<TD ALIGN=right CLASS="logo">
-            <A HREF="introduction.html" CLASS="logolink">
+	    <A HREF="introduction.html" CLASS="logolink">
             INTRODUCTION</A> | <A HREF="help.php" CLASS="logolink">
             HELP</A></TD>
 	</TR>
@@ -86,35 +106,19 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">STATIC IP ADDRESSES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT STATIC IPADDRESS</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
+
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
-<?php
-	$ip_service = "";
-	if (isset($_POST['ip_service'])) {
-		$ip_service = $_POST['ip_service'];
-	}
+<?php include 'menu.php'; ?>
 
-	if ($ip_service == "ADD") {
-		
-		add_staticip(); /* append new data */
-		
-	}
-	if ($ip_service == "DELETE" ) {
-		$delete_service = "ip";
-		/* if ($debug) { echo "About to delete entry number $selected_ip<BR>"; } */
-		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"static_ipaddress.php\" NAME=\"Static ipaddress\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
-		open_file("w+");
-		write_config("1", "", $selected_ip, $delete_service);
-		exit;
-	}
+<?php
+	// echo "Query = $QUERY_STRING";
 
 ?>
-
-<?php include 'menu.php'; ?>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR BGCOLOR="#EEEEEE">
@@ -133,89 +137,102 @@ A.logolink      {
                 &nbsp;|&nbsp;
 
                 </TD>
-
                 <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
 
 
-<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="static_ipaddress.php">
+<P>
 
-	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
-		<TR>
-			<TD></TD>
-				<TD CLASS="title">IP</TD>
-				<TD CLASS="title">NETMASK</TD>
-                		<TD CLASS="title">INTERFACE</TD>
-		</TR>
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="static_ipaddress.php">
 
-<?php
+<TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
+	<TR>
+		<TD CLASS="title">&nbsp;</TD>
+		<TD CLASS="title">IP</TD>
+		<TD CLASS="title">NETMASK</TD>
+		<TD CLASS="title">INTERFACE</TD>
+		<TD CLASS="title">SCOPE</TD>
+<?php //	<TD CLASS="title">NETMASK</TD> ?>
+	</TR>
 
-	$loop1 = 1;
+<!-- Somehow dynamically generated here -->
 	
-	while (isset($static_ipaddress[$loop1]['ip']) && $static_ipaddress[$loop1]['ip'] != "") { /* for all virtual items... */
 
-		/* lhh - this CONFIRM is never made by any form
-		if ($virtual_action == "CONFIRM") { $virt[$loop1t]['protocol'] = $index; };
-		 */
+	<?php
+	/* magic */
 
+	$loop=1;
+
+//	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
+	foreach ($static_ipaddress as $ips) {
 		echo "<TR>";
-		echo "<TD><INPUT TYPE=RADIO	NAME=selected_ip	VALUE=$loop1";
-			if ($selected_ip == "") { $selected_ip = 1; }
-			if ($loop1 == $selected_ip) { echo " CHECKED "; }
-			echo "> </TD>";
-
-
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=ip		SIZE=16	COLS=10	VALUE="	. $static_ipaddress[$loop1]['ip']	. ">";
-		echo $static_ipaddress[$loop1]['ip']	. "</TD>";
-
-		if (isset($static_ipaddress[$loop1]['mask'])) {
-			$temp = $static_ipaddress[$loop1]['mask'];
+		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
+				
+		$string = explode(" ", $ips);
+		if (isset($string[3]) && $string[3] == "scope") {
+			$ipmask = explode("/", $string[0]);
+			$ip = $ipmask[0];
+			$netmask = $ipmask[1];
+			$interface = $string[2];
+			$scope = $string[4];
 		} else {
-			$temp = "0";
-		}
-		$mask = CIDRtoMask($temp);
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=mask		SIZE=16	COLS=10	VALUE="	. $mask . ">";
-
-		if ($temp == "0") {
-			echo "Unused</TD>";
-		} else {
-			echo $mask	. "</TD>";
+			$ipmask = explode("/", $string[0]);
+			$ip = $ipmask[0];
+			$netmask = $ipmask[1];
+			$interface = $string[2];
+			$scope = "";
 		}
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=interface	SIZE=16	COLS=10	VALUE="	. $static_ipaddress[$loop1]['dev']	. ">";
-		echo $static_ipaddress[$loop1]['dev']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";		echo $ip	. ">";
+		echo $ip	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";		echo $netmask	. ">";
+		echo $netmask	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";		echo $interface	. ">";
+		echo $interface	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=scope COLS=6 VALUE=";		echo $scope	. ">";
+		echo $scope	. "</TD>";
+
 		echo "</TR>";
-		$loop1++;
+	
+	$loop++;
 	}
-?>
-	<!-- end of dynamic generation -->
+	echo "</TABLE>";
 
-	</TABLE>
-	<BR>
+	?>
+	
 
-	<P>
-	<!-- should align beside the above table -->
+<!-- end of dynamic generation -->
 
-	<TABLE>
+
+
+<!-- should align beside the above table -->
+
+<TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="ip_service" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="ip_service" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="ip_service" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="(DE)ACTIVATE"></TD>
+		</TR>
+</TABLE>
+
+
+	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
+		<TR> 
+			<TD ALIGN="right">
+				<INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="CANCEL">
+			</TD>
 		</TR>
 	</TABLE>
-	<P>
-	Note: Use the radio button on the side to select which virtual service you wish to edit before selecting 'EDIT' or 'DELETE'
-<?php // echo "<INPUT TYPE=HIDDEN NAME=selected_ip VALUE=$selected_ip>" ?>
 
-<?php
-	if ($ip_service != "DELETE") {
-		open_file("w+");
-		write_config("");
-	}
-?>
+
+<?php open_file ("w+"); write_config(""); ?>
 
 </FORM>
-</TD></TR></TABLE>
+</TD> </TR> </TABLE>
 </BODY>
 </HTML>

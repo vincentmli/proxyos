@@ -32,13 +32,7 @@ $global_defs = array (
 
 	);
 
-$static_ipaddress = array ( "",
-			array (
-				"ip" => "",
-				"mask" => "",
-  	 			"dev" => "", 
-			)
-	);
+$static_ipaddress = array ();
 
 $static_routes = array();
 
@@ -316,7 +310,7 @@ function parse($name, $datum) {
 								break;
 
 			case "static_ipaddress"		: 	$service = "static_ipaddress";
-						  		if ($service == "static_ipaddress") $static_ipaddress['static_ipaddress']	= $datum;
+						  		if ($service == "static_ipaddress") $static_ipaddress = array();
 								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of static ip address definition </I><B>$service</B></FONT><BR>"; };
 								break;
 
@@ -329,21 +323,7 @@ function parse($name, $datum) {
 				if ($name != "" ) { //http://stackoverflow.com/questions/4043741/regexp-in-switch-statement
 						    //This only works when $name evaluates to true. If $name == '' this will yield wrong results. -1 
 				   if($service == "static_ipaddress") {
-					$ip_count++;
-					$service = "static_ipaddress";
-					if ($debug) { 
-						echo "<FONT COLOR=\"yellow\"><I>Asked for static ipaddress </I><B>\$static_ipaddress[$ip_count]</B></FONT><BR>"; 
-					};
-					if($service == "static_ipaddress") {
-						$ipmask = explode('/', $name);
-						$ip = $ipmask[0];
-						$mask = $ipmask[1];
-						$deveth = explode(" ", $datum);
-						$dev = $deveth[1];
-						$static_ipaddress[$ip_count]['ip']       = $ip;
-						$static_ipaddress[$ip_count]['mask']       = $mask;
-						$static_ipaddress[$ip_count]['dev']       = $dev;
-					}
+					$static_ipaddress[] = "$name" . " " . "$datum";
 				    } else if($service == "static_routes") {
 					$static_routes[] = "$name" . " " . "$datum";
 				    }
@@ -920,7 +900,7 @@ function read_config() {
 				
 			}
 			else if (isset($pieces[2]) and $pieces[1] == "dev") {
-                                        $datum = $pieces[1] . " " . $pieces[2];
+					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
 			else if (isset($pieces[2]) and $pieces[0] == "virtual_server") {
                                         $datum = $pieces[1] . " " . $pieces[2];
@@ -1047,10 +1027,8 @@ function print_arrays() {
 	echo "<BR>Global_defs  [router_id] = "			. $global_defs['router_id'];
 	
 	echo "<P><B>Static_ipaddress</B>";
-	while ($static_ipaddress[++$loop1]['ip'] != "" ) { /* NOTE: must use *pre*increment not post */
-		echo "<BR>Static_ipaddress [$loop1] [ip] = "	. $static_ipaddress[$loop1]['ip'];
-		echo "<BR>Static_ipaddress [$loop1] [mask] = "	. $static_ipaddress[$loop1]['mask'];
-		echo "<BR>Static_ipaddress [$loop1] [dev] = "	. $static_ipaddress[$loop1]['dev'];
+        foreach ($static_ipaddress as $ip) {
+		if ($debug) { echo "$egap1" . $ip . "<BR>"; };
 	}
 
 	echo "<P><B>Static_routes</B><BR>";
@@ -1267,7 +1245,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 	$loop1 = $loop2 = 1;
 	$loop3 = $loop4 = 1;
-	$loop5 = $loop6 = 1;
+	$loop5 = 0; //static_ipaddress
+	$loop6 = 1;
 	$loop7  = 1;
 	$loop8  = 0; //vrrp virtual_ipaddress
 	$loop9 = 0; //vrrp virtual_routes 
@@ -1279,7 +1258,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop15 = 0; //virtual server group member fwmark 
 	$loop16 = 1; //local address group
 	$loop17 = 0; //local address group ip
-	$loop18 = 0;
+	$loop18 = 0; //staic routes
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1353,31 +1332,23 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 	if ($debug) { echo "<P><B>Static IPADDRESS</B><BR>"; };
 
-	if (isset($static_ipaddress)) {
+	if (isset($static_ipaddress) && count($static_ipaddress) > 0) {
 		fputs ($fd, "static_ipaddress "				. " {\n", 80);
 		if ($debug) { echo "static_ipaddress "			. " {<BR>"; };
-	}
-
-
-	while (isset($static_ipaddress[$loop5]['ip']) &&
-	       $static_ipaddress[$loop5]['ip'] != "") { 
-		
-		if ((($loop5 == $delete_item ) && ($level == "1")) && ($delete_service == "ip")) {
-			$loop5++;
-		} else {
-
-			if (isset($static_ipaddress[$loop5]['ip']) &&
-			    $static_ipaddress[$loop5]['ip'] != "") {
-				$ipstring = $static_ipaddress[$loop5]['ip']   . "/" . $static_ipaddress[$loop5]['mask'] . " " . "dev" . " " . $static_ipaddress[$loop5]['dev'];
-				fputs ($fd, "$gap1" . $ipstring . "\n", 80);
-				if ($debug) { echo "$egap1" . $ipstring . "<BR>"; };
+		foreach ($static_ipaddress as $ip) {
+			if (($loop5 == $delete_item) && ($level == "1") && ($delete_service == "static_ipaddress")) {
+				$loop5++;
+                        } else {
+				fputs ($fd, "$gap1 "            . $ip   . "\n", 80);
+				if ($debug) { echo "$egap1 "    . $ip   . "<BR>"; };
+				$loop5++;
 			}
-			$loop5++;
+
 		}
+		fputs ($fd,"}\n", 80);
+		if ($debug) { echo "}<BR>"; }
 	}
 
-	fputs ($fd,"}\n", 80);
-	if ($debug) { echo "}<BR>"; };
 
 	if ($debug) { echo "<P><B>Static routes</B><BR>"; };
 
@@ -2274,20 +2245,10 @@ function add_virtual() {
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
-function add_staticip() {
+function add_static_ipaddress() {
 
 	global $static_ipaddress;
-	$loop2 = 1;	
-
-	/* find end of existing data */
-	while (isset($static_ipaddress[$loop2]['ip']) &&
-	       $static_ipaddress[$loop2]['ip'] != "") {
-		$loop2++;
-	}
-
-	$static_ipaddress[$loop2]['ip']		= "0.0.0.0";
-	$static_ipaddress[$loop2]['mask']	= "24";
-	$static_ipaddress[$loop2]['dev']	= "eth1";
+	$static_ipaddress[] = "network/netmask dev ethxxx scope global";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
