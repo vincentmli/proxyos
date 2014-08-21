@@ -2,7 +2,7 @@
         $edit_action = $_GET['edit_action'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: static_ipaddress.php?selected=$selected");		
+		header("Location: global_notification_email.php?selected=$selected");		
 		exit;
 	}
 	
@@ -11,7 +11,7 @@
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); // always modified
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
-	global $static_ipaddress;
+	global $global_defs;
 
 	require('parse.php');
 
@@ -19,15 +19,9 @@
 		
 	if ($edit_action == "ACCEPT") {
 
-		$ip		=	$_GET['ip'];
-		$netmask	=	$_GET['netmask'];
-		$interface	=	$_GET['interface'];
-		$scope		=	$_GET['scope'];
-		if ($scope != "") {
-			$static_ipaddress[$selected-1]		= "$ip/$netmask dev $interface scope $scope";	
-		} else {
-			$static_ipaddress[$selected-1]		= "$ip/$netmask dev $interface";	
-		}
+		$email	=	$_GET['email'];
+		$global_defs['notification_email'][$selected-1]		= "$email";	
+		echo $interface;
 
 	}
 
@@ -97,7 +91,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT STATIC IPADDRESS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT GLOBAL NOTIFICATION EMAIL</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -139,49 +133,18 @@ A.logolink      {
 <P>
 
 
-<FORM id="static_ipaddress_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="static_ipaddress_edit.php">
-
+<FORM id="global_notification_email_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="global_notification_email_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-	        $string = explode(" ", $static_ipaddress[$selected-1]);
-                if (isset($string[3]) && $string[3] == "scope") {
-                        $ipmask = explode("/", $string[0]);
-                        $ip = $ipmask[0];
-                        $netmask = $ipmask[1];
-                        $interface = $string[2];
-                        $scope = $string[4];
-                } else {
-                        $ipmask = explode("/", $string[0]);
-                        $ip = $ipmask[0];
-                        $netmask = $ipmask[1];
-                        $interface = $string[2];
-                        $scope = "";
-                }
-
+		$email =  $global_defs['notification_email'][$selected-1];
 
 		echo "<TR>";
-			echo "<TD>SOURCE IP: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=ip VALUE=";   echo $ip . ">"; echo "</TD>";
+			echo "<TD>EMAIL: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=email VALUE=\""; echo $email . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>NETMASK: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=netmask VALUE=";   echo $netmask . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>INTERFACE: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=interface VALUE=";  echo $interface . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>SCOPE: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=scope VALUE=";  echo $scope . ">"; echo "</TD>";
-		echo "</TR>";
-
 
 	echo "</TABLE>";
 

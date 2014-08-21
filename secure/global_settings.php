@@ -114,6 +114,9 @@ A.logolink      {
                 <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
                 &nbsp;|&nbsp;
 
+                <A HREF="global_notification_email.php" NAME="GLOBAL NOTIFICATION EMAIL">GLOBAL NOTIFICATION EMAIL</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
                 &nbsp;|&nbsp;
 
@@ -141,12 +144,6 @@ A.logolink      {
                 <TD CLASS="title" COLSPAN="2">ENVIRONMENT</TD>
         </TR>
 
-	<TR>
-		<TD>Notification email :</TD>
-		<TD><INPUT TYPE="TEXT" NAME="notification_email" SIZE=26 VALUE="<?php
-			echo $global_defs['notification_email'];
-		?>"></TD>
-	</TR>
 	<TR>
 		<TD>Notification email from :</TD>
 		<TD><INPUT TYPE="TEXT" NAME="notification_email_from" SIZE=26 VALUE="<?php

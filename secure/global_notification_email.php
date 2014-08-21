@@ -1,22 +1,23 @@
 <?php
 	$selected_host = "";
 	$selected = "";
+	
 
 	if (isset($_GET['selected'])) {
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "CANCEL")) {
+	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "CANCEL")) {
 		/* Redirect browser to editing page */
-		header("Location: static_ipaddress.php?selected_host=$selected");
+		header("Location: global_notification_email.php?selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "EDIT")) {
+	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: static_ipaddress_edit.php?selected=$selected");
+		header("Location: global_notification_email_edit.php?selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -29,17 +30,26 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "ADD")) {
-		add_static_ipaddress();
+	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "ADD")) {
+		add_global_notification_email();
 	}
 
-	if ((isset($_GET['static_ipaddress_service'])) && ($_GET['static_ipaddress_service'] == "DELETE")) {
-		$delete_service = "static_ipaddress";
+	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "DELETE")) {
+		$delete_service = "global_notification_email";
 		if ($debug) { echo "About to delete entry number $selected<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"static_ipaddress.php?selected=$selected\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"global_notification_email.php?selected=$selected\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
-		write_config("1", "", $selected-1, $delete_service);
+		write_config("2", "", $selected-1, $delete_service);
 		exit;
+	}
+
+	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "(DE)ACTIVATE")) {
+		switch ($serv[$selected_host][$selected]['active']) {
+			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
+			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
+			case	"1"	:	$serv[$selected_host][$selected]['active'] = "0"; break;
+			default		:	$serv[$selected_host][$selected]['active'] = "0"; break;
+		}
 	}
 
 	/* Umm,... just in case someone is dumb enuf to fiddle */
@@ -106,7 +116,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT STATIC IPADDRESS</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT GLOBAL NOTIFICATION EMAIL</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -144,60 +154,29 @@ A.logolink      {
         </TR>
 </TABLE>
 
-
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="static_ipaddress.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="global_notification_email.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">IP</TD>
-		<TD CLASS="title">NETMASK</TD>
-		<TD CLASS="title">INTERFACE</TD>
-		<TD CLASS="title">SCOPE</TD>
-<?php //	<TD CLASS="title">NETMASK</TD> ?>
+		<TD CLASS="title">EMAIL</TD>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
 	
 
 	<?php
-	/* magic */
 
 	$loop=1;
 
-//	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
-	foreach ($static_ipaddress as $ips) {
+	foreach ($global_defs['notification_email'] as $email) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
-				
-		$string = explode(" ", $ips);
-		if (isset($string[3]) && $string[3] == "scope") {
-			$ipmask = explode("/", $string[0]);
-			$ip = $ipmask[0];
-			$netmask = $ipmask[1];
-			$interface = $string[2];
-			$scope = $string[4];
-		} else {
-			$ipmask = explode("/", $string[0]);
-			$ip = $ipmask[0];
-			$netmask = $ipmask[1];
-			$interface = $string[2];
-			$scope = "";
-		}
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";		echo $ip	. ">";
-		echo $ip	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";		echo $netmask	. ">";
-		echo $netmask	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";		echo $interface	. ">";
-		echo $interface	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=scope COLS=6 VALUE=";		echo $scope	. ">";
-		echo $scope	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=email COLS=6 VALUE=";	echo $email	. ">";
+		echo $email	. "</TD>";
 
 		echo "</TR>";
 	
@@ -216,18 +195,19 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
+
 
 
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>

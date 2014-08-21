@@ -127,6 +127,9 @@ A.logolink      {
                 <A HREF="global_settings.php" NAME="GLOBAL SETTING">GLOBAL SETTING</A>
                 &nbsp;|&nbsp;
 
+                <A HREF="global_notification_email.php" NAME="GLOBAL NOTIFICATION EMAIL">GLOBAL NOTIFICATION EMAIL</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="static_ipaddress.php" CLASS="tabon" NAME="STATIC IPADDRESS">STATIC IPADDRESS</A>
                 &nbsp;|&nbsp;
 

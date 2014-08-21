@@ -24,7 +24,6 @@ $serv = array ( "",
 
 $global_defs = array (
 		"global_defs" => "",
-  	 	"notification_email" => "", 
 		"notification_email_from" => "",
 		"smtp_server" => "",
    		"smtp_connect_timeout" => "",
@@ -300,6 +299,8 @@ function parse($name, $datum) {
 						  		if ($service == "global_defs") $global_defs['global_defs']	= $datum;
 								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of global definition </I><B>$service</B></FONT><BR>"; };
 								break;
+			case "notification_email"	: 	 $service = "global_defs";/* ignore here for global */ 
+								break;
 			case "notification_email_from"	:	if ($service == "global_defs") $global_defs['notification_email_from'] 	= $datum;
 								break;
 			case "smtp_server"		:	if ($service == "global_defs") $global_defs['smtp_server'] 	= $datum;
@@ -517,6 +518,22 @@ function parse($name, $datum) {
 	/* Level 2 */
 	if ($level == 2 ) {
 		switch ($name) {
+
+			case "notification_email"	:  if ($service == "global_defs") {
+							   	$global_defs['notification_email'] = array(); 
+							   }
+							break;
+
+			case (preg_match("/$email_regex/", $name) ? true : false )	:	
+				if ($name != "" ) {
+					if ($debug) { 
+						echo "<FONT COLOR=\"yellow\"><I>Asked for global notification email </I><B></B></FONT><BR>"; 
+					};
+					if($service == "global_defs")  {
+						$global_defs['notification_email'][] = $name;
+					 } 
+				}
+							break;
 	
 			case "real_server"		:	if ($debug) { 
 							echo "<FONT COLOR=\"yellow\"><I>Asked for vitual.server (" 
@@ -536,16 +553,6 @@ function parse($name, $datum) {
 							break;
 			case "weight"		:	$serv[$virt_count][$server_count+1]['weight']		= $datum;
 							break;
-
-			case (preg_match("/($email_regex)/", $name) ? true : false )	:	
-				if ($debug) {
-                                       echo "<FONT COLOR=\"yellow\"><I>Asked for global_defs.notification_email "
-                                        . 
-                                        "</I> - <B>\$global_defs[notification_email]:"
-                                        . $name .
-                                        "</B></FONT><BR>"; };
-                                       $global_defs['notification_email']       = $global_defs['notification_email'] .  " $name";
-                                                        break;
 
 			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = $name; 
 							break;
@@ -1020,7 +1027,10 @@ function print_arrays() {
 	echo "<BR>serial_no = "					. $prim['serial_no'];
 
 	echo "<P><B>Global_defs</B>";
-	echo "<BR>Global_defs  [notification_email]  = "    	. $global_defs['notification_email'];
+	echo "<P><B>notification_email</B><BR>";
+        foreach ($global_defs['notification_email'] as $email) {
+		if ($debug) { echo "$egap1" . $email . "<BR>"; };
+	}
 	echo "<BR>Global_defs  [notification_email_from] = "	. $global_defs['notification_email_from'];
 	echo "<BR>Global_defs  [smtp_server] = "		. $global_defs['smtp_server'];
 	echo "<BR>Global_defs  [smtp_connect_timeout] = "	. $global_defs['smtp_connect_timeout'];
@@ -1259,6 +1269,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop16 = 1; //local address group
 	$loop17 = 0; //local address group ip
 	$loop18 = 0; //staic routes
+	$loop19 = 0;
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1291,24 +1302,28 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		fputs ($fd, "global_defs "				. $global_defs['global_defs'] 	. " {\n", 80);
 		if ($debug) { echo "global_defs "			. $global_defs['global_defs'] 	. " {<BR>"; };
 	}
-	if (isset($global_defs['notification_email'])) {
-		fputs ($fd, "$gap1 notification_email "		 	. " {\n", 80);
-		if ($debug) { echo "$egap1 notification_email "	 	. " {<BR>"; };
-	}
 
-	if ($global_defs['notification_email'] != ""){
-		$global_defs['notification_email'] = trim($global_defs['notification_email']);
-		$email = explode(" ", $global_defs['notification_email']);
-		$i = 0;
-		while ($email[$i] != "") {
-			fputs ($fd, "$gap2 $email[$i]"	. "\n", 80);
-			if ($debug) { echo "$egap2 $email[$i]"	. "<BR>"; };
-			$i++;
-		}
-	}
-	
-	fputs ($fd,"$gap1 }\n", 80);
-	if ($debug) { echo "$egap1 }<BR>"; };
+       if (isset($global_defs['notification_email'])
+              && $global_defs['notification_email'] != ""
+              && count($global_defs['notification_email']) > 0) {
+              	fputs ($fd, "$gap1 notification_email "            . " {\n", 80);
+              	if ($debug) { echo "$egap1 notification_email "    . " {<BR>"; };
+
+              	foreach ($global_defs['notification_email'] as $email) {
+
+                	if (($loop19 == $delete_item) && ($level == "2") && ($delete_service == "global_notification_email")) {
+                		$loop19++;
+                	}
+                	else {
+                		fputs ($fd, "$gap2 "            . $email    . "\n", 80);
+                		if ($debug) { echo "$egap2 "    . $email    . "<BR>"; };
+               			$loop19++;
+               		}
+               }
+
+               fputs ($fd,"$gap1 }\n", 80);
+               if ($debug) { echo "$egap1 }<BR>"; }
+        }
 
 	if ($global_defs['notification_email_from'] != ""){
 		fputs ($fd, "$gap1 notification_email_from "			. $global_defs['notification_email_from']	. "\n", 80);
@@ -2153,6 +2168,14 @@ function open_file($mode) {
 	}
 		
         rewind($fd); /* unnessecary but I'm paranoid */
+}
+
+function add_global_notification_email() {
+
+	global $global_defs;
+	$global_defs['notification_email'][] = "username@example.com";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
 function add_vrrp() {
