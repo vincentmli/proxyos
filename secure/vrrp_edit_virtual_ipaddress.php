@@ -143,6 +143,9 @@ A.logolink      {
                 <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS">VRRP VIRTUAL IPADDRESS</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS EXCLUDED">VRRP VIRTUAL IPADDRESS EXCLUDED</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
 		&nbsp;|&nbsp;
 
@@ -165,6 +168,7 @@ A.logolink      {
 		<TD CLASS="title">IP</TD>
 		<TD CLASS="title">NETMASK</TD>
 		<TD CLASS="title">INTERFACE</TD>
+		<TD CLASS="title">SCOPE</TD>
 <?php //	<TD CLASS="title">NETMASK</TD> ?>
 	</TR>
 
@@ -178,15 +182,24 @@ A.logolink      {
 	$loop=1;
 
 //	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
-	foreach ($vrrp_instance[$selected_host]['virtual_ipaddress'] as $ip) {
+	foreach ($vrrp_instance[$selected_host]['virtual_ipaddress'] as $ips) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
+                $string = explode(" ", $ips);
+                if (isset($string[3]) && $string[3] == "scope") {
+                        $ipnetmask = explode("/", $string[0]);
+                        $ip = $ipnetmask[0];
+                        $netmask = $ipnetmask[1];
+                        $interface = $string[2];
+                        $scope = $string[4];
+                } else {
+                        $ipnetmask = explode("/", $string[0]);
+                        $ip = $ipnetmask[0];
+                        $netmask = $ipnetmask[1];
+                        $interface = $string[2];
+                        $scope = "";
+                }
 				
-		$ips = explode(" ", $ip);
-		$ipnetmask = explode("/", $ips[0]);
-		$ip = $ipnetmask[0];
-		$netmask = $ipnetmask[1];
-		$interface = $ips[2];
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ips[0]	. ">";
 		echo $ip	. "</TD>";
@@ -196,6 +209,9 @@ A.logolink      {
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
 		echo $interface	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=scope COLS=6 VALUE=";	echo $scope	. ">";
+		echo $scope	. "</TD>";
 
 		echo "</TR>";
 	

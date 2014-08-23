@@ -73,6 +73,7 @@ $vrrp_instance = array ( "",
 			"advert_int"			=> "",
 			"authentication"		=> "",
 			"virtual_ipaddress"		=> "",
+			"virtual_ipaddress_excluded"	=> "",
 			"virtual_routes"		=> "",
 			"nopreempt"			=> "",
 			"preempt_delay"			=> "",
@@ -199,6 +200,7 @@ function parse($name, $datum) {
 		    or $name == "static_routes"
 		    or $name == "authentication"
 		    or $name == "virtual_ipaddress"
+		    or $name == "virtual_ipaddress_excluded"
 		    or $name == "virtual_routes"
 		    or $name == "track_interface"
 		    or $name == "group"
@@ -400,6 +402,8 @@ function parse($name, $datum) {
 							break;
 			case "virtual_ipaddress"	: /* ignore here for vrrp_instance */ 
 							break;
+			case "virtual_ipaddress_excluded"	: /* ignore here for vrrp_instance */ 
+							break;
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "track_interface"	: /* ignore here for vrrp_instance */ 
@@ -566,6 +570,12 @@ function parse($name, $datum) {
 							   }
 							break;
 
+			case "virtual_ipaddress_excluded"	:  if ($service == "vrrp_instance") { 
+								$ip_of = "virtual_ipaddress_excluded";
+								$vrrp_instance[$vrrp_instance_count]['virtual_ipaddress_excluded'] = array();
+							   }
+							break;
+
 			case "virtual_routes"	:  if ($service == "vrrp_instance") { 
 								$ip_of = "virtual_routes";
 								$vrrp_instance[$vrrp_instance_count]['virtual_routes'] = array(); 
@@ -581,17 +591,22 @@ function parse($name, $datum) {
 					if($service == "vrrp_instance") {
 					   if($ip_of == "virtual_ipaddress") {
 						    $vrrp_instance[$vrrp_instance_count]['virtual_ipaddress'][] = $name . " " . $datum;
-					   } else if ($ip_of == "virtual_routes") {
+					   }
+					   else if ($ip_of == "virtual_ipaddress_excluded") {
+						    $vrrp_instance[$vrrp_instance_count]['virtual_ipaddress_excluded'][] = $name . " " . $datum;
+						    if ($debug) { 
+							echo "<FONT COLOR=\"yellow\"><I>Asked for VIRTUAL_IPADDRESS_EXCLUDED </I><B></B></FONT><BR>"; 
+							var_dump($vrrp_instance[$vrrp_instance_count]['virtual_ipaddress_excluded']);
+						    };
+					   }
+					   else if ($ip_of == "virtual_routes") {
 						    $vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
-						    if ($debug) {
-								echo "$name $datum<BR>";
-						    }
 					   }
 					}
 				}
 				break;
 
-			case "src"	:  if ($service == "vrrp_instance" and $ip_of == "virtual_routes")  
+			case "src"	:  if ($service == "vrrp_instance" && $ip_of == "virtual_routes")  
 					   	$vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
 				break;
 
@@ -1017,7 +1032,7 @@ function print_arrays() {
 	global $static_ipaddress;
 	global $static_routes;
 	global $local_address_group;
-	global $ip_of;
+//	global $ip_of;
 
 	$loop1 = $loop2 = 0;
 
@@ -1088,21 +1103,22 @@ function print_arrays() {
 		echo "<BR>vrrp_instance [$loop1] [auth_pass] = "	. $vrrp_instance[$loop1]['auth_pass'];
 
 		echo "<P><B>vrrp_instance virtual_ipaddress</B>";
-		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['virtual_ipaddress']);
-
-		echo "<P><B>vrrp_instance virtual_routes</B>";
-		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['virtual_routes']);
-
                 foreach ($vrrp_instance[$loop1]['virtual_ipaddress'] as $ip) {
 				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
 		}
+
+		echo "<P><B>vrrp_instance virtual_ipaddress_excluded</B>";
+		var_dump($vrrp_instance[$loop1]['virtual_ipaddress_excluded']);
+                foreach ($vrrp_instance[$loop1]['virtual_ipaddress_excluded'] as $ip) {
+				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
+		}
+
+		echo "<P><B>vrrp_instance virtual_routes</B>";
                 foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
 				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
 		}
 
 		echo "<P><B>vrrp_instance track_interface</B>";
-		echo "<BR>" .  var_dump($vrrp_instance[$loop1]['track_interface']);
-
                 foreach ($vrrp_instance[$loop1]['track_interface'] as $interface) {
 				if ($debug) { echo "$egap1" . $interface . "<BR>"; };
 		}
@@ -1253,6 +1269,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 	if ($debug) { echo "<BR>Delete array number = $delete_item from level = $level<BR>"; }
 
+	//too many loop variable :), two is engough
 	$loop1 = $loop2 = 1;
 	$loop3 = $loop4 = 1;
 	$loop5 = 0; //static_ipaddress
@@ -1269,7 +1286,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop16 = 1; //local address group
 	$loop17 = 0; //local address group ip
 	$loop18 = 0; //staic routes
-	$loop19 = 0;
+	$loop19 = 0; //notification
+	$loop20  = 0; //vrrp virtual_ipaddress_excluded
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1426,7 +1444,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0;} else {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0; $loop20 = 0;} else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
 			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
@@ -1561,6 +1579,29 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 						fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
 						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
 						$loop8++;
+					}
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
+			if (isset($vrrp_instance[$loop7]['virtual_ipaddress_excluded']) &&
+			    $vrrp_instance[$loop7]['virtual_ipaddress_excluded'] != ""  &&
+			    count($vrrp_instance[$loop7]['virtual_ipaddress_excluded']) > 0) {
+				fputs ($fd, "$gap1 virtual_ipaddress_excluded "		. " {\n", 80);
+				if ($debug) { echo "$egap1 virtual_ipaddress_excluded "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop7]['virtual_ipaddress_excluded'] as $ip) {
+
+                                	if (($loop20 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_ipaddress_excluded")) {
+                                        	$loop20++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+						$loop20++;
 					}
                 		}
 
@@ -2301,6 +2342,14 @@ function add_vrrp_virtual_ipaddress($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['virtual_ipaddress'][] = "ip/netmask dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_virtual_ipaddress_excluded($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['virtual_ipaddress_excluded'][] = "ip/netmask dev ethxxx scope global";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }

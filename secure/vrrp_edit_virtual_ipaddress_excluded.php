@@ -10,7 +10,7 @@
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "CANCEL")) {
+	if ((isset($_GET['vrrp_virtual_ipaddress_excluded'])) && ($_GET['vrrp_virtual_ipaddress_excluded'] == "CANCEL")) {
 		/* Redirect browser to editing page */
 		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
@@ -18,9 +18,9 @@
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "EDIT")) {
+	if ((isset($_GET['vrrp_virtual_ipaddress_excluded'])) && ($_GET['vrrp_virtual_ipaddress_excluded'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_virtual_routes_edit.php?selected_host=$selected_host&selected=$selected");
+		header("Location: vrrp_edit_virtual_ipaddress_excluded_edit.php?selected_host=$selected_host&selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -33,20 +33,20 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "ADD")) {
-		add_vrrp_virtual_routes($selected_host);
+	if ((isset($_GET['vrrp_virtual_ipaddress_excluded'])) && ($_GET['vrrp_virtual_ipaddress_excluded'] == "ADD")) {
+		add_vrrp_virtual_ipaddress_excluded($selected_host);
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "DELETE")) {
-		$delete_service = "vrrp_virtual_routes";
+	if ((isset($_GET['vrrp_virtual_ipaddress_excluded'])) && ($_GET['vrrp_virtual_ipaddress_excluded'] == "DELETE")) {
+		$delete_service = "vrrp_virtual_ipaddress_excluded";
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"vrrp_edit_virtual_routes.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"vrrp_edit_virtual_ipaddress_excluded.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
 		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
 
-	if ((isset($_GET['vrrp_virtual_routes'])) && ($_GET['vrrp_virtual_routes'] == "(DE)ACTIVATE")) {
+	if ((isset($_GET['vrrp_virtual_ipaddress_excluded'])) && ($_GET['vrrp_virtual_ipaddress_excluded'] == "(DE)ACTIVATE")) {
 		switch ($serv[$selected_host][$selected]['active']) {
 			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
 			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
@@ -119,7 +119,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL ROUTES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS EXCLUDED</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -144,7 +144,7 @@ A.logolink      {
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS EXCLUDED">VRRP VIRTUAL IPADDRESS EXCLUDED</A>
-                &nbsp;|&nbsp;
+		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
 		&nbsp;|&nbsp;
@@ -154,24 +154,21 @@ A.logolink      {
 
 		</TD>
 
-
-
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
 
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_routes.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_ipaddress_excluded.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">SOURCE IP</TD>
-		<TD CLASS="title">DESTINATION NETWORK</TD>
+		<TD CLASS="title">IP</TD>
 		<TD CLASS="title">NETMASK</TD>
-		<TD CLASS="title">GATEWAY</TD>
 		<TD CLASS="title">INTERFACE</TD>
+		<TD CLASS="title">SCOPE</TD>
 <?php //	<TD CLASS="title">NETMASK</TD> ?>
 	</TR>
 
@@ -185,57 +182,36 @@ A.logolink      {
 	$loop=1;
 
 //	while ((isset($vrrp[$selected_host]['virtual_ipaddress'])) && ($vrrp[$selected_host]['virtual_ipaddress'] != "" )) {
-	foreach ($vrrp_instance[$selected_host]['virtual_routes'] as $ip) {
+	foreach ($vrrp_instance[$selected_host]['virtual_ipaddress_excluded'] as $ips) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
 				
-		$ips = explode(" ", $ip);
-                if ($ips[0] == "src") {
-                        if ($ips[2] == "to") {
-                                $srcip = $ips[1];
-                                $dst = explode("/", $ips[3]);
-                                $network = $dst[0];
-                                $netmask = $dst[1];
-                                $gateway = $ips[5];
-                                $interface = $ips[7];
-                        } else {
-                                $srcip = $ips[1];
-                                $dst = explode("/", $ips[2]);
-                                $network = $dst[0];
-                                $netmask = $dst[1];
-                                $gateway = $ips[4];
-                                $interface = $ips[6];
-                        }
-                } else if ($ips[1] == "dev") {
-                        $srcip = "";
-                        $dst = explode("/", $ips[0]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = "";
-                        $interface = $ips[2];
-                } else {
-                        $srcip = "";
-                        $dst = explode("/", $ips[0]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = $ips[2];
-                        $interface = $ips[4];
-                }
+		$string = explode(" ", $ips);
+		if (isset($string[3]) && $string[3] == "scope") {
+			$ipnetmask = explode("/", $string[0]);
+			$ip = $ipnetmask[0];
+			$netmask = $ipnetmask[1];
+			$interface = $string[2]; 
+			$scope = $string[4];
+		} else {	
+			$ipnetmask = explode("/", $string[0]);
+			$ip = $ipnetmask[0];
+			$netmask = $ipnetmask[1];
+			$interface = $string[2];
+			$scope = "";
+		}
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=srcip COLS=6 VALUE=";		echo $srcip	. ">";
-		echo $srcip	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ip	. ">";
+		echo $ip	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=network COLS=6 VALUE=";		echo $network	. ">";
-		echo $network	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";		echo $netmask	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";	echo $netmask	. ">";
 		echo $netmask	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=gateway COLS=6 VALUE=";		echo $gateway	. ">";
-		echo $gateway	. "</TD>";
-
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";		echo $interface	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
 		echo $interface	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=scope COLS=6 VALUE=";	echo $scope	. ">";
+		echo $scope	. "</TD>";
 
 		echo "</TR>";
 	
@@ -254,10 +230,10 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress_excluded" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress_excluded" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress_excluded" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress_excluded" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 
@@ -267,7 +243,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="vrrp_virtual_routes" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress_excluded" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>

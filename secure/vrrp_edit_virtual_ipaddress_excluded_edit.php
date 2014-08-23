@@ -3,7 +3,7 @@
         $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_virtual_routes.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: vrrp_edit_virtual_ipaddress_excluded.php?selected_host=$selected_host&selected=$selected");		
 		exit;
 	}
 	
@@ -20,17 +20,14 @@
 		
 	if ($edit_action == "ACCEPT") {
 
-		$srcip	=	$_GET['srcip'];
-		$network	=	$_GET['network'];
+		$ip	=	$_GET['ip'];
 		$netmask	=	$_GET['netmask'];
-		$gateway	=	$_GET['gateway'];
 		$interface	=	$_GET['interface'];
-		if ($srcip != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "src $srcip to $network/$netmask via $gateway dev $interface";	
-		} else if($gateway != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask via $gateway dev $interface";	
+		$scope	=	$_GET['scope'];
+		if(isset($scope) && $scope !="") {
+			$vrrp_instance[$selected_host]['virtual_ipaddress_excluded'][$selected-1]		= "$ip/$netmask dev $interface scope $scope";	
 		} else {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask dev $interface";	
+			$vrrp_instance[$selected_host]['virtual_ipaddress_excluded'][$selected-1]		= "$ip/$netmask dev $interface";	
 		}
 
 	}
@@ -101,7 +98,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VIRTUAL ROUTES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP VIRTUAL IPADDRESS</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -127,16 +124,15 @@ A.logolink      {
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS EXCLUDED">VRRP VIRTUAL IPADDRESS EXCLUDED</A>
-                &nbsp;|&nbsp;
+		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VRRP VIRTUAL ROUTES</A>
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">VRRP TRACK INTERFACE</A>
-		&nbsp;|&nbsp;
+                &nbsp;|&nbsp;
 
 		</TD>
-
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
@@ -144,54 +140,46 @@ A.logolink      {
 <P>
 
 
-<FORM id="vrrp_virtual_routes_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_routes_edit.php">
-
+<FORM id="vrrp_virtual_ipaddress_excluded_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_ipaddress_excluded_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-	        $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_routes'][$selected-1]);
-                if ($ips[0] == "src") {
-                        $srcip = $ips[1];
-                        $dst = explode("/", $ips[3]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = $ips[5];
-                        $interface = $ips[7];
+		$string = explode(" ", $vrrp_instance[$selected_host]['virtual_ipaddress_excluded'][$selected-1]);
+                if (isset($string[3]) && $string[3] == "scope") {
+                        $ipnetmask = explode("/", $string[0]);
+                        $ip = $ipnetmask[0];
+                        $netmask = $ipnetmask[1];
+                        $interface = $string[2];
+                        $scope = $string[4];
                 } else {
-                        $dst = explode("/", $ips[0]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = $ips[2];
-                        $interface = $ips[4];
+                        $ipnetmask = explode("/", $string[0]);
+                        $ip = $ipnetmask[0];
+                        $netmask = $ipnetmask[1];
+                        $interface = $string[2];
+                        $scope = "";
                 }
 
 		echo "<TR>";
-			echo "<TD>SOURCE IP: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=srcip VALUE=";   echo $srcip . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>NETWORK: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=network VALUE="; echo $network . ">"; echo "</TD>";
+			echo "<TD>IP: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=ip VALUE=\""; echo $ip . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 		echo "<TR>";
 			echo "<TD>NETMASK: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=netmask VALUE=";   echo $netmask . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>GATEWAY: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=gateway VALUE=";  echo $gateway . ">"; echo "</TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=netmask VALUE=\""; echo $netmask . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 		echo "<TR>";
 			echo "<TD>INTERFACE: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=interface VALUE=";  echo $interface . ">"; echo "</TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=interface VALUE=\""; echo $interface . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
+		echo "<TR>";
+			echo "<TD>SCOPE: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=scope VALUE=\""; echo $scope . "\""  . ">"; echo "</TD>";
+		echo "</TR>";
 
 	echo "</TABLE>";
 
