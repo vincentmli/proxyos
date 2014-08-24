@@ -144,7 +144,7 @@ A.logolink      {
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
 	<TR BGCOLOR="#CC0000"> <TD CLASS="logo"> <B>KEEPALIVED</B> CONFIGURATION TOOL </TD>
 	<TD ALIGN=right CLASS="logo">
-            <A HREF="introduction.html" CLASS="logolink">
+            <A HREF="introduction.php" CLASS="logolink">
             INTRODUCTION</A> | <A HREF="help.php" CLASS="logolink">
             HELP</A></TD>
 	</TR>

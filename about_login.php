@@ -67,14 +67,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
-        <TR BGCOLOR="#666666">
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="secure/control.php" NAME="Control/Monitoring" CLASS="taboff"><B>CONTROL/MONITORING</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="secure/global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="secure/redundancy.php" NAME="Redundancy" CLASS="taboff"><B>REDUNDANCY</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="secure/virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
-        </TR>
-</TABLE>
+<?php include 'secure/menu.php'; ?>
 
 <TABLE>
 	<TR>

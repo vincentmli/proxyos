@@ -91,7 +91,7 @@ A.logolink      {
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
 	<TR BGCOLOR="#CC0000"> <TD CLASS="logo"> <B>KEEPALIVED</B> CONFIGURATION TOOL </TD>
 	<TD ALIGN=right CLASS="logo">
-            <A HREF="introduction.html" CLASS="logolink">
+            <A HREF="introduction.php" CLASS="logolink">
             INTRODUCTION</A> | <A HREF="help.php" CLASS="logolink">
             HELP</A></TD>
 	</TR>
@@ -123,7 +123,7 @@ A.logolink      {
 	<TR> <TD BGCOLOR="#EEEEEE">
 	<?php
 		$retval=1;
-		exec("/etc/rc.d/init.d/pulse status",$lines,$retval);
+		exec("/etc/rc.d/init.d/keepalived status",$lines,$retval);
 		
 		if ($retval == 0) { 
 			echo "Daemon: <FONT COLOR=\"green\"> running </FONT>";
@@ -199,7 +199,7 @@ A.logolink      {
 	</TABLE>
 	
 	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
-	<?php echo nl2br(htmlspecialchars(`/bin/ps auxw | /bin/egrep "pulse|lvs|send_arp|nanny|fos|ipvs" | /bin/grep -v grep`)); ?>
+	<?php echo nl2br(htmlspecialchars(`/bin/ps auxw | /bin/egrep "keepalived" | /bin/grep -v grep`)); ?>
 	&nbsp;	
 	</TT> </TD> </TR> </TABLE>
 
