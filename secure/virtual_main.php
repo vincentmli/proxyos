@@ -194,10 +194,10 @@ A.logolink      {
 		echo "<TD>";
 
 		switch ($virt[$loop1]['protocol']) {
-			case	""	:	$virt[$loop1]['protocol'] = "tcp"; break;
-			case	"tcp"	:	$virt[$loop1]['protocol'] = "tcp"; break;
-			case	"udp"	:	$virt[$loop1]['protocol'] = "udp"; break;
-			default		:	$virt[$loop1]['protocol'] = "tcp"; break;
+			case	""	:	$virt[$loop1]['protocol'] = "TCP"; break;
+			case	"TCP"	:	$virt[$loop1]['protocol'] = "TCP"; break;
+			case	"UDP"	:	$virt[$loop1]['protocol'] = "UDP"; break;
+			default		:	$virt[$loop1]['protocol'] = "TCP"; break;
 		}
 
 		echo $virt[$loop1]['protocol'];

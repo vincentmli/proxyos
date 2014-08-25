@@ -22,6 +22,20 @@
 		header("Location: passwd.php");
 		exit;
 	}
+	
+	
+
+	if ($control_action == "RELOAD CONFIG") {
+		$temp = tempnam(sys_get_temp_dir(), 'php');
+		$today = date("Y-m-d-H:i:s"); 
+		exec("/usr/bin/sudo /usr/bin/rsync -p -o --backup --backup-dir=/etc/sysconfig/ha/web --suffix $today /etc/sysconfig/ha/web/lvs.cf /etc/keepalived/keepalived.conf>".$temp." 2>&1");
+                exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1');
+		#unlink($temp);
+
+		header("Location: control.php");
+		exit;
+	}
+
 		
 	header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");             // Date in the past
 	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");// always modified
@@ -191,6 +205,17 @@ A.logolink      {
 
 	?>
 	</TT> </TD> </TR> </TABLE>
+
+	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
+        <TR>
+                <TD CLASS="title">CURRENT LVS CONFIGURATION</TD>
+        </TR>
+	</TABLE>
+
+	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
+	<?php $conf = file_get_contents('/etc/sysconfig/ha/web/lvs.cf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
+	&nbsp;	
+	</TT> </TD> </TR> </TABLE>
 	
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
         <TR>
@@ -230,6 +255,9 @@ A.logolink      {
 		End of comment -->
 		<TD ALIGN=right>
 			<INPUT TYPE="Submit" NAME="control_action" VALUE="CHANGE PASSWORD"> <SPAN CLASS="taboff">
+		</TD>
+		<TD ALIGN=left>
+			<INPUT TYPE="Submit" NAME="control_action" VALUE="RELOAD CONFIG"> <SPAN CLASS="taboff">
 		</TD>
        		</TR>
 	</TABLE>

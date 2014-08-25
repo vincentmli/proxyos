@@ -244,9 +244,9 @@ A.logolink      {
 		<TD>Protocol:</TD>
 		<TD>
 			<SELECT NAME="protocol">
-				<OPTION <?php if (($virt[$selected_host]['protocol'] == "tcp") || 
-					       ($virt[$selected_host]['protocol'] == "")) { echo "SELECTED"; } ?>> tcp
-				<OPTION <?php if ($virt[$selected_host]['protocol'] == "udp") { echo "SELECTED"; } ?>> udp
+				<OPTION <?php if (($virt[$selected_host]['protocol'] == "TCP") || 
+					       ($virt[$selected_host]['protocol'] == "")) { echo "SELECTED"; } ?>> TCP 
+				<OPTION <?php if ($virt[$selected_host]['protocol'] == "UDP") { echo "SELECTED"; } ?>> UDP 
 			</SELECT>
 		</TD>
 
