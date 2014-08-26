@@ -234,11 +234,40 @@ A.logolink      {
 	</TR>
 	<TR>
 		<TD>Forward Method:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="lb_kind" VALUE=<?php echo  $virt[$selected_host]['lb_kind'] ?>></TD>
+		<!--TD><INPUT TYPE="TEXT" NAME="lb_kind" VALUE=<?php echo  $virt[$selected_host]['lb_kind'] ?>></TD-->
+		<TD>
+			<SELECT NAME="lb_kind">
+				<OPTION <?php if (($virt[$selected_host]['lb_kind'] == "FNAT") || 
+					       ($virt[$selected_host]['lb_kind'] == "")) { echo "SELECTED"; } ?>> FNAT 
+				<OPTION <?php if ($virt[$selected_host]['lb_kind'] == "NAT") { echo "SELECTED"; } ?>> NAT 
+				<OPTION <?php if ($virt[$selected_host]['lb_kind'] == "DR") { echo "SELECTED"; } ?>> DR 
+				<OPTION <?php if ($virt[$selected_host]['lb_kind'] == "TUN") { echo "SELECTED"; } ?>> TUN 
+			</SELECT>
+		</TD>
 	</TR>
 	<TR>
 		<TD>SNAT Address Group:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="laddr_group_name" VALUE=<?php echo  $virt[$selected_host]['laddr_group_name'] ?>></TD>
+		<TD>
+			<?php
+				global $local_address_group;
+				$laddrg = $local_address_group;
+			
+			echo "<SELECT NAME=\"laddr_group_name\">";
+
+			foreach($laddrg as $key => $value) {
+				if ($virt[$selected_host]['laddr_group_name'] == $laddrg[$key]['local_address_group']) {
+					$SELECTED = ' selected="selected"';
+				} else {
+					$SELECTED = '';
+				}
+
+				echo "<OPTION value=" . $laddrg[$key]['local_address_group'] .  "$SELECTED" . ">"
+					  .  $laddrg[$key]['local_address_group'] .  "</OPTION>";
+			}
+
+			echo "</SELECT>";
+			?>
+		</TD>
 	</TR>
 	<TR>
 		<TD>Protocol:</TD>
