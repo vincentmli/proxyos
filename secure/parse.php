@@ -86,6 +86,11 @@ $vrrp_instance = array ( "",
 		)
 	);
 
+$vrrp_script = array ( "",
+		array (
+		)
+	);
+
 $vrrp_sync_group = array ( "",
 		array (
 			"group"				=> "",
@@ -156,6 +161,7 @@ function parse($name, $datum) {
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_script;
 	global $vrrp_sync_group;
 	global $virt_server_group;
 	global $serv;
@@ -182,6 +188,7 @@ function parse($name, $datum) {
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
+	static $vrrp_script_count = 0;
 	static $vrrp_sync_group_count = 0;
 	static $virt_server_group_count = 0;
 	static $local_address_group_count = 0;
@@ -276,6 +283,8 @@ function parse($name, $datum) {
 */
 //			case "virt_server_group"			: $service="virt_server_group"; echo $service;
 //									break;
+			case "vrrp_script"				: $service="vrrp_script"; echo $service;
+									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
 
@@ -407,6 +416,20 @@ function parse($name, $datum) {
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "track_interface"	: /* ignore here for vrrp_instance */ 
+							break;
+
+			case "vrrp_script"	:	$vrrp_script_count++;
+							$service="vrrp_script";
+							if ($debug) { echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp script </I><B>\$vrrp_script[$vrrp_script_count]</B></FONT><BR>"; };
+                                                        if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['vrrp_script']     = $datum;
+
+							break;
+
+			case "script"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['script'] = $datum;
+							break;
+			case "interval"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['interval'] = $datum;
+							break;
+			case "weight"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['weight'] = $datum;
 							break;
 
 			case "vrrp_sync_group"	:	$vrrp_sync_group_count++;
@@ -895,6 +918,7 @@ function read_config() {
 			     or strstr($buffer,"notify_master" )
 			     or strstr($buffer,"notify_backup" )
 			     or strstr($buffer,"notify" )
+			     or preg_match("/^script/", $buffer) //since strstr returns true for string "script" and "vrrp_script", so use preg_match
 				) { //!!! if strings contains quote and space in quote use following regex!!!
 				$pieces = preg_split("/[\s,]*(\"[^\"]+\")[\s,]*/", $buffer, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 			} else {
@@ -1024,6 +1048,7 @@ function print_arrays() {
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_script;
 	global $vrrp_sync_group;
 	global $virt_server_group;
 	global $serv;
@@ -1123,6 +1148,16 @@ function print_arrays() {
 				if ($debug) { echo "$egap1" . $interface . "<BR>"; };
 		}
 
+	}
+
+	$loop1 = $loop2 =  0;
+
+	while ($vrrp_script[++$loop1]['vrrp_script'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+	echo "<P><B>vrrp_script</B>";
+		echo "<BR>vrrp_script [$loop1] [vrrp_script] = "	. $vrrp_script[$loop1]['vrrp_script'];
+		echo "<BR>vrrp_script [$loop1] [script] = "	. $vrrp_script[$loop1]['script'];
+		echo "<BR>vrrp_script [$loop1] [interval] = "	. $vrrp_script[$loop1]['interval'];
+		echo "<BR>vrrp_script [$loop1] [weight] = "	. $vrrp_script[$loop1]['weight'];
 	}
 
 	$loop1 = $loop2 =  0;
@@ -1255,6 +1290,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $prim;
 	global $virt;
 	global $vrrp_instance;
+	global $vrrp_script;
 	global $vrrp_sync_group;
 	global $virt_server_group;
 	global $serv;
@@ -1288,6 +1324,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop18 = 0; //staic routes
 	$loop19 = 0; //notification
 	$loop20  = 0; //vrrp virtual_ipaddress_excluded
+	$loop21 = 1; //vrrp_script
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1665,6 +1702,42 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			
 		}
 	}
+
+	while ( $vrrp_script[$loop21]['vrrp_script'] != "" ) {
+		if ((($loop21 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_script")) {  $loop21++;} else {
+			if ($debug) { echo "<P><B>vrrp_script</B><BR>"; };	
+
+			if (isset($vrrp_script[$loop21]['vrrp_script']) &&
+			    $vrrp_script[$loop21]['vrrp_script'] != "") {
+				fputs ($fd, "vrrp_script "				. $vrrp_script[$loop21]['vrrp_script']	. " {\n", 80);
+				if ($debug) { echo "vrrp_script "			. $vrrp_script[$loop21]['vrrp_script']	. " {<BR>"; };
+			}
+
+			if (isset($vrrp_script[$loop21]['script']) &&
+			    $vrrp_script[$loop21]['script'] != "") {
+				fputs ($fd, "$gap1 script "		. $vrrp_script[$loop21]['script']	. "\n", 80);
+				if ($debug) { echo "$egap1 script "	. $vrrp_script[$loop21]['script']	. "<BR>"; };
+			}
+			if (isset($vrrp_script[$loop21]['interval']) &&
+			    $vrrp_script[$loop21]['interval'] != "") {
+				fputs ($fd, "$gap1 interval "		. $vrrp_script[$loop21]['interval']	. "\n", 80);
+				if ($debug) { echo "$egap1 interval "	. $vrrp_script[$loop21]['interval']	. "<BR>"; };
+			}
+
+			if (isset($vrrp_script[$loop21]['weight']) &&
+			    $vrrp_script[$loop21]['weight'] != "") {
+				fputs ($fd, "$gap1 weight "		. $vrrp_script[$loop21]['weight']	. "\n", 80);
+				if ($debug) { echo "$egap1 weight "	. $vrrp_script[$loop21]['weight']	. "<BR>"; };
+			}
+
+			fputs ($fd,"}\n", 80);
+			if ($debug) { echo "}<BR>"; }
+
+			$loop21++;
+			
+		}
+	}
+
 
 	while ( $vrrp_sync_group[$loop11]['vrrp_sync_group'] != "" ) {
 		if ((($loop11 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_sync_group")) {  $loop11++; $loop12 = 0;} else {
@@ -2230,6 +2303,22 @@ function add_vrrp() {
 	$vrrp_instance[$loop2]['vrrp_instance']	= "[vrrp_instance_name]";
 	$vrrp_instance[$loop2]['state']	= "MASTER|SLAVE";
 	$vrrp_instance[$loop2]['priority']	= "[priority]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_script() {
+
+	global $vrrp_script;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while ($vrrp_script[$loop2]['vrrp_script'] != "" ) { $loop2++; }
+	
+	$vrrp_script[$loop2]['vrrp_script']	= "[vrrp_script_name]";
+	$vrrp_script[$loop2]['script']	= "";
+	$vrrp_script[$loop2]['interval']	= "[interval]";
+	$vrrp_script[$loop2]['weight']	= "[weight]";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }

@@ -126,6 +126,26 @@ A.logolink      {
 
 <?php include 'menu.php'; ?>
 
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR BGCOLOR="#EEEEEE">
+                <TD WIDTH="60%">EDIT:
+
+                <A HREF="vrrp_main.php" NAME="VRRP INSTANCE">VRRP INSTANCE</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="vrrp_sync_group_main.php" NAME="VRRP SYNC GROUP">VRRP SYNC GROUP</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="vrrp_script_main.php" NAME="VRRP SCRIPT">VRRP SCRIPT</A>
+                &nbsp;|&nbsp;
+
+                </TD>
+
+                <!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
+        </TR>
+</TABLE>
+
+
 <FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_main.php">
 
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
