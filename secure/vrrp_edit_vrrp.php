@@ -56,6 +56,7 @@
                 $vrrp_instance[$selected_host]['notify_fault']		=	$_GET['notify_fault'];
                 $vrrp_instance[$selected_host]['notify']		=	$_GET['notify'];
                 $vrrp_instance[$selected_host]['smtp_alert']		=	$_GET['smtp_alert'];
+                $vrrp_instance[$selected_host]['authentication']	=	true;
                 $vrrp_instance[$selected_host]['auth_type']		=	$_GET['auth_type'];
                 $vrrp_instance[$selected_host]['auth_pass']		=	$_GET['auth_pass'];
 	}

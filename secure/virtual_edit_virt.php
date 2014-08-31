@@ -33,7 +33,13 @@
 
 	require('parse.php'); /* read in the config! Hurragh! */
 
-
+	if($virt[$selected_host]['syn_proxy'] == 'yes') {
+		$yes_status = 'checked';
+	}else if ($virt[$selected_host]['syn_proxy'] == 'no'){
+		$no_status = 'checked';
+	}
+	//$yes_status = 'unchecked';
+	//$no_status = 'unchecked';
 	if ( $vev_action == "ACCEPT" ) {
 
 
@@ -45,6 +51,12 @@
                 // $virt[$selected_host]['address']		=	$temp[0];
                 $virt[$selected_host]['protocol']		=	$_GET['protocol'];
                 $virt[$selected_host]['lb_kind']		=	$_GET['lb_kind'];
+		$virt[$selected_host]['syn_proxy'] = $_GET['syn_proxy'];
+		if($virt[$selected_host]['syn_proxy'] == 'yes') {
+			$yes_status = 'checked';
+		}else if ($virt[$selected_host]['syn_proxy'] == 'no'){
+			$no_status = 'checked';
+		}
                 $virt[$selected_host]['laddr_group_name']		=	$_GET['laddr_group_name'];
                 $virt[$selected_host]['persistence_timeout']		=	$_GET['persistence_timeout'];
                 $virt[$selected_host]['virtualhost']		=	$_GET['virtualhost'];
@@ -234,7 +246,6 @@ A.logolink      {
 	</TR>
 	<TR>
 		<TD>Forward Method:</TD>
-		<!--TD><INPUT TYPE="TEXT" NAME="lb_kind" VALUE=<?php echo  $virt[$selected_host]['lb_kind'] ?>></TD-->
 		<TD>
 			<SELECT NAME="lb_kind">
 				<OPTION <?php if (($virt[$selected_host]['lb_kind'] == "FNAT") || 
@@ -243,6 +254,13 @@ A.logolink      {
 				<OPTION <?php if ($virt[$selected_host]['lb_kind'] == "DR") { echo "SELECTED"; } ?>> DR 
 				<OPTION <?php if ($virt[$selected_host]['lb_kind'] == "TUN") { echo "SELECTED"; } ?>> TUN 
 			</SELECT>
+		</TD>
+	</TR>
+	<TR>
+		<TD>SYN Proxy:</TD>
+		<TD>
+		<Input type = 'Radio' Name ='syn_proxy' value= 'yes' <?PHP print $yes_status; ?> >yes
+		<Input type = 'Radio' Name ='syn_proxy' value= 'no' <?PHP print $no_status; ?> >no
 		</TD>
 	</TR>
 	<TR>

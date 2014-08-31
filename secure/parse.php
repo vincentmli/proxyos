@@ -43,7 +43,7 @@ $virt = array ( "",
 			"delay_loop"			=> "",
 			"lb_algo"			=> "",
 			"lb_kind"			=> "",
-			"syn_proxy"			=> "",
+			"syn_proxy"			=> "no",
 			"laddr_group_name"		=> "",
 			"persistence_timeout"		=> "",
 			"persistence_granularity"	=> "",
@@ -71,7 +71,7 @@ $vrrp_instance = array ( "",
 			"virtual_router_id"		=> "",
 			"priority"			=> "",
 			"advert_int"			=> "",
-			"authentication"		=> "",
+			"authentication"		=> true,
 			"virtual_ipaddress"		=> "",
 			"virtual_ipaddress_excluded"	=> "",
 			"virtual_routes"		=> "",
@@ -474,6 +474,8 @@ function parse($name, $datum) {
 							break;
 			case "lb_kind"		:	if ($service == "lvs") $virt[$virt_count]['lb_kind']	= $datum;
 							break;
+			case "syn_proxy"		:	if ($service == "lvs") $virt[$virt_count]['syn_proxy']	= 'yes';
+							break;
 			case "protocol"		:	if ($service == "lvs") $virt[$virt_count]['protocol']	= $datum;
 							break;
 			case "laddr_group_name"	:	if ($service == "lvs") $virt[$virt_count]['laddr_group_name']	= $datum;
@@ -581,7 +583,7 @@ function parse($name, $datum) {
 			case "weight"		:	$serv[$virt_count][$server_count+1]['weight']		= $datum;
 							break;
 
-			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = $name; 
+			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = true; 
 							break;
 			case "auth_type"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['auth_type'] = $datum; 
 							break;
@@ -1216,7 +1218,8 @@ while ($virt[++$loop1]['ip'] != "" ) { /* NOTE: must use *pre*increment not post
 	//	echo "<BR>Virtual [$loop1] [active] = "		. $virt[$loop1]['active'];
 		echo "<BR>Virtual [$loop1] [delay_loop] "	. $virt[$loop1]['delay_loop'];
 		echo "<BR>Virtual [$loop1] [lb_algo] "		. $virt[$loop1]['lb_algo'];
-		echo "<BR>Virtual [$loop1] [lb_kind] "		. $virt[$loop1]['vip_nmask'];
+		echo "<BR>Virtual [$loop1] [lb_kind] "		. $virt[$loop1]['lb_kind'];
+		echo "<BR>Virtual [$loop1] [syn_proxy] "		. $virt[$loop1]['syn_proxy'];
 		echo "<BR>Virtual [$loop1] [laddr_group_name] "		. $virt[$loop1]['laddr_group_name'];
 		echo "<BR>Virtual [$loop1] [persistence_timeout] "	. $virt[$loop1]['persistence_timeout'];
 		echo "<BR>Virtual [$loop1] [persistence_granularity] "	. $virt[$loop1]['persistence_granularity'];
@@ -1578,8 +1581,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($fd, "$gap1 smtp_alert "		. $vrrp_instance[$loop7]['smtp_alert']	. "\n", 80);
 				if ($debug) { echo "$egap1 smtp_alert "	. $vrrp_instance[$loop7]['smtp_alert']	. "<BR>"; };
 			}
-			if (isset($vrrp_instance[$loop7]['authentication']) &&
-			    $vrrp_instance[$loop7]['authentication'] != "") {
+			if (isset($vrrp_instance[$loop7]['authentication'])) {
 
 				fputs ($fd, "$gap1 authentication "		. " {\n", 80);
 				if ($debug) { echo "$egap1 authentication "	. " {<BR>"; };
@@ -1912,6 +1914,12 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			    $virt[$loop3]['lb_kind'] != "") {
 				fputs ($fd, "$gap1 lb_kind "			. $virt[$loop3]['lb_kind']	. "\n", 80);
 				if ($debug) { echo "$egap1 lb_kind "		. $virt[$loop3]['lb_kind']	. "<BR>"; };
+			}
+
+			if (isset($virt[$loop3]['syn_proxy']) &&
+				($virt[$loop3]['syn_proxy'] == 'yes')) {
+				fputs ($fd, "$gap1 syn_proxy"			. "\n", 80);
+				if ($debug) { echo "$egap1 syn_proxy"		. "<BR>"; };
 			}
 
 			if (isset($virt[$loop3]['laddr_group_name']) &&
@@ -2380,6 +2388,7 @@ function add_virtual() {
 	$virt[$loop2]['delay_loop']	= "5";
 	$virt[$loop2]['lb_algo']		= "wrr";
 	$virt[$loop2]['lb_kind']		= "FNAT";
+	$virt[$loop2]['syn_proxy']		= "no";
 	$virt[$loop2]['laddr_group_name']	= "none";
 	$virt[$loop2]['protocol']	= "tcp";
 	$virt[$loop2]['persistence_timeout']	= "";
