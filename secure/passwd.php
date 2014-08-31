@@ -62,14 +62,7 @@ A.logolink      {
 
 <BODY BGCOLOR="#660000">
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
-	<TR BGCOLOR="#CC0000"> <TD CLASS="logo"> <B>PIRANHA</B> CONFIGURATION TOOL </TD>
-	<TD ALIGN=right CLASS="logo">
-	    <A HREF="introduction.php" CLASS="logolink">
-            INTRODUCTION</A> | <A HREF="help.php" CLASS="logolink">
-            HELP</A></TD>
-	</TR>
-</TABLE>
+<?php include 'name.php'; ?>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
@@ -79,14 +72,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
-        <TR BGCOLOR="#666666">
-                <TD WIDTH="25%" ALIGN="CENTER" BGCOLOR=#ffffff> <A HREF="control.php" NAME="Control/Monitoring" CLASS="tabon"><B>CONTROL/MONITORING</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="global_settings.php" NAME="Global Settings" CLASS="taboff"><B>GLOBAL SETTINGS</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="redundancy.php" NAME="Redundancy" CLASS="taboff"><B>REDUNDANCY</B></A> </TD>
-                <TD WIDTH="25%" ALIGN="CENTER"> <A HREF="virtual_main.php" NAME="Virtual" CLASS="taboff"><B>VIRTUAL SERVERS</B></A> </TD>
-        </TR>
-</TABLE>
+<?php include 'menu.php'; ?>
 
 <?php
 	// echo "Query = $QUERY_STRING";

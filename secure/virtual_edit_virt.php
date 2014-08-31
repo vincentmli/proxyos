@@ -97,15 +97,6 @@
 <script language="javascript" type="text/javascript" src="jquery-1.11.0.js"></script>
 <script language="javascript" type="text/javascript" src="jquery.validate.js"></script>
 <script language="javascript" type="text/javascript" src="superez.js"></script>
-<!--script>
-function checkit(){
-$("#zero-out :input").each(function() {
- $(this).keydown(function() {
-   $("#zero-out :input").not(this).val("");
- });
-});
-}
-</script-->
 
 <TITLE>Piranha (Virtual Servers - Editing virtual server)</TITLE>
 
@@ -153,14 +144,7 @@ A.logolink      {
 
 <BODY BGCOLOR="#660000">
 
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
-	<TR BGCOLOR="#CC0000"> <TD CLASS="logo"> <B>KEEPALIVED</B> CONFIGURATION TOOL </TD>
-	<TD ALIGN=right CLASS="logo">
-            <A HREF="introduction.php" CLASS="logolink">
-            INTRODUCTION</A> | <A HREF="help.php" CLASS="logolink">
-            HELP</A></TD>
-	</TR>
-</TABLE>
+<?php include 'name.php'; ?>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
