@@ -21,12 +21,13 @@
 
 		$ip		=	$_GET['ip'];
 		$netmask	=	$_GET['netmask'];
+		$cidr		=	Mask2CIDR($netmask);
 		$interface	=	$_GET['interface'];
 		$scope		=	$_GET['scope'];
 		if ($scope != "") {
-			$static_ipaddress[$selected-1]		= "$ip/$netmask dev $interface scope $scope";	
+			$static_ipaddress[$selected-1]		= "$ip/$cidr dev $interface scope $scope";	
 		} else {
-			$static_ipaddress[$selected-1]		= "$ip/$netmask dev $interface";	
+			$static_ipaddress[$selected-1]		= "$ip/$cidr dev $interface";	
 		}
 
 	}
@@ -143,13 +144,15 @@ A.logolink      {
                 if (isset($string[3]) && $string[3] == "scope") {
                         $ipmask = explode("/", $string[0]);
                         $ip = $ipmask[0];
-                        $netmask = $ipmask[1];
+                        $cidr = $ipmask[1];
+			$netmask = CIDRtoMask($cidr); 
                         $interface = $string[2];
                         $scope = $string[4];
                 } else {
                         $ipmask = explode("/", $string[0]);
                         $ip = $ipmask[0];
-                        $netmask = $ipmask[1];
+                        $cidr = $ipmask[1];
+			$netmask = CIDRtoMask($cidr); 
                         $interface = $string[2];
                         $scope = "";
                 }

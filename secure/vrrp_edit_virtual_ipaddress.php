@@ -162,7 +162,6 @@ A.logolink      {
 		<TD CLASS="title">NETMASK</TD>
 		<TD CLASS="title">INTERFACE</TD>
 		<TD CLASS="title">SCOPE</TD>
-<?php //	<TD CLASS="title">NETMASK</TD> ?>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
@@ -182,19 +181,21 @@ A.logolink      {
                 if (isset($string[3]) && $string[3] == "scope") {
                         $ipnetmask = explode("/", $string[0]);
                         $ip = $ipnetmask[0];
-                        $netmask = $ipnetmask[1];
+                        $cidr = $ipnetmask[1];
+                        $netmask = CIDRtoMask($cidr);
                         $interface = $string[2];
                         $scope = $string[4];
                 } else {
                         $ipnetmask = explode("/", $string[0]);
                         $ip = $ipnetmask[0];
-                        $netmask = $ipnetmask[1];
+                        $cidr = $ipnetmask[1];
+                        $netmask = CIDRtoMask($cidr);
                         $interface = $string[2];
                         $scope = "";
                 }
 				
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ips[0]	. ">";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ip	. ">";
 		echo $ip	. "</TD>";
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";	echo $netmask	. ">";

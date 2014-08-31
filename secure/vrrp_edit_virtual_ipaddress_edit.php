@@ -20,12 +20,13 @@
 
                 $ip     =       $_GET['ip'];
                 $netmask        =       $_GET['netmask'];
+		$cidr 		=	Mask2CIDR($netmask);
                 $interface      =       $_GET['interface'];
                 $scope  =       $_GET['scope'];
                 if(isset($scope) && $scope !="") {
-                        $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]               = "$ip/$netmask dev $interface scope $scope"; 
+                        $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]               = "$ip/$cidr dev $interface scope $scope"; 
                 } else {
-                        $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]               = "$ip/$netmask dev $interface";
+                        $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]               = "$ip/$cidr dev $interface";
                 }
 
 	}
@@ -141,13 +142,15 @@ A.logolink      {
                 if (isset($string[3]) && $string[3] == "scope") {
                         $ipnetmask = explode("/", $string[0]);
                         $ip = $ipnetmask[0];
-                        $netmask = $ipnetmask[1];
+                        $cidr = $ipnetmask[1];
+			$netmask = CIDRtoMask($cidr);
                         $interface = $string[2];
                         $scope = $string[4];
                 } else {
                         $ipnetmask = explode("/", $string[0]);
                         $ip = $ipnetmask[0];
-                        $netmask = $ipnetmask[1];
+                        $cidr = $ipnetmask[1];
+			$netmask = CIDRtoMask($cidr);
                         $interface = $string[2];
                         $scope = "";
                 }

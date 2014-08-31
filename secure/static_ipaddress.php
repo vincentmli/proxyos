@@ -169,13 +169,15 @@ A.logolink      {
 		if (isset($string[3]) && $string[3] == "scope") {
 			$ipmask = explode("/", $string[0]);
 			$ip = $ipmask[0];
-			$netmask = $ipmask[1];
+			$cidr = $ipmask[1];
+			$netmask = CIDRtoMask($cidr);
 			$interface = $string[2];
 			$scope = $string[4];
 		} else {
 			$ipmask = explode("/", $string[0]);
 			$ip = $ipmask[0];
-			$netmask = $ipmask[1];
+			$cidr = $ipmask[1];
+			$netmask = CIDRtoMask($cidr);
 			$interface = $string[2];
 			$scope = "";
 		}
