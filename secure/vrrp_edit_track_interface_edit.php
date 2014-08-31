@@ -21,9 +21,12 @@
 	if ($edit_action == "ACCEPT") {
 
 		$interface	=	$_GET['interface'];
-		$vrrp_instance[$selected_host]['track_interface'][$selected-1]		= "$interface";	
-		echo $interface;
-
+		$weight	=	$_GET['weight'];
+		if($weight != '') { 
+	       	   $vrrp_instance[$selected_host]['track_interface'][$selected-1] = "$interface" . " " . 'weight' . " " . "$weight";	
+		} else {
+		   $vrrp_instance[$selected_host]['track_interface'][$selected-1] = "$interface";	
+		}
 	}
 
 ?>
@@ -133,11 +136,26 @@ A.logolink      {
 	<TABLE>
 
 	<?php	
-		$interface =  $vrrp_instance[$selected_host]['track_interface'][$selected-1];
+		$element =  $vrrp_instance[$selected_host]['track_interface'][$selected-1];
+		$string = explode(" ", $element);
+		if($string[1] == 'weight') {
+			$interface = $string[0];
+			$weight = $string[2];
+		} else {
+			$interface = $string[0];
+			$weight = '';
+		}
 
 		echo "<TR>";
 			echo "<TD>INTERFACE: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=interface VALUE=\""; echo $interface . "\""  . ">"; echo "</TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=interface VALUE=\""; echo $interface . "\""  . ">"; 
+			echo "</TD>";
+		echo "</TR>";
+
+		echo "<TR>";
+			echo "<TD>WEIGHT: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=weight VALUE=\""; echo $weight . "\""  . ">";
+		        echo "</TD>";
 		echo "</TR>";
 
 	echo "</TABLE>";

@@ -641,13 +641,13 @@ function parse($name, $datum) {
 						    }
 							break;
 
-			case (preg_match("/$interface_regex/", $name) ? true : false )	:	
+			case (preg_match("/^$interface_regex/", $name) ? true : false )	:	
 				if ($name != "" ) {
 					if ($debug) { 
 						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_instance track interface </I><B></B></FONT><BR>"; 
 					};
 					if(($service == "vrrp_instance") && ($is_track_interface == "track_interface")) {
-						    $vrrp_instance[$vrrp_instance_count]['track_interface'][] = $name;
+						    $vrrp_instance[$vrrp_instance_count]['track_interface'][] = $name . " " . $datum;
 					 } 
 				}
 				break;
@@ -948,6 +948,9 @@ function read_config() {
 				
 			}
 			else if (isset($pieces[2]) and $pieces[1] == "dev") {
+					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
+			}
+			else if (isset($pieces[2]) and $pieces[1] == "weight") {
 					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
 			else if (isset($pieces[2]) and $pieces[0] == "virtual_server") {

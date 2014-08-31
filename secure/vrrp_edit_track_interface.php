@@ -159,6 +159,7 @@ A.logolink      {
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
 		<TD CLASS="title">INTERFACE</TD>
+		<TD CLASS="title">WEIGHT</TD>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
@@ -170,12 +171,23 @@ A.logolink      {
 
 	$loop=1;
 
-	foreach ($vrrp_instance[$selected_host]['track_interface'] as $interface) {
+	foreach ($vrrp_instance[$selected_host]['track_interface'] as $element) {
+		$string = explode(" ", $element);
+		if($string[1] == 'weight') {
+			$interface = $string[0];
+			$weight = $string[2];
+		} else {
+			$interface = $string[0];
+			$weight = '';
+		}
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
 		echo $interface	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN NAME=weight COLS=6 VALUE=";	echo $weight	. ">";
+		echo $weight	. "</TD>";
 
 		echo "</TR>";
 	
