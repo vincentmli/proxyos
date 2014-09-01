@@ -133,7 +133,10 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="vrrp_script_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP instance">VRRP SCRIPT</A>
+		<A HREF="vrrp_script_main.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP instance">VRRP SCRIPT</A>
+		&nbsp;|&nbsp;
+
+		<A HREF="vrrp_script_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP SCRIPT">EDIT VRRP SCRIPT</A>
 		&nbsp;|&nbsp;
 
         </TR>

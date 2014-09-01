@@ -2381,7 +2381,7 @@ function add_vrrp_script() {
 	/* find end of existing data */
 	while ($vrrp_script[$loop2]['vrrp_script'] != "" ) { $loop2++; }
 	
-	$vrrp_script[$loop2]['vrrp_script']	= "[vrrp_script_name]";
+	$vrrp_script[$loop2]['vrrp_script']	= "[chk_xxx]";
 	$vrrp_script[$loop2]['script']	= "";
 	$vrrp_script[$loop2]['interval']	= "[interval]";
 	$vrrp_script[$loop2]['weight']	= "[weight]";

@@ -33,6 +33,8 @@
 			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask dev $interface";	
 		}
 
+		header("Location: vrrp_edit_virtual_routes.php?selected_host=$selected_host&selected=$selected-1");		
+
 	}
 
 ?>

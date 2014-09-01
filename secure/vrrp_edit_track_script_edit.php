@@ -27,6 +27,8 @@
 		} else {
 		   $vrrp_instance[$selected_host]['track_script'][$selected-1] = "$script";	
 		}
+
+		header("Location: vrrp_edit_track_script.php?selected_host=$selected_host&selected=$selected-1");		
 	}
 
 ?>
@@ -148,11 +150,29 @@ A.logolink      {
 			$script = $string[0];
 			$weight = '';
 		}
+		
+		global $vrrp_script;
 
 		echo "<TR>";
 			echo "<TD>SCRIPT: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=script VALUE=\""; echo $script . "\""  . ">"; 
+			echo "<TD>";
+				echo "<SELECT NAME=\"script\">";
+                        	foreach($vrrp_script as $key => $value) {
+                               	   if ($vrrp_instance[$selected_host]['track_script'] == $vrrp_script[$key]['vrrp_script']) {
+                                        $SELECTED = ' selected="selected"';
+                                   } else {
+                                        $SELECTED = '';
+                                   }
+
+                                	echo "<OPTION value=" . $vrrp_script[$key]['vrrp_script'] .  "$SELECTED" . ">"
+                                          .  $vrrp_script[$key]['vrrp_script'] .  "</OPTION>";
+                         	}
+
+                        	echo "</SELECT>";
 			echo "</TD>";
+
+			//echo "<TD><INPUT TYPE=TEXT NAME=script VALUE=\""; echo $script . "\""  . ">"; 
+			//echo "</TD>";
 		echo "</TR>";
 
 		echo "<TR>";

@@ -27,6 +27,8 @@
 		} else {
 		   $vrrp_instance[$selected_host]['track_interface'][$selected-1] = "$interface";	
 		}
+
+		header("Location: vrrp_edit_track_interface.php?selected_host=$selected_host&selected=$selected-1");		
 	}
 
 ?>

@@ -29,6 +29,8 @@
                         $vrrp_instance[$selected_host]['virtual_ipaddress'][$selected-1]               = "$ip/$cidr dev $interface";
                 }
 
+		header("Location: vrrp_edit_virtual_ipaddress.php?selected_host=$selected_host&selected=$selected-1");		
+
 	}
 
 ?>

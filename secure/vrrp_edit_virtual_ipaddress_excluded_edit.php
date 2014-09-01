@@ -30,6 +30,8 @@
 			$vrrp_instance[$selected_host]['virtual_ipaddress_excluded'][$selected-1]		= "$ip/$netmask dev $interface";	
 		}
 
+		header("Location: vrrp_edit_virtual_ipaddress_excluded.php?selected_host=$selected_host&selected=$selected-1");		
+
 	}
 
 ?>

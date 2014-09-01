@@ -145,6 +145,8 @@ A.logolink      {
 		<TR>
 			<TD></TD>
 			       	<TD CLASS="title">NAME</TD>
+			       	<TD CLASS="title">INTERVAL</TD>
+			       	<TD CLASS="title">WEIGHT</TD>
 		</TR>
 
 <?php
@@ -175,6 +177,12 @@ A.logolink      {
 
 		echo "<TD><INPUT TYPE=HIDDEN 	NAME=vrrp_script	SIZE=16	COLS=10	VALUE="	. $vrrp_script[$loop1]['vrrp_script']	. ">";
 		echo $vrrp_script[$loop1]['vrrp_script']	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=interval	SIZE=16	COLS=10	VALUE="	. $vrrp_script[$loop1]['interval']	. ">";
+		echo $vrrp_script[$loop1]['interval']	. "</TD>";
+
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=weight	SIZE=16	COLS=10	VALUE="	. $vrrp_script[$loop1]['weight']	. ">";
+		echo $vrrp_script[$loop1]['weight']	. "</TD>";
 
 		
 		echo "</TR>";
