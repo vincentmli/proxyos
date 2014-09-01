@@ -10,7 +10,7 @@
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "CANCEL")) {
+	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "CANCEL")) {
 		/* Redirect browser to editing page */
 		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
@@ -18,9 +18,9 @@
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "EDIT")) {
+	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_track_interface_edit.php?selected_host=$selected_host&selected=$selected");
+		header("Location: vrrp_edit_track_script_edit.php?selected_host=$selected_host&selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -33,20 +33,20 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "ADD")) {
-		add_vrrp_track_interface($selected_host);
+	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "ADD")) {
+		add_vrrp_track_script($selected_host);
 	}
 
-	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "DELETE")) {
-		$delete_service = "vrrp_track_interface";
+	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "DELETE")) {
+		$delete_service = "vrrp_track_script";
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"vrrp_edit_track_interface.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"vrrp_edit_track_script.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
 		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
 
-	if ((isset($_GET['vrrp_track_interface'])) && ($_GET['vrrp_track_interface'] == "(DE)ACTIVATE")) {
+	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "(DE)ACTIVATE")) {
 		switch ($serv[$selected_host][$selected]['active']) {
 			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
 			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
@@ -112,7 +112,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK INTERFACE</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK SCRIPT</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -156,12 +156,12 @@ A.logolink      {
 
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_interface.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_script.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">INTERFACE</TD>
+		<TD CLASS="title">SCRIPT</TD>
 		<TD CLASS="title">WEIGHT</TD>
 	</TR>
 
@@ -174,20 +174,20 @@ A.logolink      {
 
 	$loop=1;
 
-	foreach ($vrrp_instance[$selected_host]['track_interface'] as $element) {
+	foreach ($vrrp_instance[$selected_host]['track_script'] as $element) {
 		$string = explode(" ", $element);
 		if($string[1] == 'weight') {
-			$interface = $string[0];
+			$script = $string[0];
 			$weight = $string[2];
 		} else {
-			$interface = $string[0];
+			$script = $string[0];
 			$weight = '';
 		}
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=interface COLS=6 VALUE=";	echo $interface	. ">";
-		echo $interface	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=script COLS=6 VALUE=";	echo $script	. ">";
+		echo $script	. "</TD>";
 
 		echo "<TD><INPUT TYPE=HIDDEN NAME=weight COLS=6 VALUE=";	echo $weight	. ">";
 		echo $weight	. "</TD>";
@@ -209,10 +209,10 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 
@@ -222,7 +222,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="vrrp_track_interface" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>

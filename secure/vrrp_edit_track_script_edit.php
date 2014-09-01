@@ -3,7 +3,7 @@
         $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_virtual_routes.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: vrrp_edit_track_script.php?selected_host=$selected_host&selected=$selected");		
 		exit;
 	}
 	
@@ -20,19 +20,13 @@
 		
 	if ($edit_action == "ACCEPT") {
 
-		$srcip	=	$_GET['srcip'];
-		$network	=	$_GET['network'];
-		$netmask	=	$_GET['netmask'];
-		$gateway	=	$_GET['gateway'];
-		$interface	=	$_GET['interface'];
-		if ($srcip != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "src $srcip to $network/$netmask via $gateway dev $interface";	
-		} else if($gateway != "") {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask via $gateway dev $interface";	
+		$script	=	$_GET['script'];
+		$weight	=	$_GET['weight'];
+		if($weight != '') { 
+	       	   $vrrp_instance[$selected_host]['track_script'][$selected-1] = "$script" . " " . 'weight' . " " . "$weight";	
 		} else {
-			$vrrp_instance[$selected_host]['virtual_routes'][$selected-1]		= "$network/$netmask dev $interface";	
+		   $vrrp_instance[$selected_host]['track_script'][$selected-1] = "$script";	
 		}
-
 	}
 
 ?>
@@ -94,7 +88,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VIRTUAL ROUTES</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK SCRIPT</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -126,13 +120,12 @@ A.logolink      {
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK INTERFACE</A>
-		&nbsp;|&nbsp;
+                &nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_track_script.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK SCRIPT">TRACK SCRIPT</A>
-		&nbsp;|&nbsp;
+                &nbsp;|&nbsp;
 
 		</TD>
-
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>
@@ -140,54 +133,33 @@ A.logolink      {
 <P>
 
 
-<FORM id="vrrp_virtual_routes_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_virtual_routes_edit.php">
-
+<FORM id="vrrp_track_script_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_script_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-	        $ips = explode(" ", $vrrp_instance[$selected_host]['virtual_routes'][$selected-1]);
-                if ($ips[0] == "src") {
-                        $srcip = $ips[1];
-                        $dst = explode("/", $ips[3]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = $ips[5];
-                        $interface = $ips[7];
-                } else {
-                        $dst = explode("/", $ips[0]);
-                        $network = $dst[0];
-                        $netmask = $dst[1];
-                        $gateway = $ips[2];
-                        $interface = $ips[4];
-                }
+		$element =  $vrrp_instance[$selected_host]['track_script'][$selected-1];
+		$string = explode(" ", $element);
+		if($string[1] == 'weight') {
+			$script = $string[0];
+			$weight = $string[2];
+		} else {
+			$script = $string[0];
+			$weight = '';
+		}
 
 		echo "<TR>";
-			echo "<TD>SOURCE IP: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=srcip VALUE=";   echo $srcip . ">"; echo "</TD>";
+			echo "<TD>SCRIPT: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=script VALUE=\""; echo $script . "\""  . ">"; 
+			echo "</TD>";
 		echo "</TR>";
 
 		echo "<TR>";
-			echo "<TD>NETWORK: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=network VALUE="; echo $network . ">"; echo "</TD>";
+			echo "<TD>WEIGHT: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=weight VALUE=\""; echo $weight . "\""  . ">";
+		        echo "</TD>";
 		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>NETMASK: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=netmask VALUE=";   echo $netmask . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>GATEWAY: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=gateway VALUE=";  echo $gateway . ">"; echo "</TD>";
-		echo "</TR>";
-
-		echo "<TR>";
-			echo "<TD>INTERFACE: </TD>";
-			echo "<TD><INPUT TYPE=\"TEXT\" NAME=interface VALUE=";  echo $interface . ">"; echo "</TD>";
-		echo "</TR>";
-
 
 	echo "</TABLE>";
 

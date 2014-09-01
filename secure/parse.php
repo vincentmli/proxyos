@@ -65,6 +65,7 @@ $vrrp_instance = array ( "",
 			"interface"			=> "",
 			"dont_track_primary"		=> "",
 			"track_interface"		=> "",
+			"track_script"			=> "",
 			"mcast_src_ip"			=> "",
 			"lvs_sync_daemon_interface"	=> "",
 			"garp_master_delay"		=> "",
@@ -173,6 +174,7 @@ function parse($name, $datum) {
 	global $local_address_group;
 	global $ip_of;
 	global $is_track_interface;
+	global $is_track_script;
 	global $is_group;
 
 	static $email_regex = '[\w\-]+\@[\w\-]+\.[\w\-]+';
@@ -181,6 +183,7 @@ function parse($name, $datum) {
 	static $iprange_regex = '^\d+\.';
 	static $port_regex = '\d+';
 	static $interface_regex = 'eth*'; //may adjust to other interface naming
+	static $script_regex = 'chk_*'; //vrrp_script name convention start with 'chk_'
 	static $sync_group_regex = '\w*'; //vrrp sync group name
 	static $laddrgname;
 	static $level = 0 ;
@@ -210,6 +213,7 @@ function parse($name, $datum) {
 		    or $name == "virtual_ipaddress_excluded"
 		    or $name == "virtual_routes"
 		    or $name == "track_interface"
+		    or $name == "track_script"
 		    or $name == "group"
 		    or $name == "TCP_CHECK"
 		    or $name == "HTTP_GET"
@@ -416,6 +420,8 @@ function parse($name, $datum) {
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "track_interface"	: /* ignore here for vrrp_instance */ 
+							break;
+			case "track_script"	: /* ignore here for vrrp_instance */ 
 							break;
 
 			case "vrrp_script"	:	$vrrp_script_count++;
@@ -651,6 +657,24 @@ function parse($name, $datum) {
 					 } 
 				}
 				break;
+
+			case "track_script"	:  if ($service == "vrrp_instance") { 
+								$is_track_script = "track_script";
+								$vrrp_instance[$vrrp_instance_count]['track_script'] = array(); 
+						    }
+							break;
+
+			case (preg_match("/^$script_regex/", $name) ? true : false )	:	
+				if ($name != "" ) {
+					if ($debug) { 
+						echo "<FONT COLOR=\"yellow\"><I>Asked for vrrp_instance track script </I><B></B></FONT><BR>"; 
+					};
+					if(($service == "vrrp_instance") && ($is_track_script == "track_script")) {
+						    $vrrp_instance[$vrrp_instance_count]['track_script'][] = $name . " " . $datum;
+					 } 
+				}
+				break;
+
 
 			case "group"	:  if ($service == "vrrp_sync_group") { 
 								$is_group = "group";
@@ -1153,6 +1177,11 @@ function print_arrays() {
 				if ($debug) { echo "$egap1" . $interface . "<BR>"; };
 		}
 
+		echo "<P><B>vrrp_instance track_script</B>";
+                foreach ($vrrp_instance[$loop1]['track_script'] as $script) {
+				if ($debug) { echo "$egap1" . $script . "<BR>"; };
+		}
+
 	}
 
 	$loop1 = $loop2 =  0;
@@ -1331,6 +1360,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop19 = 0; //notification
 	$loop20  = 0; //vrrp virtual_ipaddress_excluded
 	$loop21 = 1; //vrrp_script
+	$loop22 = 0; //track_script
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1487,7 +1517,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	
 
 	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0; $loop20 = 0;} else {
+		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0; $loop20 = 0; $loop22 = 0;} else {
 			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
 
 			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
@@ -1697,6 +1727,29 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				if ($debug) { echo "$egap1 }<BR>"; }
 			}
 
+			if (isset($vrrp_instance[$loop7]['track_script'])
+			    && $vrrp_instance[$loop7]['track_script'] != ""
+			    && count($vrrp_instance[$loop7]['track_script']) > 0) {
+				fputs ($fd, "$gap1 track_script "		. " {\n", 80);
+				if ($debug) { echo "$egap1 track_script "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop7]['track_script'] as $script) {
+
+                                	if (($loop22 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_track_script")) {
+                                        	$loop22++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $script	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $script	. "<BR>"; };
+						$loop22++;
+					}
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
 			fputs ($fd,"}\n", 80);
 			if ($debug) { echo "}<BR>"; }
 
@@ -1704,6 +1757,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 			$loop8 = 0;
 			$loop9 = 0;
 			$loop10 = 0;
+			$loop20 = 0;
+			$loop22 = 0;
 			
 		}
 	}
@@ -2475,6 +2530,14 @@ function add_vrrp_track_interface($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['track_interface'][] = "ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_track_script($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['track_script'][] = "chk_xxx weight int";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }

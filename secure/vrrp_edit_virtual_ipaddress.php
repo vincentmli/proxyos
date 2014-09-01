@@ -145,6 +145,9 @@ A.logolink      {
                 <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">TRACK INTERFACE</A>
                 &nbsp;|&nbsp;
 
+                <A HREF="vrrp_edit_track_script.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK SCRIPT</A>
+                &nbsp;|&nbsp;
+
 		</TD>
 
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->

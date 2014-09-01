@@ -179,6 +179,9 @@ A.logolink      {
                 <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK INTERFACE</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="vrrp_edit_track_script.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK SCRIPT">TRACK SCRIPT</A>
+		&nbsp;|&nbsp;
+
 
         </TR>
 </TABLE>
