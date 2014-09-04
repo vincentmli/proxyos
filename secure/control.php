@@ -2,6 +2,7 @@
 	$control_action = "";
 	$auto_update = "";
 	$rate = "";
+	$backup = "";
 
 	if (isset($_GET['control_action'])) {
         	$control_action = $_GET['control_action'];
@@ -11,6 +12,9 @@
 	}
 	if (isset($_GET['rate'])) {
         	$rate = $_GET['rate'];
+	}
+	if (isset($_GET['backup'])) {
+		$backup = $_GET['backup'];
 	}
 
 	if ($auto_update == 1) {
@@ -29,6 +33,16 @@
 		$temp = tempnam(sys_get_temp_dir(), 'php');
 		$today = date("Y-m-d-H:i:s"); 
 		exec("/usr/bin/sudo /usr/bin/rsync -p -o --backup --backup-dir=/etc/sysconfig/ha/web --suffix $today /etc/sysconfig/ha/web/lvs.cf /etc/keepalived/keepalived.conf>".$temp." 2>&1");
+                exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1');
+		#unlink($temp);
+
+		header("Location: control.php");
+		exit;
+	}
+
+	if ($control_action == "RESTORE CONFIG") {
+		$temp = tempnam(sys_get_temp_dir(), 'keepalived');
+		exec("/usr/bin/sudo /bin/cp -f $backup /etc/keepalived/keepalived.conf>".$temp." 2>&1");
                 exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1');
 		#unlink($temp);
 
@@ -207,7 +221,43 @@ A.logolink      {
 	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
 	<?php $conf = file_get_contents('/etc/sysconfig/ha/web/lvs.cf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
 	&nbsp;	
-	</TT> </TD> </TR> </TABLE>
+	</TT> </TD> </TR>
+	<TR> <TD ALIGN=left>
+		<INPUT TYPE="Submit" NAME="control_action" VALUE="RELOAD CONFIG"> <SPAN CLASS="taboff">
+	</TD> </TR>
+	 </TABLE>
+
+	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
+        <TR>
+                <TD CLASS="title">BACKUP LVS CONFIGURATION</TD>
+        </TR>
+	</TABLE>
+
+	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> 
+	<TR> <TD> <TT>
+	<?php
+		$backups = glob("/etc/sysconfig/ha/web/keepalived.conf2014*");
+                echo "<SELECT NAME=\"backup\">";
+                        foreach($backups as $element) {
+                                if ($backup == $element) {
+                                        $SELECTED = ' selected="selected"';
+                                } else {
+                                        $SELECTED = '';
+                                }
+
+                                echo "<OPTION value=" . $element .  "$SELECTED" . ">"
+                                          .  $element .  "</OPTION>";
+                        }
+
+                echo "</SELECT>";
+
+	?>
+	&nbsp;	
+	</TT> </TD> </TR>
+	<TR> <TD ALIGN=left>
+		<INPUT TYPE="Submit" NAME="control_action" VALUE="RESTORE CONFIG"> <SPAN CLASS="taboff">
+	</TD> </TR> 
+	</TABLE>
 	
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
         <TR>
@@ -215,10 +265,12 @@ A.logolink      {
         </TR>
 	</TABLE>
 	
-	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
+	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR>
+	 <TD> <TT>
 	<?php echo nl2br(htmlspecialchars(`/bin/ps auxw | /bin/egrep "keepalived" | /bin/grep -v grep`)); ?>
 	&nbsp;	
-	</TT> </TD> </TR> </TABLE>
+	</TT> </TD>
+	</TR> </TABLE>
 
 
 <?php } else { ?>
@@ -247,9 +299,6 @@ A.logolink      {
 		End of comment -->
 		<TD ALIGN=right>
 			<INPUT TYPE="Submit" NAME="control_action" VALUE="CHANGE PASSWORD"> <SPAN CLASS="taboff">
-		</TD>
-		<TD ALIGN=left>
-			<INPUT TYPE="Submit" NAME="control_action" VALUE="RELOAD CONFIG"> <SPAN CLASS="taboff">
 		</TD>
        		</TR>
 	</TABLE>
