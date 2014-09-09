@@ -9,6 +9,7 @@ struct nla_policy ipvs_cmd_policy[IPVS_CMD_ATTR_MAX + 1] = {
 	[IPVS_CMD_ATTR_TIMEOUT_TCP]	= { .type = NLA_U32 },
 	[IPVS_CMD_ATTR_TIMEOUT_TCP_FIN]	= { .type = NLA_U32 },
 	[IPVS_CMD_ATTR_TIMEOUT_UDP]	= { .type = NLA_U32 },
+	[IPVS_CMD_ATTR_LADDR]           = { .type = NLA_NESTED},
 };
 
 struct nla_policy ipvs_service_policy[IPVS_SVC_ATTR_MAX + 1] = {
@@ -40,6 +41,13 @@ struct nla_policy ipvs_dest_policy[IPVS_DEST_ATTR_MAX + 1] = {
 	[IPVS_DEST_ATTR_INACT_CONNS]	= { .type = NLA_U32 },
 	[IPVS_DEST_ATTR_PERSIST_CONNS]	= { .type = NLA_U32 },
 	[IPVS_DEST_ATTR_STATS]		= { .type = NLA_NESTED },
+};
+
+struct nla_policy ipvs_laddr_policy[IPVS_LADDR_ATTR_MAX + 1] = {
+        [IPVS_LADDR_ATTR_ADDR]          = { .type = NLA_UNSPEC,
+                                            .maxlen = sizeof(struct in6_addr) },
+        [IPVS_LADDR_ATTR_PORT_CONFLICT]   = { .type = NLA_U64 },
+        [IPVS_LADDR_ATTR_CONN_COUNTS]   = { .type = NLA_U32 },
 };
 
 struct nla_policy ipvs_stats_policy[IPVS_STATS_ATTR_MAX + 1] = {

@@ -47,6 +47,9 @@
 #define LVS_CMD_ADD_DEST	IP_VS_SO_SET_ADDDEST
 #define LVS_CMD_DEL_DEST	IP_VS_SO_SET_DELDEST
 #define LVS_CMD_EDIT_DEST	IP_VS_SO_SET_EDITDEST
+#define LVS_CMD_ADD_LADDR      IP_VS_SO_SET_ADDLADDR
+#define LVS_CMD_DEL_LADDR       IP_VS_SO_SET_DELLADDR
+
 
 /* prototypes */
 extern void perform_svr_state(int, virtual_server_t *, real_server_t *);

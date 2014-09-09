@@ -69,6 +69,12 @@ vsg_handler(vector_t *strvec)
 	alloc_value_block(strvec, alloc_vsg_entry);
 }
 static void
+laddr_group_handler(vector_t *strvec)
+{
+        alloc_laddr_group(vector_slot(strvec, 1));
+        alloc_value_block(strvec, alloc_laddr_entry);
+}
+static void
 vs_handler(vector_t *strvec)
 {
 	alloc_vs(vector_slot(strvec, 1), vector_slot(strvec, 2));
@@ -106,6 +112,8 @@ lbkind_handler(vector_t *strvec)
 		vs->loadbalancing_kind = IP_VS_CONN_F_DROUTE;
 	else if (!strcmp(str, "TUN"))
 		vs->loadbalancing_kind = IP_VS_CONN_F_TUNNEL;
+	else if (!strcmp(str, "FNAT"))
+		vs->loadbalancing_kind = IP_VS_CONN_F_FULLNAT;
 	else
 		log_message(LOG_INFO, "PARSER : unknown [%s] routing method.", str);
 }
@@ -283,6 +291,28 @@ hysteresis_handler(vector_t *strvec)
 	vs->hysteresis = tmp;
 }
 
+static void
+laddr_gname_handler(vector_t *strvec)
+{
+        virtual_server_t *vs = LIST_TAIL_DATA(check_data->vs);
+
+        vs->local_addr_gname = set_value(strvec);
+}
+
+static void
+syn_proxy_handler(vector_t *strvec)
+{
+        virtual_server_t *vs = LIST_TAIL_DATA(check_data->vs);
+        vs->syn_proxy = 1;
+}
+
+static void
+bind_dev_handler(vector_t *strvec)
+{
+        virtual_server_t *vs = LIST_TAIL_DATA(check_data->vs);
+        vs->vip_bind_dev = set_value(strvec);
+}
+
 vector_t *
 check_init_keywords(void)
 {
@@ -295,6 +325,9 @@ check_init_keywords(void)
 	install_keyword("ca", &sslca_handler);
 	install_keyword("certificate", &sslcert_handler);
 	install_keyword("key", &sslkey_handler);
+
+	/* local IP address mapping */
+	install_keyword_root("local_address_group", &laddr_group_handler);
 
 	/* Virtual server mapping */
 	install_keyword_root("virtual_server_group", &vsg_handler);
@@ -337,6 +370,10 @@ check_init_keywords(void)
 	/* Checkers mapping */
 	install_checkers_keyword();
 	install_sublevel_end();
+
+	install_keyword("laddr_group_name", &laddr_gname_handler);
+	install_keyword("syn_proxy", &syn_proxy_handler);
+	install_keyword("vip_bind_dev", &bind_dev_handler);
 
 	return keywords;
 }

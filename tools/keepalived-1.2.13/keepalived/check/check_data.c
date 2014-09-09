@@ -69,6 +69,77 @@ dump_ssl(void)
 		log_message(LOG_INFO, " Using autogen SSL context");
 }
 
+/* local IP address group facility functions */
+static void
+free_laddr_group(void *data)
+{
+        local_addr_group *laddr_group = data;
+        FREE_PTR(laddr_group->gname);
+        free_list(laddr_group->addr_ip);
+        free_list(laddr_group->range);
+        FREE(laddr_group);
+}
+static void
+dump_laddr_group(void *data)
+{
+        local_addr_group *laddr_group = data;
+
+        log_message(LOG_INFO, " local IP address group = %s", laddr_group->gname);
+        dump_list(laddr_group->addr_ip);
+        dump_list(laddr_group->range);
+}
+static void
+free_laddr_entry(void *data)
+{
+        FREE(data);
+}
+static void
+dump_laddr_entry(void *data)
+{
+        local_addr_entry *laddr_entry = data;
+
+        if (laddr_entry->range)
+                log_message(LOG_INFO, "   IP Range = %s-%d"
+                                    , inet_sockaddrtos(&laddr_entry->addr)
+                                    , laddr_entry->range);
+        else
+                log_message(LOG_INFO, "   IP = %s"
+                                    , inet_sockaddrtos(&laddr_entry->addr));
+}
+void
+alloc_laddr_group(char *gname)
+{
+        int size = strlen(gname);
+        local_addr_group *new;
+
+        new = (local_addr_group *) MALLOC(sizeof (local_addr_group));
+        new->gname = (char *) MALLOC(size + 1);
+        memcpy(new->gname, gname, size);
+        new->addr_ip = alloc_list(free_laddr_entry, dump_laddr_entry);
+        new->range = alloc_list(free_laddr_entry, dump_laddr_entry);
+
+        list_add(check_data->laddr_group, new);
+}
+void
+alloc_laddr_entry(vector_t *strvec)
+{
+        local_addr_group *laddr_group = LIST_TAIL_DATA(check_data->laddr_group);
+        local_addr_entry *new;
+
+        new = (local_addr_entry *) MALLOC(sizeof (local_addr_entry));
+
+
+        new->range = inet_stor(vector_slot(strvec, 0));
+        inet_stosockaddr(vector_slot(strvec, 0), NULL, &new->addr);
+        if (!new->range)
+                list_add(laddr_group->addr_ip, new);
+        else if ( (0 < new->range) && (new->range < 255) )
+                list_add(laddr_group->range, new);
+        else
+                log_message(LOG_INFO, "invalid: local IP address range %d", new->range);
+}
+
+
 /* Virtual server group facility functions */
 static void
 free_vsg(void *data)
@@ -159,6 +230,8 @@ free_vs(void *data)
 	free_list(vs->rs);
 	FREE_PTR(vs->quorum_up);
 	FREE_PTR(vs->quorum_down);
+	FREE_PTR(vs->local_addr_gname);
+	FREE_PTR(vs->vip_bind_dev);
 	FREE(vs);
 }
 static void
@@ -189,6 +262,8 @@ dump_vs(void *data)
 	       (vs->service_type == IPPROTO_TCP) ? "TCP" : "UDP");
 	log_message(LOG_INFO, "   alpha is %s, omega is %s",
 		    vs->alpha ? "ON" : "OFF", vs->omega ? "ON" : "OFF");
+	log_message(LOG_INFO, "   SYN proxy is %s", 
+			vs->syn_proxy ? "ON" : "OFF");
 	log_message(LOG_INFO, "   quorum = %lu, hysteresis = %lu", vs->quorum, vs->hysteresis);
 	if (vs->quorum_up)
 		log_message(LOG_INFO, "   -> Notify script UP = %s",
@@ -219,6 +294,10 @@ dump_vs(void *data)
 	}
 	if (!LIST_ISEMPTY(vs->rs))
 		dump_list(vs->rs);
+	if (vs->local_addr_gname)
+		log_message(LOG_INFO, " LOCAL_ADDR GROUP = %s", vs->local_addr_gname);
+	if (vs->vip_bind_dev)
+		log_message(LOG_INFO, " vip_bind_dev = %s", vs->vip_bind_dev);
 }
 
 void
@@ -243,11 +322,14 @@ alloc_vs(char *ip, char *port)
 	new->virtualhost = NULL;
 	new->alpha = 0;
 	new->omega = 0;
+	new->syn_proxy = 0;
 	new->quorum_up = NULL;
 	new->quorum_down = NULL;
 	new->quorum = 1;
 	new->hysteresis = 0;
 	new->quorum_state = UP;
+	new->local_addr_gname = NULL;
+	new->vip_bind_dev = NULL;
 
 	list_add(check_data->vs, new);
 }
@@ -326,6 +408,7 @@ alloc_check_data(void)
 	new = (check_data_t *) MALLOC(sizeof(check_data_t));
 	new->vs = alloc_list(free_vs, dump_vs);
 	new->vs_group = alloc_list(free_vsg, dump_vsg);
+	new->laddr_group = alloc_list(free_laddr_group, dump_laddr_group);
 
 	return new;
 }
@@ -335,6 +418,7 @@ free_check_data(check_data_t *data)
 {
 	free_list(data->vs);
 	free_list(data->vs_group);
+	free_list(data->laddr_group);
 	FREE(data);
 }
 
@@ -349,6 +433,8 @@ dump_check_data(check_data_t *data)
 		log_message(LOG_INFO, "------< LVS Topology >------");
 		log_message(LOG_INFO, " System is compiled with LVS v%d.%d.%d",
 		       NVERSION(IP_VS_VERSION_CODE));
+		if (!LIST_ISEMPTY(check_data->laddr_group))
+			dump_list(check_data->laddr_group);
 		if (!LIST_ISEMPTY(data->vs_group))
 			dump_list(data->vs_group);
 		dump_list(data->vs);

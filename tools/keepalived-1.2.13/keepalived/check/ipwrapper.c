@@ -194,6 +194,12 @@ init_service_vs(virtual_server_t * vs)
 			SET_ALIVE(vs);
 	}
 
+	/*Set local ip address in "FNAT" mode of IPVS */
+	if ((vs->loadbalancing_kind == IP_VS_CONN_F_FULLNAT) && vs->local_addr_gname) { 
+		if (!ipvs_cmd(LVS_CMD_ADD_LADDR, check_data->vs_group, vs, NULL))
+			return 0; 
+	}
+
 	/* Processing real server queue */
 	if (!LIST_ISEMPTY(vs->rs)) {
 		if (vs->alpha && ! vs->reloaded)
@@ -520,6 +526,7 @@ clear_diff_vsge(list old, list new, virtual_server_t * old_vs)
 
 			if (!ipvs_group_remove_entry(old_vs, vsge))
 				return 0;
+
 		}
 	}
 
@@ -665,6 +672,75 @@ clear_diff_rs(list old_vs_group, virtual_server_t * old_vs)
 	return ret;
 }
 
+/* Check if a local address entry is in list */
+static int
+laddr_entry_exist(local_addr_entry *laddr_entry, list l)
+{
+        element e;
+        local_addr_entry *entry;
+
+        for (e = LIST_HEAD(l); e; ELEMENT_NEXT(e)) {
+                entry = ELEMENT_DATA(e);
+                if (sockstorage_equal(&entry->addr, &laddr_entry->addr) &&
+                                                entry->range == laddr_entry->range)
+                        return 1;
+        }
+
+        return 0;
+}
+
+/* Clear the diff local address entry of eth old vs */
+static int
+clear_diff_laddr_entry(list old, list new, virtual_server_t *old_vs)
+{
+        element e;
+        local_addr_entry *laddr_entry;
+
+        for (e = LIST_HEAD(old); e; ELEMENT_NEXT(e)) {
+                laddr_entry = ELEMENT_DATA(e);
+                if (!laddr_entry_exist(laddr_entry, new)) {
+                        log_message(LOG_INFO, "VS [%s-%d] in local address group %s no longer exist\n"
+                                            , inet_sockaddrtos(&laddr_entry->addr)
+                                            , laddr_entry->range
+                                            , old_vs->local_addr_gname);
+
+                        if (!ipvs_laddr_remove_entry(old_vs, laddr_entry))
+                                return 0;
+                }
+        }
+
+        return 1;
+}
+/* Clear the diff local address of the old vs */
+static int
+clear_diff_laddr(virtual_server_t *old_vs)
+{
+        local_addr_group *old;
+        local_addr_group *new;
+
+        /*
+ *          *  If old vs was not in fulllnat mod or didn't own local address group, 
+ *                   * then do nothing and return 
+ *                            */
+        if ((old_vs->loadbalancing_kind != IP_VS_CONN_F_FULLNAT) ||
+                                                !old_vs->local_addr_gname)
+                return 1;
+
+        /* Fetch local address group */
+        old = ipvs_get_laddr_group_by_name(old_vs->local_addr_gname,
+                                                        old_check_data->laddr_group);
+        new = ipvs_get_laddr_group_by_name(old_vs->local_addr_gname,
+                                                        check_data->laddr_group);
+
+        if (!clear_diff_laddr_entry(old->addr_ip, new->addr_ip, old_vs))
+                return 0;
+        if (!clear_diff_laddr_entry(old->range, new->range, old_vs))
+                return 0;
+
+        return 1;
+}
+
+
 /* When reloading configuration, remove negative diff entries */
 int
 clear_diff_services(void)
@@ -710,6 +786,10 @@ clear_diff_services(void)
 						      , vs
 						      , vs->s_svr))
 						return 0;
+			/* perform local address diff */
+			if (!clear_diff_laddr(vs))
+				return 0;
+
 		}
 	}
 

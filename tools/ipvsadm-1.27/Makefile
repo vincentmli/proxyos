@@ -43,7 +43,8 @@ MAN		= $(BUILD_ROOT)/$(MANDIR)/man8
 INIT		= $(BUILD_ROOT)/etc/rc.d/init.d
 MKDIR		= mkdir
 INSTALL		= install
-STATIC_LIBS	= libipvs/libipvs.a
+#STATIC_LIBS	= libipvs/libipvs.a
+STATIC_LIBS	= ../keepalived-1.2.13/keepalived/libipvs-2.6/libipvs.a 
 
 ifeq "${ARCH}" "sparc64"
     CFLAGS = -Wall -Wunused -Wstrict-prototypes -g -m64 -pipe -mcpu=ultrasparc -mcmodel=medlow

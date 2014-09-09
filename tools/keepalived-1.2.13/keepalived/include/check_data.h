@@ -93,6 +93,19 @@ typedef struct _real_server {
 #endif
 } real_server_t;
 
+/* local ip address group definition */
+typedef struct _local_addr_entry {
+       struct sockaddr_storage addr;
+       uint8_t range;
+} local_addr_entry;
+
+typedef struct _local_addr_group {
+       char *gname;
+       list addr_ip;
+       list range;
+} local_addr_group;
+
+
 /* Virtual Server group definition */
 typedef struct _virtual_server_group_entry {
 	struct sockaddr_storage		addr;
@@ -128,12 +141,15 @@ typedef struct _virtual_server {
 	int				alive;
 	unsigned			alpha;		/* Alpha mode enabled. */
 	unsigned			omega;		/* Omega mode enabled. */
+	unsigned syn_proxy;             /* Syn_proxy mode enabled. */
 	char				*quorum_up;	/* A hook to call when the VS gains quorum. */
 	char				*quorum_down;	/* A hook to call when the VS loses quorum. */
 	long unsigned			quorum;		/* Minimum live RSs to consider VS up. */
 
 	long unsigned			hysteresis;	/* up/down events "lag" WRT quorum. */
 	unsigned			quorum_state;	/* Reflects result of the last transition done. */
+        char				*local_addr_gname;         /* local ip address group name */
+        char				*vip_bind_dev;             /* the interface name,vip bindto */
 	int					reloaded;   /* quorum_state was copied from old config while reloading */
 #if defined(_WITH_SNMP_) && defined(_KRNL_2_6_) && defined(_WITH_LVS_)
 	/* Statistics */
@@ -147,6 +163,7 @@ typedef struct _check_data {
 	ssl_data_t			*ssl;
 	list				vs_group;
 	list				vs;
+	list				laddr_group;
 } check_data_t;
 
 /* inline stuff */
@@ -219,6 +236,7 @@ static inline int inaddr_equal(sa_family_t family, void *addr1, void *addr2)
 			 (X)->loadbalancing_kind      == (Y)->loadbalancing_kind	&&\
 			 (X)->nat_mask                == (Y)->nat_mask			&&\
 			 (X)->granularity_persistence == (Y)->granularity_persistence	&&\
+			 (X)->syn_proxy               == (Y)->syn_proxy                 &&\
 			 (  (!(X)->quorum_up && !(Y)->quorum_up) || \
 			    ((X)->quorum_up && (Y)->quorum_up && !strcmp ((X)->quorum_up, (Y)->quorum_up)) \
 			 ) &&\
@@ -226,7 +244,10 @@ static inline int inaddr_equal(sa_family_t family, void *addr1, void *addr2)
 			 !strcmp((X)->timeout_persistence, (Y)->timeout_persistence)	&&\
 			 (((X)->vsgname && (Y)->vsgname &&				\
 			   !strcmp((X)->vsgname, (Y)->vsgname)) || 			\
-			  (!(X)->vsgname && !(Y)->vsgname)))
+			  (!(X)->vsgname && !(Y)->vsgname)) 				&&\
+			 (((X)->local_addr_gname && (Y)->local_addr_gname &&            \
+                           !strcmp((X)->local_addr_gname, (Y)->local_addr_gname)) ||    \
+                          (!(X)->local_addr_gname && !(Y)->local_addr_gname)))
 
 #define VSGE_ISEQ(X,Y)	(sockstorage_equal(&(X)->addr,&(Y)->addr) &&	\
 			 (X)->range     == (Y)->range &&		\
@@ -242,6 +263,8 @@ extern check_data_t *old_check_data;
 /* prototypes */
 extern ssl_data_t *alloc_ssl(void);
 extern void free_ssl(void);
+extern void alloc_laddr_group(char *);
+extern void alloc_laddr_entry(vector_t *);
 extern void alloc_vsg(char *);
 extern void alloc_vsg_entry(vector_t *);
 extern void alloc_vs(char *, char *);
