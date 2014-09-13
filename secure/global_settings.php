@@ -12,28 +12,46 @@
 	require('parse.php'); /* read in the config! Hurragh! */
 	$prim['service'] = "lvs";
 
+        if($global_defs['enable_traps'] == 'yes') {
+                $yes_status = 'checked';
+        }else if ($global_defs['enable_traps'] == 'no' ) {
+                $no_status = 'checked';
+        }
+
+
 	if (isset($_GET['global_action']) &&
 	    $_GET['global_action'] == "ACCEPT") {
-	}
 
 	/* keepalived global defs */
 
-	if (isset($_GET['notification_email'])) {
-		$global_defs['notification_email'] = $_GET['notification_email'];
+		if (isset($_GET['notification_email'])) {
+			$global_defs['notification_email'] = $_GET['notification_email'];
+		}
+		if (isset($_GET['notification_email_from'])) {
+			$global_defs['notification_email_from'] = $_GET['notification_email_from'];
+		}
+		if (isset($_GET['smtp_server'])) {
+			$global_defs['smtp_server'] = $_GET['smtp_server'];
+		}
+		if (isset($_GET['smtp_connect_timeout'])) {
+			$global_defs['smtp_connect_timeout'] = $_GET['smtp_connect_timeout'];
+		}
+		if (isset($_GET['router_id'])) {
+			$global_defs['router_id'] = $_GET['router_id'];
+		}
+		if (isset($_GET['vrrp_mcast_group4'])) {
+			$global_defs['vrrp_mcast_group4'] = $_GET['vrrp_mcast_group4'];
+		}
+		if (isset($_GET['vrrp_mcast_group6'])) {
+			$global_defs['vrrp_mcast_group6'] = $_GET['vrrp_mcast_group6'];
+		}
+		$global_defs['enable_traps'] = $_GET['enable_traps'];
+		if ($global_defs['enable_traps'] == 'yes') {
+			$yes_status = 'checked';
+		} else if ($global_defs['enable_traps'] == 'no' ){
+			$no_status = 'checked';
+		}
 	}
-	if (isset($_GET['notification_email_from'])) {
-		$global_defs['notification_email_from'] = $_GET['notification_email_from'];
-	}
-	if (isset($_GET['smtp_server'])) {
-		$global_defs['smtp_server'] = $_GET['smtp_server'];
-	}
-	if (isset($_GET['smtp_connect_timeout'])) {
-		$global_defs['smtp_connect_timeout'] = $_GET['smtp_connect_timeout'];
-	}
-	if (isset($_GET['router_id'])) {
-		$global_defs['router_id'] = $_GET['router_id'];
-	}
-	print_r($_GET['notification_email']);
 
 	// echo "Query = $QUERY_STRING";
 ?>
@@ -161,6 +179,26 @@ A.logolink      {
 			echo $global_defs['router_id'];
 		?>"></TD>
 	</TR>
+	<TR>
+		<TD>VRRP multicast group4 :</TD>
+		<TD><INPUT TYPE="TEXT" NAME="vrrp_mcast_group4" SIZE=16 VALUE="<?php
+			echo $global_defs['vrrp_mcast_group4'];
+		?>"></TD>
+	</TR>
+	<TR>
+		<TD>VRRP multicast group6 :</TD>
+		<TD><INPUT TYPE="TEXT" NAME="vrrp_mcast_group6" SIZE=16 VALUE="<?php
+			echo $global_defs['vrrp_mcast_group6'];
+		?>"></TD>
+	</TR>
+        <TR>
+                <TD>Enable traps:</TD>
+                <TD>
+                <Input type = 'Radio' Name ='enable_traps' value= 'yes' <?PHP print $yes_status; ?> >yes
+                <Input type = 'Radio' Name ='enable_traps' value= 'no' <?PHP print $no_status; ?> >no
+                </TD>
+        </TR>
+
 
 </TABLE>
 <HR>

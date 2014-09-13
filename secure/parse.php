@@ -6,28 +6,15 @@ $LVS	=	"/etc/sysconfig/ha/web/lvs.cf";	/* Global */
 /* 1 = debuging, 0 or undefined = no debuging */
 //$debug=1;
 
-/* Bah 8( ....
-$serv = array ( "",
-		array ( "",
-			array (
-				"server"	=> "",
-				"address"	=> "",
-				"active"	=> "",
-				"nmask"		=> "",
-				"heartbeat"	=> "",
-				"port"		=> ""
-				"weight"	=> ""
-			),
-		),
-	);
-*/
-
 $global_defs = array (
 		"global_defs" => "",
 		"notification_email_from" => "",
 		"smtp_server" => "",
    		"smtp_connect_timeout" => "",
 		"router_id" => "",
+		"vrrp_mcast_group4" => "",
+		"vrrp_mcast_group6" => "",
+		"enable_traps" => "no",
 
 	);
 
@@ -323,6 +310,12 @@ function parse($name, $datum) {
 			case "smtp_connect_timeout"	:	if ($service == "global_defs") $global_defs['smtp_connect_timeout'] 	= $datum;
 								break;
 			case "router_id"		:	if ($service == "global_defs") $global_defs['router_id'] 	= $datum;
+								break;
+			case "vrrp_mcast_group4"		:	if ($service == "global_defs") $global_defs['vrrp_mcast_group4'] 	= $datum;
+								break;
+			case "vrrp_mcast_group6"		:	if ($service == "global_defs") $global_defs['vrrp_mcast_group6'] 	= $datum;
+								break;
+			case "enable_traps"		:	if ($service == "global_defs") $global_defs['enable_traps'] 	= 'yes';
 								break;
 
 			case "static_ipaddress"		: 	$service = "static_ipaddress";
@@ -1104,6 +1097,9 @@ function print_arrays() {
 	echo "<BR>Global_defs  [smtp_server] = "		. $global_defs['smtp_server'];
 	echo "<BR>Global_defs  [smtp_connect_timeout] = "	. $global_defs['smtp_connect_timeout'];
 	echo "<BR>Global_defs  [router_id] = "			. $global_defs['router_id'];
+	echo "<BR>Global_defs  [vrrp_mcast_group4] = "			. $global_defs['vrrp_mcast_group4'];
+	echo "<BR>Global_defs  [vrrp_mcast_group6] = "			. $global_defs['vrrp_mcast_group6'];
+	echo "<BR>Global_defs  [enable_traps] = "			. $global_defs['enable_traps'];
 	
 	echo "<P><B>Static_ipaddress</B>";
         foreach ($static_ipaddress as $ip) {
@@ -1431,6 +1427,19 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	if ($global_defs['router_id'] != ""){
 		fputs ($fd, "$gap1 router_id "				. $global_defs['router_id']		. "\n", 80);
 		if ($debug) { echo "$egap1 router_id "				. $global_defs['router_id']		. "<BR>"; };
+	}
+	if ($global_defs['vrrp_mcast_group4'] != ""){
+		fputs ($fd, "$gap1 vrrp_mcast_group4 "				. $global_defs['vrrp_mcast_group4']		. "\n", 80);
+		if ($debug) { echo "$egap1 vrrp_mcast_group4 "				. $global_defs['vrrp_mcast_group4']		. "<BR>"; };
+	}
+	if ($global_defs['vrrp_mcast_group6'] != ""){
+		fputs ($fd, "$gap1 vrrp_mcast_group6 "				. $global_defs['vrrp_mcast_group6']		. "\n", 80);
+		if ($debug) { echo "$egap1 vrrp_mcast_group6 "				. $global_defs['vrrp_mcast_group6']		. "<BR>"; };
+	}
+	if (isset($global_defs['enable_traps']) &&
+		($global_defs['enable_traps'] == 'yes')){
+		fputs ($fd, "$gap1 enable_traps" 				. "\n", 80);
+		if ($debug) { echo "$egap1 enable_traps "			. "<BR>"; };
 	}
 
 	fputs ($fd,"}\n", 80);
