@@ -129,8 +129,11 @@ A.logolink      {
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
+
+                <A HREF="virtual_main.php" NAME="VIRTUAL SERVER">VIRTUAL SERVER</A>
+                &nbsp;|&nbsp;
 		
-		<A HREF="virtual_edit_virt.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL SERVER">VIRTUAL SERVER</A>
+		<A HREF="virtual_edit_virt.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="EDIT VIRTUAL SERVER">EDIT VIRTUAL SERVER</A>
 		&nbsp;|&nbsp;
 
                 <A HREF="virtual_edit_real.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="REAL SERVER">REAL SERVER</A>

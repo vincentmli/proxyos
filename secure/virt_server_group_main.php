@@ -120,6 +120,22 @@ A.logolink      {
 
 <?php include 'menu.php'; ?>
 
+<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
+        <TR BGCOLOR="#EEEEEE">
+                <TD WIDTH="60%">EDIT:
+
+                <A HREF="virtual_main.php" NAME="VIRTUAL SERVER">VIRTUAL SERVER</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="virt_server_group_main.php" CLASS="tabon" NAME="VIRTUAL GROUP">VIRTUAL GROUP</A>
+                &nbsp;|&nbsp;
+
+                </TD>
+
+        </TR>
+</TABLE>
+
+
 <FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="virt_server_group_main.php">
 
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">

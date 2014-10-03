@@ -130,8 +130,11 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="virt_server_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL SERVER GROUP">VIRTUAL SERVER GROUP</A>
-		&nbsp;|&nbsp;
+                <A HREF="virt_server_group_main.php" CLASS="tabon" NAME="VIRTUAL SERVER GROUP">VIRTUAL GROUP</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="virt_server_group_edit_group.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="EDIT VIRTUAL GROUP">EDIT VIRTUAL SERVER GROUP</A>
+                &nbsp;|&nbsp;
 
                 <A HREF="virt_server_group_edit_iprange.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL SERVER GROUP IPRANGE">VIRTUAL SERVER GROUP IPRANGE</A>
                 &nbsp;|&nbsp;
