@@ -287,22 +287,22 @@ function parse_tengine($name, $datum) {
 								break;
 
 			case "global_defs"			:	/* global definitition */
-									$service="global_defs"; echo $service;
+									$service="global_defs";
 									break;
 			case "http"			:	/* http block definitition */
-									$service="http"; echo $service;
+									$service="http";
 									break;
 			case "static_ipaddress"			:	/* static ip definitition */
-									$service="static_ipaddress"; echo $service;
+									$service="static_ipaddress";
 									break;
 			case "static_routes"			:	/* static ip definitition */
-									$service="static_routes"; echo $service;
+									$service="static_routes";
 									break;
 //			case "local_address_group"			:/* local address group definitition */
 //									$service="local_address_group"; echo $service;
 									break;
 			case "virtual_server"				:	/* new virtual server definitition */
-									$service="lvs"; echo $service;
+									$service="lvs";
 									break;
 /*
 			case "vrrp_instance"				: $service="vrrp_instance"; echo $service;
@@ -312,7 +312,7 @@ function parse_tengine($name, $datum) {
 */
 //			case "virt_server_group"			: $service="virt_server_group"; echo $service;
 //									break;
-			case "vrrp_script"				: $service="vrrp_script"; echo $service;
+			case "vrrp_script"				: $service="vrrp_script";
 									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
 									break;
