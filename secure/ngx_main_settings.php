@@ -21,6 +21,12 @@
 		if (isset($_GET['worker_processes'])) {
 			$main['worker_processes'] = $_GET['worker_processes'];
 		}
+		if (isset($_GET['worker_cpu_affinity'])) {
+			$main['worker_cpu_affinity'] = $_GET['worker_cpu_affinity'];
+		}
+		if (isset($_GET['error_log'])) {
+			$main['error_log'] = $_GET['error_log'];
+		}
 	}
 
 	// echo "Query = $QUERY_STRING";
@@ -114,9 +120,17 @@ A.logolink      {
 
 	<TR>
 		<TD>Worker processes :</TD>
-		<TD><INPUT TYPE="TEXT" NAME="worker_processes" SIZE=26 VALUE="<?php
-			echo $main['worker_processes'];
-		?>"></TD>
+		<TD><INPUT TYPE="TEXT" NAME="worker_processes" SIZE=26 VALUE="<?php echo $main['worker_processes']; ?>"></TD>
+	</TR>
+
+	<TR>
+		<TD>Worker CPU Affinity :</TD>
+		<TD><INPUT TYPE="TEXT" NAME="worker_cpu_affinity" SIZE=26 VALUE="<?php echo $main['worker_cpu_affinity']; ?>"></TD>
+	</TR>
+
+	<TR>
+		<TD>Error log :</TD>
+		<TD><INPUT TYPE="TEXT" NAME="error_log" SIZE=26 VALUE="<?php echo $main['error_log']; ?>"></TD>
 	</TR>
 
 

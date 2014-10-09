@@ -28,6 +28,8 @@ $main = array (
 		"error_log"			=> "",
 	);
 
+$http = array ();
+
 $events = array (
 		"worker_connections" => "",
 		"connections" => "",
@@ -135,11 +137,12 @@ if (empty($debug)) { $debug = 0; } /* if unset, leave debugging off */
 
 $buffer = "";
 
-function parse($name, $datum) {
+function parse_tengine($name, $datum) {
 	global $debug;
 	global $buffer;
 	global $ngx_fd;
 	global $main;
+	global $http;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -185,6 +188,7 @@ function parse($name, $datum) {
 
 	if (strstr($buffer,"{")) { 
 		if ($name == "global_defs"
+		    or $name == "http"
 		    or $name == "notification_email"
 		    or $name == "static_ipaddress"
 		    or $name == "static_routes"
@@ -223,7 +227,7 @@ function parse($name, $datum) {
 		if (($level >  1) && ($name == "real_server")) { $server_count++ ; }; 
 //		if ($level >  1) { $server_count++ ; }; 
 
-		parse($name, $datum);
+		parse_tengine($name, $datum);
 		return; /* <--- HIGHLY IMPORTANT! do **NOT** remove this VITAL command */
 	 };
 
@@ -233,7 +237,7 @@ function parse($name, $datum) {
 		$buffer = "$name $datum";
 		if ($debug) { echo "<FONT COLOR=\"RED\">Striping the \"}\". Level changed down. Calling parse(). <BR></FONT>"; };
 		$level--;
-		parse($name, $datum);
+		parse_tengine($name, $datum);
 		return; /* <--- HIGHLY IMPORTANT! do **NOT** remove this VITAL command */
 	};
 
@@ -285,6 +289,9 @@ function parse($name, $datum) {
 			case "global_defs"			:	/* global definitition */
 									$service="global_defs"; echo $service;
 									break;
+			case "http"			:	/* http block definitition */
+									$service="http"; echo $service;
+									break;
 			case "static_ipaddress"			:	/* static ip definitition */
 									$service="static_ipaddress"; echo $service;
 									break;
@@ -330,6 +337,10 @@ function parse($name, $datum) {
 		switch ($name) {
 			case "global_defs"		: 	$service = "global_defs";
 						  		if ($service == "global_defs") $global_defs['global_defs']	= $datum;
+								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of global definition </I><B>$service</B></FONT><BR>"; };
+								break;
+			case "http"		: 		$service = "http";
+						  		if ($service == "http") $http['http']	= $datum;
 								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of global definition </I><B>$service</B></FONT><BR>"; };
 								break;
 			case "notification_email"	: 	 $service = "global_defs";/* ignore here for global */ 
@@ -923,7 +934,9 @@ function next_line() {
 		/* All data is comprised of a name, an optional seperator and a datum */
 
 		/* oh wow!.. trim()!!! I could hug somebody! */
+		$buffer = preg_replace('/;+$/', ' ', $buffer);
 		$buffer = trim($buffer);
+		//$buffer = rtrim($buffer, ';');
 
 		if (strlen ($buffer) > 4) { /* basically 'if not empty',.. however 'if (!empty($buffer)' didn't work */
 			/* explode! oh boy! */
@@ -956,6 +969,8 @@ function read_config() {
 		/* all data is comprised of a name, an optional seperator, and a datum */
 
 		/* oh wow!.. trim()!!! I could hug somebody! */
+		//$buffer = preg_replace('/;+$/', ' ', $buffer);
+		$buffer = str_replace(';', ' ', $buffer); //replace trailing ; with space
 		$buffer = trim($buffer);
 
 		//BUG!!! strlen > 4 condition check cause vrrp track_interface like eth1 cause parsing write failure
@@ -1020,7 +1035,7 @@ function read_config() {
 */
 
 		}
-		parse($name, $datum);
+		parse_tengine($name, $datum);
 	}
 	/* specials that need to be preset if unset */
 	if (empty($prim['rsh_command'])) {
@@ -1099,6 +1114,7 @@ function backup_lvs() {
 function print_arrays() {
 	/* debugging function only */
 	global $main;
+	global $http;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1119,6 +1135,7 @@ function print_arrays() {
 	echo "<B>Main</B>";
 	echo "<BR>serial_no = "			. $main['serial_no'];
 	echo "<BR>worker_processes = "		. $main['worker_processes'];
+	echo "<BR>worker_cpu_affinity = "	. $main['worker_cpu_affinity'];
 	echo "<BR>error_log = "			. $main['error_log'];
 	echo "<BR>pid = "			. $main['pid'];
 
@@ -1134,6 +1151,8 @@ function print_arrays() {
 	echo "<BR>Global_defs  [vrrp_mcast_group4] = "			. $global_defs['vrrp_mcast_group4'];
 	echo "<BR>Global_defs  [vrrp_mcast_group6] = "			. $global_defs['vrrp_mcast_group6'];
 	echo "<BR>Global_defs  [enable_traps] = "			. $global_defs['enable_traps'];
+
+	echo "<P><B>http</B>";
 	
 	echo "<P><B>Static_ipaddress</B>";
         foreach ($static_ipaddress as $ip) {
@@ -1353,6 +1372,7 @@ while ($virt[++$loop1]['ip'] != "" ) { /* NOTE: must use *pre*increment not post
 function write_config($level="0", $delete_virt="", $delete_item="", $delete_service="") {
 	global $ngx_fd;
 	global $main;
+	global $http;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1421,18 +1441,31 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 
 	if (isset($main['worker_processes'])
               && $main['worker_processes'] != "") {
-		fputs ($ngx_fd, "worker_processes "		. $main['worker_processes'] . "\n", 80);
-		if ($debug) { echo "worker_processes "	. $main['worker_processes'] . "<BR>"; };		
+		fputs ($ngx_fd, "worker_processes "		. $main['worker_processes'] . ";\n", 80);
+		if ($debug) { echo "worker_processes "	. $main['worker_processes'] . ";<BR>"; };		
+	}
+	if (isset($main['worker_cpu_affinity'])
+              && $main['worker_cpu_affinity'] != "") {
+		fputs ($ngx_fd, "worker_cpu_affinity "		. $main['worker_cpu_affinity'] . ";\n", 80);
+		if ($debug) { echo "worker_cpu_affinity "	. $main['worker_cpu_affinity'] . ";<BR>"; };		
 	}
 	if (isset($main['error_log'])
               && $main['error_log'] != "") {
-		fputs ($ngx_fd, "error_log "		. $main['error_log'] . "\n", 80);
-		if ($debug) { echo "error_log "	. $main['error_log'] . "<BR>"; };		
+		fputs ($ngx_fd, "error_log "		. $main['error_log'] . ";\n", 80);
+		if ($debug) { echo "error_log "	. $main['error_log'] . ";<BR>"; };		
 	}
 	if (isset($main['pid'])
               && $main['pid'] != "") {
 		fputs ($ngx_fd, "pid "		. $main['pid'] . "\n", 80);
 		if ($debug) { echo "pid "	. $main['pid'] . "<BR>"; };		
+	}
+
+	if (isset($http)) {
+		fputs ($ngx_fd, "http "				. $http['http'] 	. " {\n", 80);
+		if ($debug) { echo "http "			. $http['http'] 	. " {<BR>"; };
+
+		fputs ($ngx_fd,"}\n", 80);
+		if ($debug) { echo "}<BR>"; };
 	}
 	
 	if (isset($global_defs)) {
