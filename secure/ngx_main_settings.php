@@ -118,15 +118,15 @@ A.logolink      {
                 <TD CLASS="title" COLSPAN="2">ENVIRONMENT</TD>
         </TR>
 
-	<TR>
+	<!--TR>
 		<TD>Worker processes :</TD>
 		<TD><INPUT TYPE="TEXT" NAME="worker_processes" SIZE=26 VALUE="<?php echo $main['worker_processes']; ?>"></TD>
-	</TR>
+	</TR-->
 
-	<TR>
+	<!--TR>
 		<TD>Worker CPU Affinity :</TD>
 		<TD><INPUT TYPE="TEXT" NAME="worker_cpu_affinity" SIZE=26 VALUE="<?php echo $main['worker_cpu_affinity']; ?>"></TD>
-	</TR>
+	</TR-->
 
 	<TR>
 		<TD>Error log :</TD>

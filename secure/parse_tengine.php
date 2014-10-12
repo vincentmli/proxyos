@@ -4,7 +4,7 @@ $TENGINE	=	"/etc/sysconfig/ha/nginx.conf";	/* Global */
 //$TENGINE	=	"/etc/sysconfig/ha/keepalived.conf";	/* Global */
 
 /* 1 = debuging, 0 or undefined = no debuging */
-//$debug=1;
+$debug=1;
 
 $main = array (
 		"serial_no"			=> "",
@@ -29,6 +29,8 @@ $main = array (
 	);
 
 $http = array ();
+
+$upstream = array();
 
 $events = array (
 		"worker_connections" => "",
@@ -143,6 +145,7 @@ function parse_tengine($name, $datum) {
 	global $ngx_fd;
 	global $main;
 	global $http;
+	global $upstream;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -171,6 +174,7 @@ function parse_tengine($name, $datum) {
 	static $laddrgname;
 	static $level = 0 ;
 	static $server_count = 0;
+	static $upstream_count = 0;
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
@@ -189,23 +193,6 @@ function parse_tengine($name, $datum) {
 	if (strstr($buffer,"{")) { 
 		if ($name == "global_defs"
 		    or $name == "http"
-		    or $name == "notification_email"
-		    or $name == "static_ipaddress"
-		    or $name == "static_routes"
-		    or $name == "authentication"
-		    or $name == "virtual_ipaddress"
-		    or $name == "virtual_ipaddress_excluded"
-		    or $name == "virtual_routes"
-		    or $name == "track_interface"
-		    or $name == "track_script"
-		    or $name == "group"
-		    or $name == "TCP_CHECK"
-		    or $name == "HTTP_GET"
-		    or $name == "SSL_GET"
-		    or $name == "SMTP_CHECK"
-		    or $name == "MISC_CHECK"
-		    or $name == "url"
-		    or $name == "host"
 		) {
 			$datum = "";
 		}
@@ -224,7 +211,9 @@ function parse_tengine($name, $datum) {
 		/* I'm sure my logic is flawed, however, this works			*/
 		/* Note to self: NEVER TOUCH THESE TWO LINES AGAIN (I REALLY MEAN THAT)	*/
 		if ($level == 1) { $server_count = -1; };
+		if ($level == 1) { $upstream_count = -1; };
 		if (($level >  1) && ($name == "real_server")) { $server_count++ ; }; 
+		if (($level >  1) && ($name == "upstream")) { $upstream_count++ ; }; 
 //		if ($level >  1) { $server_count++ ; }; 
 
 		parse_tengine($name, $datum);
@@ -286,7 +275,7 @@ function parse_tengine($name, $datum) {
 			case "error_log"		:	$main['error_log']	= $datum;
 								break;
 
-			case "global_defs"			:	/* global definitition */
+			case "global_defs"		:	/* global definitition */
 									$service="global_defs";
 									break;
 			case "http"			:	/* http block definitition */
@@ -298,20 +287,9 @@ function parse_tengine($name, $datum) {
 			case "static_routes"			:	/* static ip definitition */
 									$service="static_routes";
 									break;
-//			case "local_address_group"			:/* local address group definitition */
-//									$service="local_address_group"; echo $service;
-									break;
 			case "virtual_server"				:	/* new virtual server definitition */
 									$service="lvs";
 									break;
-/*
-			case "vrrp_instance"				: $service="vrrp_instance"; echo $service;
-									break;
-			case "vrrp_sync_group"				: $service="vrrp_sync_group"; echo $service;
-									break;
-*/
-//			case "virt_server_group"			: $service="virt_server_group"; echo $service;
-//									break;
 			case "vrrp_script"				: $service="vrrp_script";
 									break;
 			case "monitor_links"			:	$prim['monitor_links']			= $datum;
@@ -346,16 +324,6 @@ function parse_tengine($name, $datum) {
 			case "notification_email"	: 	 $service = "global_defs";/* ignore here for global */ 
 								break;
 			case "notification_email_from"	:	if ($service == "global_defs") $global_defs['notification_email_from'] 	= $datum;
-								break;
-			case "smtp_server"		:	if ($service == "global_defs") $global_defs['smtp_server'] 	= $datum;
-								break;
-			case "smtp_connect_timeout"	:	if ($service == "global_defs") $global_defs['smtp_connect_timeout'] 	= $datum;
-								break;
-			case "router_id"		:	if ($service == "global_defs") $global_defs['router_id'] 	= $datum;
-								break;
-			case "vrrp_mcast_group4"		:	if ($service == "global_defs") $global_defs['vrrp_mcast_group4'] 	= $datum;
-								break;
-			case "vrrp_mcast_group6"		:	if ($service == "global_defs") $global_defs['vrrp_mcast_group6'] 	= $datum;
 								break;
 			case "enable_traps"		:	if ($service == "global_defs") $global_defs['enable_traps'] 	= 'yes';
 								break;
@@ -394,46 +362,6 @@ function parse_tengine($name, $datum) {
 							break;
 			case "state"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['state'] = $datum;
 						  	break;
-			case "interface"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['interface'] = $datum;
-							break;
-			case "dont_track_primary"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['dont_track_primary'] = $datum;
-							break;
-			case "mcast_src_ip"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['mcast_src_ip']	= $datum;
-							break;
-			case "lvs_sync_daemon_interface" : if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['lvs_sync_daemon_interface'] = $datum;
-								break;
-			case "garp_master_delay"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['garp_master_delay'] = $datum;
-							break;
-			case "virtual_router_id"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['virtual_router_id'] = $datum;
-							break;
-			case "priority"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['priority'] = $datum;
-							break;
-			case "advert_int"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['advert_int'] = $datum;
-							break;
-			case "nopreempt"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['nopreempt'] = $datum;
-							break;
-			case "preempt_delay"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['preempt_delay'] = $datum;
-							break;
-			case "debug"			: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['debug'] = $datum;
-							break;
-			case "notify_master"		: if ($service == "vrrp_instance") {
-								$vrrp_instance[$vrrp_instance_count]['notify_master'] = $datum;
-							  } else if ($service == "vrrp_sync_group") {
-							  	$vrrp_sync_group[$vrrp_sync_group_count]['notify_master'] = $datum;	
-							  }
-							break;
-			case "notify_backup"		: if ($service == "vrrp_instance") {
-								$vrrp_instance[$vrrp_instance_count]['notify_backup'] = $datum;
-							  } else if ($service == "vrrp_sync_group") {
-								$vrrp_sync_group[$vrrp_sync_group_count]['notify_backup'] = $datum;
-							  }
-							break;
-			case "notify"		: if ($service == "vrrp_instance") {
-								$vrrp_instance[$vrrp_instance_count]['notify'] = $datum;
-							  } else  if ($service == "vrrp_sync_group") {
-								$vrrp_sync_group[$vrrp_sync_group_count]['notify'] = $datum;
-							  }
-							break;
 			case "notify_fault"		: if ($service == "vrrp_instance") {
 								$vrrp_instance[$vrrp_instance_count]['notify_fault'] = $datum;
 							  } else  if ($service == "vrrp_sync_group") {
@@ -446,18 +374,6 @@ function parse_tengine($name, $datum) {
 								$vrrp_sync_group[$vrrp_sync_group_count]['smtp_alert'] = $datum;
 							  }
 							break;
-			case "authentication"		: 
-							break;
-			case "virtual_ipaddress"	: /* ignore here for vrrp_instance */ 
-							break;
-			case "virtual_ipaddress_excluded"	: /* ignore here for vrrp_instance */ 
-							break;
-			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
-							break;
-			case "track_interface"	: /* ignore here for vrrp_instance */ 
-							break;
-			case "track_script"	: /* ignore here for vrrp_instance */ 
-							break;
 
 			case "vrrp_script"	:	$vrrp_script_count++;
 							$service="vrrp_script";
@@ -467,10 +383,6 @@ function parse_tengine($name, $datum) {
 							break;
 
 			case "script"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['script'] = $datum;
-							break;
-			case "interval"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['interval'] = $datum;
-							break;
-			case "weight"		: if ($service == "vrrp_script") $vrrp_script[$vrrp_script_count]['weight'] = $datum;
 							break;
 
 			case "vrrp_sync_group"	:	$vrrp_sync_group_count++;
@@ -540,6 +452,8 @@ function parse_tengine($name, $datum) {
 			case "est_timeout"	:	if ($service == "lvs") $virt[$virt_count]['est_timeout']	= $datum;
 							break;							
 			case "real_server"		:	/* ignored (compatibility) */
+							break;
+			case "upstream"		:	/* ignored (compatibility) */
 							break;
 
 			case "virtual_server_group"	:	$virt_server_group_count++;
@@ -614,6 +528,14 @@ function parse_tengine($name, $datum) {
 							$ipport = explode(" ", $datum);
 							$serv[$virt_count][$server_count+1]['ip']		= $ipport[0];
 							$serv[$virt_count][$server_count+1]['port']		= $ipport[1];
+							break;
+			case "upstream"		:	if ($debug) { 
+							echo "<FONT COLOR=\"yellow\"><I>Asked for http block upstream (" 
+									. ($upstream_count+1) . 
+									")</I> - <B>\$upstream["
+									. ($upstream_count+1) .  
+									"]</B></FONT><BR>"; };
+							$upstream[$upstream_count+1]['name']		= $datum;
 							break;
 			case "notify_up"		:	$serv[$virt_count][$server_count+1]['notify_up']		= $datum;
 							break;
@@ -1115,6 +1037,7 @@ function print_arrays() {
 	/* debugging function only */
 	global $main;
 	global $http;
+	global $upstream;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1154,168 +1077,17 @@ function print_arrays() {
 
 	echo "<P><B>http</B>";
 	
-	echo "<P><B>Static_ipaddress</B>";
-        foreach ($static_ipaddress as $ip) {
-		if ($debug) { echo "$egap1" . $ip . "<BR>"; };
-	}
-
-	echo "<P><B>Static_routes</B><BR>";
-        foreach ($static_routes as $routes) {
-		if ($debug) { echo "$egap1" . $routes . "<BR>"; };
-	}
-
-
-	$loop1 = $loop2 =  0;
-
-	while ($local_address_group[++$loop1]['local_address_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
-	echo "<P><B>local_address_group</B>";
-		echo "<BR>local_address_group [$loop1] [local_address_group] = "	. $local_address_group[$loop1]['local_address_group'];
-
-		echo "<P><B>local_address_group ip </B>";
-		echo "<BR>" .  var_dump($local_address_group[$loop1]['ip']);
-
-                foreach ($local_address_group[$loop1]['ip'] as $ip) {
-				if ($debug) { echo "$egap1" . $ip. "<BR>"; };
-		}
-
-	}
-
-	$loop1 = $loop2 =  0;
-
-	while ($vrrp_instance[++$loop1]['vrrp_instance'] != "" ) { /* NOTE: must use *pre*incrempent not post */
-	echo "<P><B>vrrp_instance</B>";
-		echo "<BR>vrrp_instance [$loop1] [vrrp_instance] = "	. $vrrp_instance[$loop1]['vrrp_instance'];
-		echo "<BR>vrrp_instance [$loop1] [state] = "	. $vrrp_instance[$loop1]['state'];
-		echo "<BR>vrrp_instance [$loop1] [interface] = "	. $vrrp_instance[$loop1]['interface'];
-		echo "<BR>vrrp_instance [$loop1] [dont_track_primary] = "	. $vrrp_instance[$loop1]['dont_track_primary'];
-		echo "<BR>vrrp_instance [$loop1] [mcast_src_ip] = "	. $vrrp_instance[$loop1]['mcast_src_ip'];
-		echo "<BR>vrrp_instance [$loop1] [lvs_sync_daemon_interface] = "	. $vrrp_instance[$loop1]['lvs_sync_daemon_interface'];
-		echo "<BR>vrrp_instance [$loop1] [garp_master_delay] = "	. $vrrp_instance[$loop1]['garp_master_delay'];
-		echo "<BR>vrrp_instance [$loop1] [virtual_router_id] = "	. $vrrp_instance[$loop1]['virtual_router_id'];
-		echo "<BR>vrrp_instance [$loop1] [priority] = "	. $vrrp_instance[$loop1]['priority'];
-		echo "<BR>vrrp_instance [$loop1] [advert_int] = "	. $vrrp_instance[$loop1]['advert_int'];
-		echo "<BR>vrrp_instance [$loop1] [nopreempt] = "	. $vrrp_instance[$loop1]['nopreempt'];
-		echo "<BR>vrrp_instance [$loop1] [preempt_delay] = "	. $vrrp_instance[$loop1]['preempt_delay'];
-		echo "<BR>vrrp_instance [$loop1] [debug] = "	. $vrrp_instance[$loop1]['debug'];
-		echo "<BR>vrrp_instance [$loop1] [notify_master] = "	. $vrrp_instance[$loop1]['notify_master'];
-		echo "<BR>vrrp_instance [$loop1] [notify_backup] = "	. $vrrp_instance[$loop1]['notify_backup'];
-		echo "<BR>vrrp_instance [$loop1] [notify] = "	. $vrrp_instance[$loop1]['notify'];
-		echo "<BR>vrrp_instance [$loop1] [notify_fault] = "	. $vrrp_instance[$loop1]['notify_fault'];
-		echo "<BR>vrrp_instance [$loop1] [smtp_alert] = "	. $vrrp_instance[$loop1]['smtp_alert'];
-		echo "<BR>vrrp_instance [$loop1] [auth_type] = "	. $vrrp_instance[$loop1]['auth_type'];
-		echo "<BR>vrrp_instance [$loop1] [auth_pass] = "	. $vrrp_instance[$loop1]['auth_pass'];
-
-		echo "<P><B>vrrp_instance virtual_ipaddress</B>";
-                foreach ($vrrp_instance[$loop1]['virtual_ipaddress'] as $ip) {
-				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
-		}
-
-		echo "<P><B>vrrp_instance virtual_ipaddress_excluded</B>";
-		var_dump($vrrp_instance[$loop1]['virtual_ipaddress_excluded']);
-                foreach ($vrrp_instance[$loop1]['virtual_ipaddress_excluded'] as $ip) {
-				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
-		}
-
-		echo "<P><B>vrrp_instance virtual_routes</B>";
-                foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
-				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
-		}
-
-		echo "<P><B>vrrp_instance track_interface</B>";
-                foreach ($vrrp_instance[$loop1]['track_interface'] as $interface) {
-				if ($debug) { echo "$egap1" . $interface . "<BR>"; };
-		}
-
-		echo "<P><B>vrrp_instance track_script</B>";
-                foreach ($vrrp_instance[$loop1]['track_script'] as $script) {
-				if ($debug) { echo "$egap1" . $script . "<BR>"; };
-		}
-
-	}
-
-	$loop1 = $loop2 =  0;
-
-	while ($vrrp_script[++$loop1]['vrrp_script'] != "" ) { /* NOTE: must use *pre*incrempent not post */
-	echo "<P><B>vrrp_script</B>";
-		echo "<BR>vrrp_script [$loop1] [vrrp_script] = "	. $vrrp_script[$loop1]['vrrp_script'];
-		echo "<BR>vrrp_script [$loop1] [script] = "	. $vrrp_script[$loop1]['script'];
-		echo "<BR>vrrp_script [$loop1] [interval] = "	. $vrrp_script[$loop1]['interval'];
-		echo "<BR>vrrp_script [$loop1] [weight] = "	. $vrrp_script[$loop1]['weight'];
-	}
-
-	$loop1 = $loop2 =  0;
-
-	while ($vrrp_sync_group[++$loop1]['vrrp_sync_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
-	echo "<P><B>vrrp_sync_group</B>";
-		echo "<BR>vrrp_sync_group [$loop1] [vrrp_sync_group] = "	. $vrrp_sync_group[$loop1]['vrrp_sync_group'];
-		echo "<BR>vrrp_sync_group [$loop1] [notify_master] = "	. $vrrp_sync_group[$loop1]['notify_master'];
-		echo "<BR>vrrp_sync_group [$loop1] [notify_backup] = "	. $vrrp_sync_group[$loop1]['notify_backup'];
-		echo "<BR>vrrp_sync_group [$loop1] [notify] = "	. $vrrp_sync_group[$loop1]['notify'];
-		echo "<BR>vrrp_sync_group [$loop1] [notify_fault] = "	. $vrrp_sync_group[$loop1]['notify_fault'];
-		echo "<BR>vrrp_sync_group [$loop1] [smtp_alert] = "	. $vrrp_sync_group[$loop1]['smtp_alert'];
-
-
-		echo "<P><B>vrrp_sync_group group</B>";
-		echo "<BR>" .  var_dump($vrrp_sync_group[$loop1]['group']);
-
-                foreach ($vrrp_sync_group[$loop1]['group'] as $group) {
-				if ($debug) { echo "$egap1" . $group . "<BR>"; };
-		}
-
-	}
-
-	$loop1 = $loop2 =  0;
-
-	while ($virt_server_group[++$loop1]['virt_server_group'] != "" ) { /* NOTE: must use *pre*incrempent not post */
-	echo "<P><B>virt_server_group</B>";
-		echo "<BR>virt_server_group [$loop1] [virt_server_group] = "	. $virt_server_group[$loop1]['virt_server_group'];
-
-		echo "<P><B>virt_server_group ip port range</B>";
-		echo "<BR>" .  var_dump($virt_server_group[$loop1]['iprange']);
-
-                foreach ($virt_server_group[$loop1]['iprange'] as $iprange) {
-				if ($debug) { echo "$egap1" . $iprange. "<BR>"; };
-		}
-
-		echo "<P><B>virt_server_group fwmark</B>";
-		echo "<BR>" .  var_dump($virt_server_group[$loop1]['fwmark']);
-
-                foreach ($virt_server_group[$loop1]['fwmark'] as $fwmark) {
-				if ($debug) { echo "$egap1" . $fwmark. "<BR>"; };
-		}
-
-	}
-	
-	
-	
 	$loop1 = $loop2 = 0;
+
+	echo "<P><B>upstream</B>";
+        echo "<BR>" .  var_dump($upstream);
+
+        while ($upstream[++$loop1]['name'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+                echo "<BR>upstream [$loop1] [name] = "        . $upstream[$loop1]['name'];
+
+        }
+
 	
-while ($virt[++$loop1]['ip'] != "" ) { /* NOTE: must use *pre*increment not post */
-		echo "<P><B>Virtual</B>";
-		echo "<BR>Virtual [$loop1] [fwmark] "	. $virt[$loop1]['fwmark'];
-		echo "<BR>Virtual [$loop1] [group] "	. $virt[$loop1]['group'];
-		echo "<BR>Virtual [$loop1] [ip] "	. $virt[$loop1]['ip'];
-		echo "<BR>Virtual [$loop1] [port] "	. $virt[$loop1]['port'];
-	//	echo "<BR>Virtual [$loop1] [active] = "		. $virt[$loop1]['active'];
-		echo "<BR>Virtual [$loop1] [delay_loop] "	. $virt[$loop1]['delay_loop'];
-		echo "<BR>Virtual [$loop1] [lb_algo] "		. $virt[$loop1]['lb_algo'];
-		echo "<BR>Virtual [$loop1] [lb_kind] "		. $virt[$loop1]['lb_kind'];
-		echo "<BR>Virtual [$loop1] [syn_proxy] "		. $virt[$loop1]['syn_proxy'];
-		echo "<BR>Virtual [$loop1] [laddr_group_name] "		. $virt[$loop1]['laddr_group_name'];
-		echo "<BR>Virtual [$loop1] [persistence_timeout] "	. $virt[$loop1]['persistence_timeout'];
-		echo "<BR>Virtual [$loop1] [persistence_granularity] "	. $virt[$loop1]['persistence_granularity'];
-		echo "<BR>Virtual [$loop1] [ha_suspend] "		. $virt[$loop1]['ha_suspend'];
-		echo "<BR>Virtual [$loop1] [protocol] "	. $virt[$loop1]['protocol'];
-		echo "<BR>Virtual [$loop1] [virtualhost] "	. $virt[$loop1]['virtualhost'];
-		echo "<BR>Virtual [$loop1] [quorum] "		. $virt[$loop1]['quorum'];
-		echo "<BR>Virtual [$loop1] [hysteresis] "		. $virt[$loop1]['hysteresis'];
-		echo "<BR>Virtual [$loop1] [quorum_up] "		. $virt[$loop1]['quorum_up'];
-		echo "<BR>Virtual [$loop1] [quorum_down] "	. $virt[$loop1]['quorum_down'];
-		echo "<BR>Virtual [$loop1] [est_timeout] "	. $virt[$loop1]['est_timeout'];
-		echo "<BR>Virtual [$loop1] [sorry_server] "	. $virt[$loop1]['sorry_server'];
-		
-		echo "<BR>";
-	}
 
 	$loop1 = 1; /* reuse loop1 */
 	$loop2 = 1;
@@ -1373,6 +1145,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $ngx_fd;
 	global $main;
 	global $http;
+	global $upstream;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1439,16 +1212,23 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		if ($debug) { echo "serial_no = 1<BR>"; };
 	}
 
+	//hard code the worker processes and  cpu affinity here
+	fputs ($ngx_fd, "worker_processes "		. '4' . ";\n", 80);
+	if ($debug) { echo "worker_processes "		. '4' . ";<BR>"; };		
+	fputs ($ngx_fd, "worker_priority "		. '-1' . ";\n", 80);
+	if ($debug) { echo "worker_priority "		. '-1' . ";<BR>"; };		
+	fputs ($ngx_fd, "worker_cpu_affinity "		. '0001 0010 0100 1000' . ";\n", 80);
+	if ($debug) { echo "worker_cpu_affinity "	. '0001 0010 0100 1000' . ";<BR>"; };		
+/*
 	if (isset($main['worker_processes'])
               && $main['worker_processes'] != "") {
-		fputs ($ngx_fd, "worker_processes "		. $main['worker_processes'] . ";\n", 80);
-		if ($debug) { echo "worker_processes "	. $main['worker_processes'] . ";<BR>"; };		
+		fputs ($ngx_fd, "worker_processes "		. '4' . ";\n", 80);
+		if ($debug) { echo "worker_processes "		. '4' . ";<BR>"; };		
+		fputs ($ngx_fd, "worker_cpu_affinity "		. '0001 0010 0100 1000' . ";\n", 80);
+		if ($debug) { echo "worker_cpu_affinity "	. '0001 0010 0100 1000' . ";<BR>"; };		
 	}
-	if (isset($main['worker_cpu_affinity'])
-              && $main['worker_cpu_affinity'] != "") {
-		fputs ($ngx_fd, "worker_cpu_affinity "		. $main['worker_cpu_affinity'] . ";\n", 80);
-		if ($debug) { echo "worker_cpu_affinity "	. $main['worker_cpu_affinity'] . ";<BR>"; };		
-	}
+*/
+
 	if (isset($main['error_log'])
               && $main['error_log'] != "") {
 		fputs ($ngx_fd, "error_log "		. $main['error_log'] . ";\n", 80);
@@ -1464,560 +1244,33 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		fputs ($ngx_fd, "http "				. $http['http'] 	. " {\n", 80);
 		if ($debug) { echo "http "			. $http['http'] 	. " {<BR>"; };
 
+		while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "") {
+
+			if (($loop1 == $delete_item) && ($level == "2") && ($delete_service == "upstream")) { 
+				$loop1++;
+			} else {
+
+				
+				if (isset($upstream[$loop1]['name']) &&
+		    			$upstream[$loop1]['name'] != "") { 
+						fputs ($ngx_fd, "$gap1 upstream " . $upstream[$loop1]['name']	.  " {\n", 80);
+						if ($debug) { echo "$egap1 upstream " . $upstream[$loop1]['name'] . " {<BR>"; };
+				}
+			
+				$loop1++;
+				fputs ($ngx_fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+		} //end upstream loop
+
 		fputs ($ngx_fd,"}\n", 80);
 		if ($debug) { echo "}<BR>"; };
 	}
-	
-	if (isset($global_defs)) {
-		fputs ($ngx_fd, "global_defs "				. $global_defs['global_defs'] 	. " {\n", 80);
-		if ($debug) { echo "global_defs "			. $global_defs['global_defs'] 	. " {<BR>"; };
-	}
 
-       if (isset($global_defs['notification_email'])
-              && $global_defs['notification_email'] != ""
-              && count($global_defs['notification_email']) > 0) {
-              	fputs ($ngx_fd, "$gap1 notification_email "            . " {\n", 80);
-              	if ($debug) { echo "$egap1 notification_email "    . " {<BR>"; };
-
-              	foreach ($global_defs['notification_email'] as $email) {
-
-                	if (($loop19 == $delete_item) && ($level == "2") && ($delete_service == "global_notification_email")) {
-                		$loop19++;
-                	}
-                	else {
-                		fputs ($ngx_fd, "$gap2 "            . $email    . "\n", 80);
-                		if ($debug) { echo "$egap2 "    . $email    . "<BR>"; };
-               			$loop19++;
-               		}
-               }
-
-               fputs ($ngx_fd,"$gap1 }\n", 80);
-               if ($debug) { echo "$egap1 }<BR>"; }
-        }
-
-	if ($global_defs['notification_email_from'] != ""){
-		fputs ($ngx_fd, "$gap1 notification_email_from "			. $global_defs['notification_email_from']	. "\n", 80);
-		if ($debug) { echo "$egap1 notification_email_from "		. $global_defs['notification_email_from']	. "<BR>"; };
-	}
-	if ($global_defs['smtp_server'] != ""){
-		fputs ($ngx_fd, "$gap1 smtp_server "				. $global_defs['smtp_server']		. "\n", 80);
-		if ($debug) { echo "$egap1 smtp_server "			. $global_defs['smtp_server']		. "<BR>"; };
-	}
-	if ($global_defs['smtp_connect_timeout'] != ""){
-		fputs ($ngx_fd, "$gap1 smtp_connect_timeout "			. $global_defs['smtp_connect_timeout']	. "\n", 80);
-		if ($debug) { echo "$egap1 smtp_connect_timeout "		. $global_defs['smtp_connect_timeout']	. "<BR>"; };
-	}
-	if ($global_defs['router_id'] != ""){
-		fputs ($ngx_fd, "$gap1 router_id "				. $global_defs['router_id']		. "\n", 80);
-		if ($debug) { echo "$egap1 router_id "				. $global_defs['router_id']		. "<BR>"; };
-	}
-	if ($global_defs['vrrp_mcast_group4'] != ""){
-		fputs ($ngx_fd, "$gap1 vrrp_mcast_group4 "				. $global_defs['vrrp_mcast_group4']		. "\n", 80);
-		if ($debug) { echo "$egap1 vrrp_mcast_group4 "				. $global_defs['vrrp_mcast_group4']		. "<BR>"; };
-	}
-	if ($global_defs['vrrp_mcast_group6'] != ""){
-		fputs ($ngx_fd, "$gap1 vrrp_mcast_group6 "				. $global_defs['vrrp_mcast_group6']		. "\n", 80);
-		if ($debug) { echo "$egap1 vrrp_mcast_group6 "				. $global_defs['vrrp_mcast_group6']		. "<BR>"; };
-	}
-	if (isset($global_defs['enable_traps']) &&
-		($global_defs['enable_traps'] == 'yes')){
-		fputs ($ngx_fd, "$gap1 enable_traps" 				. "\n", 80);
-		if ($debug) { echo "$egap1 enable_traps "			. "<BR>"; };
-	}
 
 //	fputs ($ngx_fd,"}\n", 80);
 //	if ($debug) { echo "}<BR>"; };
 
-	if ($debug) { echo "<P><B>Static IPADDRESS</B><BR>"; };
-
-	if (isset($static_ipaddress) && count($static_ipaddress) > 0) {
-		fputs ($ngx_fd, "static_ipaddress "				. " {\n", 80);
-		if ($debug) { echo "static_ipaddress "			. " {<BR>"; };
-		foreach ($static_ipaddress as $ip) {
-			if (($loop5 == $delete_item) && ($level == "1") && ($delete_service == "static_ipaddress")) {
-				$loop5++;
-                        } else {
-				fputs ($ngx_fd, "$gap1 "            . $ip   . "\n", 80);
-				if ($debug) { echo "$egap1 "    . $ip   . "<BR>"; };
-				$loop5++;
-			}
-
-		}
-		fputs ($ngx_fd,"}\n", 80);
-		if ($debug) { echo "}<BR>"; }
-	}
-
-
-	if ($debug) { echo "<P><B>Static routes</B><BR>"; };
-
-	if (isset($static_routes) && count($static_routes) > 0) {
-		fputs ($ngx_fd, "static_routes "				. " {\n", 80);
-		if ($debug) { echo "static_routes "			. " {<BR>"; };
-		foreach ($static_routes as $route) {
-			if (($loop18 == $delete_item) && ($level == "1") && ($delete_service == "static_routes")) {
-				$loop18++;
-                        } else {
-				fputs ($ngx_fd, "$gap1 "            . $route   . "\n", 80);
-				if ($debug) { echo "$egap1 "    . $route   . "<BR>"; };
-				$loop18++;
-			}
-
-		}
-		fputs ($ngx_fd,"}\n", 80);
-		if ($debug) { echo "}<BR>"; }
-	}
-
-	while ( $local_address_group[$loop16]['local_address_group'] != "" ) {
-		if ((($loop16 == $delete_item ) && ($level == "1")) && ($delete_service == "local_address_group")) {  $loop16++; $loop17 = 0; } else {
-			if ($debug) { echo "<P><B>local_address_group</B><BR>"; };	
-
-			if (isset($local_address_group[$loop16]['local_address_group']) &&
-			    $local_address_group[$loop16]['local_address_group'] != "") {
-				fputs ($ngx_fd, "local_address_group "				. $local_address_group[$loop16]['local_address_group']	. " {\n", 80);
-				if ($debug) { echo "local_address_group "			. $local_address_group[$loop16]['local_address_group']	. " {<BR>"; };
-			}
-
-			if (isset($local_address_group[$loop16]['ip'])
-			    && $local_address_group[$loop16]['ip'] != ""
-			    && count($local_address_group[$loop16]['ip']) > 0) {
-
-		                foreach ($local_address_group[$loop16]['ip'] as $ip) {
-
-                                	if (($loop17 == $delete_item) && ($loop16 == $delete_virt) && ($level == "1") && ($delete_service == "local_address_group_ip")) {
-                                        	$loop17++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap1 "		. $ip	. "\n", 80);
-						if ($debug) { echo "$egap1 "	. $ip	. "<BR>"; };
-						$loop17++;
-					}
-                		}
-
-			}
-
-
-			fputs ($ngx_fd,"}\n", 80);
-			if ($debug) { echo "}<BR>"; }
-
-			$loop16++;
-			$loop17 = 0;
-			
-		}
-	}
-	
-	
-
-	while ( $vrrp_instance[$loop7]['vrrp_instance'] != "" ) {
-		if ((($loop7 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_instance")) {  $loop7++; $loop8 = 0; $loop9 = 0; $loop10 = 0; $loop20 = 0; $loop22 = 0;} else {
-			if ($debug) { echo "<P><B>vrrp_instance</B><BR>"; };	
-
-			if (isset($vrrp_instance[$loop7]['vrrp_instance']) &&
-			    $vrrp_instance[$loop7]['vrrp_instance'] != "") {
-				fputs ($ngx_fd, "vrrp_instance "				. $vrrp_instance[$loop7]['vrrp_instance']	. " {\n", 80);
-				if ($debug) { echo "vrrp_instance "			. $vrrp_instance[$loop7]['vrrp_instance']	. " {<BR>"; };
-			}
-
-			if (isset($vrrp_instance[$loop7]['state']) &&
-			    $vrrp_instance[$loop7]['state'] != "") {
-				fputs ($ngx_fd, "$gap1 state "			. $vrrp_instance[$loop7]['state']	. "\n", 80);
-				if ($debug) { echo "$egap1 state "		. $vrrp_instance[$loop7]['state']	. "<BR>"; };
-			}
-			
-			if (isset($vrrp_instance[$loop7]['interface']) &&
-			    $vrrp_instance[$loop7]['interface'] != "") {
-				fputs ($ngx_fd, "$gap1 interface "		. $vrrp_instance[$loop7]['interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 interface "	. $vrrp_instance[$loop7]['interface']	. "<BR>"; };
-			}
-
-			if (isset($vrrp_instance[$loop7]['dont_track_primary']) &&
-			    $vrrp_instance[$loop7]['dont_track_primary'] != "") {
-				fputs ($ngx_fd, "$gap1 dont_track_primary "		. $vrrp_instance[$loop7]['dont_track_primary']	. "\n", 80);
-				if ($debug) { echo "$egap1 dont_track_primary "	. $vrrp_instance[$loop7]['dont_track_primary']	. "<BR>"; };
-			}
-
-			if (isset($vrrp_instance[$loop7]['mcast_src_ip']) &&
-			    $vrrp_instance[$loop7]['mcast_src_ip'] != "") {
-				fputs ($ngx_fd, "$gap1 mcast_src_ip "		. $vrrp_instance[$loop7]['mcast_src_ip']	. "\n", 80);
-				if ($debug) { echo "$egap1 mcast_src_ip "	. $vrrp_instance[$loop7]['mcast_src_ip']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['lvs_sync_daemon_interface']) &&
-			    $vrrp_instance[$loop7]['lvs_sync_daemon_interface'] != "") {
-				fputs ($ngx_fd, "$gap1 lvs_sync_daemon_interface "		. $vrrp_instance[$loop7]['lvs_sync_daemon_interface']	. "\n", 80);
-				if ($debug) { echo "$egap1 lvs_sync_daemon_interface "	. $vrrp_instance[$loop7]['lvs_sync_daemon_interface']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['garp_master_delay']) &&
-			    $vrrp_instance[$loop7]['garp_master_delay'] != "") {
-				fputs ($ngx_fd, "$gap1 garp_master_delay "		. $vrrp_instance[$loop7]['garp_master_delay']	. "\n", 80);
-				if ($debug) { echo "$egap1 garp_master_delay "	. $vrrp_instance[$loop7]['garp_master_delay']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['virtual_router_id']) &&
-			    $vrrp_instance[$loop7]['virtual_router_id'] != "") {
-				fputs ($ngx_fd, "$gap1 virtual_router_id "		. $vrrp_instance[$loop7]['virtual_router_id']	. "\n", 80);
-				if ($debug) { echo "$egap1 virtual_router_id "	. $vrrp_instance[$loop7]['virtual_router_id']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['priority']) &&
-			    $vrrp_instance[$loop7]['priority'] != "") {
-				fputs ($ngx_fd, "$gap1 priority "		. $vrrp_instance[$loop7]['priority']	. "\n", 80);
-				if ($debug) { echo "$egap1 priority "	. $vrrp_instance[$loop7]['priority']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['advert_int']) &&
-			    $vrrp_instance[$loop7]['advert_int'] != "") {
-				fputs ($ngx_fd, "$gap1 advert_int "		. $vrrp_instance[$loop7]['advert_int']	. "\n", 80);
-				if ($debug) { echo "$egap1 advert_int "	. $vrrp_instance[$loop7]['advert_int']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['nopreempt']) &&
-			    $vrrp_instance[$loop7]['nopreempt'] != "") {
-				fputs ($ngx_fd, "$gap1 nopreempt "		. $vrrp_instance[$loop7]['nopreempt']	. "\n", 80);
-				if ($debug) { echo "$egap1 nopreempt "	. $vrrp_instance[$loop7]['nopreempt']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['preempt_delay']) &&
-			    $vrrp_instance[$loop7]['preempt_delay'] != "") {
-				fputs ($ngx_fd, "$gap1 preempt_delay "		. $vrrp_instance[$loop7]['preempt_delay']	. "\n", 80);
-				if ($debug) { echo "$egap1 preempt_delay "	. $vrrp_instance[$loop7]['preempt_delay']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['debug']) &&
-			    $vrrp_instance[$loop7]['debug'] != "") {
-				fputs ($ngx_fd, "$gap1 debug "		. $vrrp_instance[$loop7]['debug']	. "\n", 80);
-				if ($debug) { echo "$egap1 debug "	. $vrrp_instance[$loop7]['debug']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['notify_master']) &&
-			    $vrrp_instance[$loop7]['notify_master'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_master "		. $vrrp_instance[$loop7]['notify_master']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_master "	. $vrrp_instance[$loop7]['notify_master']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['notify_backup']) &&
-			    $vrrp_instance[$loop7]['notify_backup'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_backup "		. $vrrp_instance[$loop7]['notify_backup']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_instance[$loop7]['notify_backup']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['notify_fault']) &&
-			    $vrrp_instance[$loop7]['notify_fault'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_fault "		. $vrrp_instance[$loop7]['notify_fault']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_fault "	. $vrrp_instance[$loop7]['notify_fault']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['notify']) &&
-			    $vrrp_instance[$loop7]['notify'] != "") {
-				fputs ($ngx_fd, "$gap1 notify "		. $vrrp_instance[$loop7]['notify']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify "	. $vrrp_instance[$loop7]['notify']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['smtp_alert']) &&
-			    $vrrp_instance[$loop7]['smtp_alert'] != "") {
-				fputs ($ngx_fd, "$gap1 smtp_alert "		. $vrrp_instance[$loop7]['smtp_alert']	. "\n", 80);
-				if ($debug) { echo "$egap1 smtp_alert "	. $vrrp_instance[$loop7]['smtp_alert']	. "<BR>"; };
-			}
-			if (isset($vrrp_instance[$loop7]['authentication'])) {
-
-				fputs ($ngx_fd, "$gap1 authentication "		. " {\n", 80);
-				if ($debug) { echo "$egap1 authentication "	. " {<BR>"; };
-
-				if (isset($vrrp_instance[$loop7]['auth_type']) &&
-			    		$vrrp_instance[$loop7]['auth_type'] != "") {
-					fputs ($ngx_fd, "$gap2 auth_type "		. $vrrp_instance[$loop7]['auth_type']	. "\n", 80);
-					if ($debug) { echo "$egap2 auth_type "	. $vrrp_instance[$loop7]['auth_type']	. "<BR>"; };
-				}
-				if (isset($vrrp_instance[$loop7]['auth_pass']) &&
-			    		$vrrp_instance[$loop7]['auth_pass'] != "") {
-					fputs ($ngx_fd, "$gap2 auth_pass "		. $vrrp_instance[$loop7]['auth_pass']	. "\n", 80);
-					if ($debug) { echo "$egap2 auth_pass "	. $vrrp_instance[$loop7]['auth_pass']	. "<BR>"; };
-				}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-
-			}
-
-			if (isset($vrrp_instance[$loop7]['virtual_ipaddress']) &&
-			    $vrrp_instance[$loop7]['virtual_ipaddress'] != ""  &&
-			    count($vrrp_instance[$loop7]['virtual_ipaddress']) > 0) {
-				fputs ($ngx_fd, "$gap1 virtual_ipaddress "		. " {\n", 80);
-				if ($debug) { echo "$egap1 virtual_ipaddress "	. " {<BR>"; };
-
-		                foreach ($vrrp_instance[$loop7]['virtual_ipaddress'] as $ip) {
-
-                                	if (($loop8 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_ipaddress")) {
-                                        	$loop8++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $ip	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
-						$loop8++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			if (isset($vrrp_instance[$loop7]['virtual_ipaddress_excluded']) &&
-			    $vrrp_instance[$loop7]['virtual_ipaddress_excluded'] != ""  &&
-			    count($vrrp_instance[$loop7]['virtual_ipaddress_excluded']) > 0) {
-				fputs ($ngx_fd, "$gap1 virtual_ipaddress_excluded "		. " {\n", 80);
-				if ($debug) { echo "$egap1 virtual_ipaddress_excluded "	. " {<BR>"; };
-
-		                foreach ($vrrp_instance[$loop7]['virtual_ipaddress_excluded'] as $ip) {
-
-                                	if (($loop20 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_ipaddress_excluded")) {
-                                        	$loop20++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $ip	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
-						$loop20++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			if (isset($vrrp_instance[$loop7]['virtual_routes']) &&
-			    $vrrp_instance[$loop7]['virtual_routes'] != ""  &&
-			    count($vrrp_instance[$loop7]['virtual_routes']) > 0) {
-				fputs ($ngx_fd, "$gap1 virtual_routes "		. " {\n", 80);
-				if ($debug) { echo "$egap1 virtual_routes "	. " {<BR>"; };
-
-		                foreach ($vrrp_instance[$loop7]['virtual_routes'] as $ip) {
-
-                                	if (($loop9 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_virtual_routes")) {
-                                        	$loop9++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $ip	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
-						$loop9++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			if (isset($vrrp_instance[$loop7]['track_interface'])
-			    && $vrrp_instance[$loop7]['track_interface'] != ""
-			    && count($vrrp_instance[$loop7]['track_interface']) > 0) {
-				fputs ($ngx_fd, "$gap1 track_interface "		. " {\n", 80);
-				if ($debug) { echo "$egap1 track_interface "	. " {<BR>"; };
-
-		                foreach ($vrrp_instance[$loop7]['track_interface'] as $interface) {
-
-                                	if (($loop10 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_track_interface")) {
-                                        	$loop10++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $interface	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $interface	. "<BR>"; };
-						$loop10++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			if (isset($vrrp_instance[$loop7]['track_script'])
-			    && $vrrp_instance[$loop7]['track_script'] != ""
-			    && count($vrrp_instance[$loop7]['track_script']) > 0) {
-				fputs ($ngx_fd, "$gap1 track_script "		. " {\n", 80);
-				if ($debug) { echo "$egap1 track_script "	. " {<BR>"; };
-
-		                foreach ($vrrp_instance[$loop7]['track_script'] as $script) {
-
-                                	if (($loop22 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_track_script")) {
-                                        	$loop22++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $script	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $script	. "<BR>"; };
-						$loop22++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			fputs ($ngx_fd,"}\n", 80);
-			if ($debug) { echo "}<BR>"; }
-
-			$loop7++;
-			$loop8 = 0;
-			$loop9 = 0;
-			$loop10 = 0;
-			$loop20 = 0;
-			$loop22 = 0;
-			
-		}
-	}
-
-	while ( $vrrp_script[$loop21]['vrrp_script'] != "" ) {
-		if ((($loop21 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_script")) {  $loop21++;} else {
-			if ($debug) { echo "<P><B>vrrp_script</B><BR>"; };	
-
-			if (isset($vrrp_script[$loop21]['vrrp_script']) &&
-			    $vrrp_script[$loop21]['vrrp_script'] != "") {
-				fputs ($ngx_fd, "vrrp_script "				. $vrrp_script[$loop21]['vrrp_script']	. " {\n", 80);
-				if ($debug) { echo "vrrp_script "			. $vrrp_script[$loop21]['vrrp_script']	. " {<BR>"; };
-			}
-
-			if (isset($vrrp_script[$loop21]['script']) &&
-			    $vrrp_script[$loop21]['script'] != "") {
-				fputs ($ngx_fd, "$gap1 script "		. $vrrp_script[$loop21]['script']	. "\n", 80);
-				if ($debug) { echo "$egap1 script "	. $vrrp_script[$loop21]['script']	. "<BR>"; };
-			}
-			if (isset($vrrp_script[$loop21]['interval']) &&
-			    $vrrp_script[$loop21]['interval'] != "") {
-				fputs ($ngx_fd, "$gap1 interval "		. $vrrp_script[$loop21]['interval']	. "\n", 80);
-				if ($debug) { echo "$egap1 interval "	. $vrrp_script[$loop21]['interval']	. "<BR>"; };
-			}
-
-			if (isset($vrrp_script[$loop21]['weight']) &&
-			    $vrrp_script[$loop21]['weight'] != "") {
-				fputs ($ngx_fd, "$gap1 weight "		. $vrrp_script[$loop21]['weight']	. "\n", 80);
-				if ($debug) { echo "$egap1 weight "	. $vrrp_script[$loop21]['weight']	. "<BR>"; };
-			}
-
-			fputs ($ngx_fd,"}\n", 80);
-			if ($debug) { echo "}<BR>"; }
-
-			$loop21++;
-			
-		}
-	}
-
-
-	while ( $vrrp_sync_group[$loop11]['vrrp_sync_group'] != "" ) {
-		if ((($loop11 == $delete_item ) && ($level == "1")) && ($delete_service == "vrrp_sync_group")) {  $loop11++; $loop12 = 0;} else {
-			if ($debug) { echo "<P><B>vrrp_sync_group</B><BR>"; };	
-
-			if (isset($vrrp_sync_group[$loop11]['vrrp_sync_group']) &&
-			    $vrrp_sync_group[$loop11]['vrrp_sync_group'] != "") {
-				fputs ($ngx_fd, "vrrp_sync_group "				. $vrrp_sync_group[$loop11]['vrrp_sync_group']	. " {\n", 80);
-				if ($debug) { echo "vrrp_sync_group "			. $vrrp_sync_group[$loop11]['vrrp_sync_group']	. " {<BR>"; };
-			}
-
-			if (isset($vrrp_sync_group[$loop11]['notify_master']) &&
-			    $vrrp_sync_group[$loop11]['notify_master'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_master "		. $vrrp_sync_group[$loop11]['notify_master']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_master "	. $vrrp_sync_group[$loop11]['notify_master']	. "<BR>"; };
-			}
-			if (isset($vrrp_sync_group[$loop11]['notify_backup']) &&
-			    $vrrp_sync_group[$loop11]['notify_backup'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_backup "		. $vrrp_sync_group[$loop11]['notify_backup']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_backup "	. $vrrp_sync_group[$loop11]['notify_backup']	. "<BR>"; };
-			}
-			if (isset($vrrp_sync_group[$loop11]['notify_fault']) &&
-			    $vrrp_sync_group[$loop11]['notify_fault'] != "") {
-				fputs ($ngx_fd, "$gap1 notify_fault "		. $vrrp_sync_group[$loop11]['notify_fault']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify_fault "	. $vrrp_sync_group[$loop11]['notify_fault']	. "<BR>"; };
-			}
-			if (isset($vrrp_sync_group[$loop11]['notify']) &&
-			    $vrrp_sync_group[$loop11]['notify'] != "") {
-				fputs ($ngx_fd, "$gap1 notify "		. $vrrp_sync_group[$loop11]['notify']	. "\n", 80);
-				if ($debug) { echo "$egap1 notify "	. $vrrp_sync_group[$loop11]['notify']	. "<BR>"; };
-			}
-			if (isset($vrrp_sync_group[$loop11]['smtp_alert']) &&
-			    $vrrp_sync_group[$loop11]['smtp_alert'] != "") {
-				fputs ($ngx_fd, "$gap1 smtp_alert "		. $vrrp_sync_group[$loop11]['smtp_alert']	. "\n", 80);
-				if ($debug) { echo "$egap1 smtp_alert "	. $vrrp_sync_group[$loop11]['smtp_alert']	. "<BR>"; };
-			}
-
-
-			if (isset($vrrp_sync_group[$loop11]['group'])
-			    && $vrrp_sync_group[$loop11]['group'] != ""
-			    && count($vrrp_sync_group[$loop11]['group']) > 0) {
-				fputs ($ngx_fd, "$gap1 group "		. " {\n", 80);
-				if ($debug) { echo "$egap1 group "	. " {<BR>"; };
-
-		                foreach ($vrrp_sync_group[$loop11]['group'] as $group) {
-
-                                	if (($loop12 == $delete_item) && ($loop11 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_sync_group_group")) {
-                                        	$loop12++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap2 "		. $group	. "\n", 80);
-						if ($debug) { echo "$egap2 "	. $group	. "<BR>"; };
-						$loop12++;
-					}
-                		}
-
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
-			}
-
-			fputs ($ngx_fd,"}\n", 80);
-			if ($debug) { echo "}<BR>"; }
-
-			$loop11++;
-			$loop12 = 0;
-			
-		}
-	}
-
-	while ( $virt_server_group[$loop13]['virt_server_group'] != "" ) {
-		if ((($loop13 == $delete_item ) && ($level == "1")) && ($delete_service == "virt_server_group")) {  $loop13++; $loop14 = 0; $loop15 = 0;} else {
-			if ($debug) { echo "<P><B>virt_server_group</B><BR>"; };	
-
-			if (isset($virt_server_group[$loop13]['virt_server_group']) &&
-			    $virt_server_group[$loop13]['virt_server_group'] != "") {
-				fputs ($ngx_fd, "virtual_server_group "				. $virt_server_group[$loop13]['virt_server_group']	. " {\n", 80);
-				if ($debug) { echo "virtual_server_group "			. $virt_server_group[$loop13]['virt_server_group']	. " {<BR>"; };
-			}
-
-			if (isset($virt_server_group[$loop13]['iprange'])
-			    && $virt_server_group[$loop13]['iprange'] != ""
-			    && count($virt_server_group[$loop13]['iprange']) > 0) {
-
-		                foreach ($virt_server_group[$loop13]['iprange'] as $iprange) {
-
-                                	if (($loop14 == $delete_item) && ($loop13 == $delete_virt) && ($level == "1") && ($delete_service == "virt_server_group_iprange")) {
-                                        	$loop14++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap1 "		. $iprange	. "\n", 80);
-						if ($debug) { echo "$egap1 "	. $iprange	. "<BR>"; };
-						$loop14++;
-					}
-                		}
-
-			}
-
-			if (isset($virt_server_group[$loop13]['fwmark'])
-			    && $virt_server_group[$loop13]['fwmark'] != ""
-			    && count($virt_server_group[$loop13]['fwmark']) > 0) {
-
-		                foreach ($virt_server_group[$loop13]['fwmark'] as $fwmark) {
-
-                                	if (($loop15 == $delete_item) && ($loop13 == $delete_virt) && ($level == "1") && ($delete_service == "virt_server_group_fwmark")) {
-                                        	$loop15++;
-
-                        		}
-                        		else {
-						fputs ($ngx_fd, "$gap1 "		. $fwmark	. "\n", 80);
-						if ($debug) { echo "$egap1 "	. $fwmark	. "<BR>"; };
-						$loop15++;
-					}
-                		}
-
-			}
-
-			fputs ($ngx_fd,"}\n", 80);
-			if ($debug) { echo "}<BR>"; }
-
-			$loop13++;
-			$loop14 = 0;
-			$loop15 = 0;
-			
-		}
-	}
-	
 	
 	while ( (isset($virt[$loop3]['ip']) or isset($virt[$loop3]['group']) or isset($virt[$loop3]['fwmark']) ) && 
 		( $virt[$loop3]['ip'] != "" or $virt[$loop3]['group'] != "" or $virt[$loop3]['fwmark'] != "" ) ) { 
@@ -2033,110 +1286,6 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($ngx_fd, "virtual_server "	. $virt[$loop3]['ip'] . " " . $virt[$loop3]['port'] . " {\n", 80);
 				if ($debug) { echo "virtual_server " . $virt[$loop3]['ip'] . " " . $virt[$loop3]['port'] . " {<BR>"; };
 			} 
-			else if (isset($virt[$loop3]['group']) && $virt[$loop3]['group'] != "" ) {
-				fputs ($ngx_fd, "virtual_server "	. "group" . " " . $virt[$loop3]['group'] . " {\n", 80);
-				if ($debug) { echo "virtual_server " . "group" . " " . $virt[$loop3]['group'] . " {<BR>"; };
-			} 
-			else if (isset($virt[$loop3]['fwmark']) && $virt[$loop3]['fwmark'] != "" ) {
-				fputs ($ngx_fd, "virtual_server "	. "fwmark" . " " . $virt[$loop3]['fwmark'] . " {\n", 80);
-				if ($debug) { echo "virtual_server " . "fwmark" . " " . $virt[$loop3]['fwmark'] . " {<BR>"; };
-			} 
-
-			if (isset($virt[$loop3]['delay_loop']) &&
-			    $virt[$loop3]['delay_loop'] != "") {
-				fputs ($ngx_fd, "$gap1 delay_loop "			. $virt[$loop3]['delay_loop']	. "\n", 80);
-				if ($debug) { echo "$egap1 delay_loop "		. $virt[$loop3]['delay_loop']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['sorry_server']) &&
-			    $virt[$loop3]['sorry_server'] != "") {
-				fputs ($ngx_fd, "$gap1 sorry_server "			. $virt[$loop3]['sorry_server']	. "\n", 80);
-				if ($debug) { echo "$egap1 sorry_server "		. $virt[$loop3]['sorry_server']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['lb_algo']) &&
-			    $virt[$loop3]['lb_algo'] != "") {
-				fputs ($ngx_fd, "$gap1 lb_algo "		. $virt[$loop3]['lb_algo']	. "\n", 80);
-				if ($debug) { echo "$egap1 lb_algo "		. $virt[$loop3]['lb_algo']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['lb_kind']) &&
-			    $virt[$loop3]['lb_kind'] != "") {
-				fputs ($ngx_fd, "$gap1 lb_kind "			. $virt[$loop3]['lb_kind']	. "\n", 80);
-				if ($debug) { echo "$egap1 lb_kind "		. $virt[$loop3]['lb_kind']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['syn_proxy']) &&
-				($virt[$loop3]['syn_proxy'] == 'yes')) {
-				fputs ($ngx_fd, "$gap1 syn_proxy"			. "\n", 80);
-				if ($debug) { echo "$egap1 syn_proxy"		. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['laddr_group_name']) &&
-			    $virt[$loop3]['laddr_group_name'] != "") {
-				fputs ($ngx_fd, "$gap1 laddr_group_name "			. $virt[$loop3]['laddr_group_name']		. "\n", 80);
-				if ($debug) { echo "$egap1 laddr_group_name "		. $virt[$loop3]['laddr_group_name']		. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['persistence_timeout']) &&
-			    $virt[$loop3]['persistence_timeout'] != "") {
-				fputs ($ngx_fd, "$gap1 persistence_timeout "		. $virt[$loop3]['persistence_timeout']	. "\n", 80);
-				if ($debug) { echo "$egap1 persistence_timeout "	. $virt[$loop3]['persistence_timeout'] . "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['persistence_granularity']) &&
-			    $virt[$loop3]['persistence_granularity'] != "") {
-				fputs ($ngx_fd, "$gap1 persistence_granularity "			. $virt[$loop3]['persistence_granularity']	. "\n", 80);
-				if ($debug) { echo "$egap1 persistence_granularity "		. $virt[$loop3]['persistence_granularity']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['ha_suspend']) &&
-			    $virt[$loop3]['ha_suspend'] != "") {
-				fputs ($ngx_fd, "$gap1 ha_suspend "			. $virt[$loop3]['ha_suspend']		. "\n", 300);
-				if ($debug) { echo "$egap1 ha_suspend "		. $virt[$loop3]['ha_suspend']		. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['virtualhost']) &&
-			    $virt[$loop3]['virtualhost'] != "") {
-				fputs ($ngx_fd, "$gap1 virtualhost "			. $virt[$loop3]['virtualhost']	. "\n", 300);
-				if ($debug) { echo "$egap1 virtualhost "		. $virt[$loop3]['virtualhost']	. "<BR>"; };
-			}
-			
-			if (isset($virt[$loop3]['quorum']) &&
-			    $virt[$loop3]['quorum'] != "") {
-				fputs ($ngx_fd, "$gap1 quorum "			. $virt[$loop3]['quorum']	. "\n", 300);
-				if ($debug) { echo "$egap1 quorum "		. $virt[$loop3]['quorum']	. "<BR>"; };
-			}
-			
-			if (isset($virt[$loop3]['hysteresis']) &&
-			    $virt[$loop3]['hysteresis'] != "") {
-				fputs ($ngx_fd, "$gap1 hysteresis "		. $virt[$loop3]['hysteresis']	. "\n", 300);
-				if ($debug) { echo "$egap1 hysteresis "	. $virt[$loop3]['hysteresis']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['quorum_up']) &&
-			    $virt[$loop3]['quorum_up'] != "") {
-				fputs ($ngx_fd, "$gap1 quorum_up "		. $virt[$loop3]['quorum_up']. "\n", 300);
-				if ($debug) { echo "$egap1 quorum_up "	. $virt[$loop3]['quorum_up']. "<BR>"; };
-			}
-			
-			if (isset($virt[$loop3]['quorum_down']) &&
-			    $virt[$loop3]['quorum_down'] != "") {
-				fputs ($ngx_fd, "$gap1 quorum_down "		. $virt[$loop3]['quorum_down']	. "\n", 80);
-				if ($debug) { echo "$egap1 quorum_down "	. $virt[$loop3]['quorum_down']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['est_timeout']) &&
-			    $virt[$loop3]['est_timeout'] != "") {
-				fputs ($ngx_fd, "$gap1 est_timeout "		. $virt[$loop3]['est_timeout']	. "\n", 80);
-				if ($debug) { echo "$egap1 est_timeout "	. $virt[$loop3]['est_timeout']	. "<BR>"; };
-			}
-
-			if (isset($virt[$loop3]['protocol']) &&
-			    $virt[$loop3]['protocol'] != "") {
-				fputs ($ngx_fd, "$gap1 protocol "			. $virt[$loop3]['protocol']	. "\n", 80);
-				if ($debug) { echo "$egap1 protocol "		. $virt[$loop3]['protocol']	. "<BR>"; };
-			}
 
 			while ( isset($serv[$loop3][$loop4]['ip']) && $serv[$loop3][$loop4]['ip'] != "") {
 
@@ -2152,258 +1301,6 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 						if ($debug) { echo "$egap1 real_server " . $serv[$loop3][$loop4]['ip'] . " " . $serv[$loop3][$loop4]['port'] . " {<BR>"; };
 					}
 
-					if (isset($serv[$loop3][$loop4]['notify_up']) &&
-					    $serv[$loop3][$loop4]['notify_up'] != "") {
-						fputs ($ngx_fd, "$gap2 notify_up "		. $serv[$loop3][$loop4]['notify_up']	. "\n", 80);
-						if ($debug) { echo "$egap2 notify_up "	. $serv[$loop3][$loop4]['notify_up']	. "<BR>"; };
-					}
-
-					if (isset($serv[$loop3][$loop4]['notify_down']) &&
-					    $serv[$loop3][$loop4]['notify_down'] != "") {
-						fputs ($ngx_fd, "$gap2 notify_down "		. $serv[$loop3][$loop4]['notify_down']	. "\n", 80);
-						if ($debug) { echo "$egap2 notify_down "	. $serv[$loop3][$loop4]['notify_down']	. "<BR>"; };
-					}
-				
-					if (isset($serv[$loop3][$loop4]['weight']) &&
-					    $serv[$loop3][$loop4]['weight'] != "") {
-						fputs ($ngx_fd, "$gap2 weight "		. $serv[$loop3][$loop4]['weight']	. "\n", 80);
-						if ($debug) { echo "$egap2 weight "	. $serv[$loop3][$loop4]['weight']	. "<BR>"; };
-					}
-
-					if (isset($serv[$loop3][$loop4]['monitor']['type'])) {
-					    	if ($serv[$loop3][$loop4]['monitor']['type'] == "TCP_CHECK") { 
-							fputs ($ngx_fd, "$gap2 TCP_CHECK " 	. " {\n", 80);
-							if ($debug) { echo "$egap2 TCP_CHECK "  . " {<BR>"; };
-					
-
-							if (isset($serv[$loop3][$loop4]['monitor']['tcp_connect_port']) &&
-					    			$serv[$loop3][$loop4]['monitor']['tcp_connect_port'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_port " . $serv[$loop3][$loop4]['monitor']['tcp_connect_port']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_port " . $serv[$loop3][$loop4]['monitor']['tcp_connect_port']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['tcp_bindto']) &&
-					    			$serv[$loop3][$loop4]['monitor']['tcp_bindto'] != "") {
-								fputs ($ngx_fd, "$gap3 bindto " . $serv[$loop3][$loop4]['monitor']['tcp_bindto']	. "\n", 80);
-								if ($debug) { echo "$egap3 bindto " . $serv[$loop3][$loop4]['monitor']['tcp_bindto']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['tcp_connect_timeout']) &&
-					    			$serv[$loop3][$loop4]['monitor']['tcp_connect_timeout'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['tcp_connect_timeout']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['tcp_connect_timeout']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap2 }\n", 80);
-                                                	if ($debug) { echo "$egap2 }<BR>"; }
-
-						} else if ($serv[$loop3][$loop4]['monitor']['type'] == "HTTP_GET") {
-							fputs ($ngx_fd, "$gap2 HTTP_GET " 	. " {\n", 80);
-							if ($debug) { echo "$egap2 HTTP_GET "  . " {<BR>"; };
-
-							fputs ($ngx_fd, "$gap3 url " 	. " {\n", 80);
-							if ($debug) { echo "$egap3 url "  . " {<BR>"; };
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_path']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_path'] != "") {
-								fputs ($ngx_fd, "$gap4 path " . $serv[$loop3][$loop4]['monitor']['http_path']	. "\n", 80);
-								if ($debug) { echo "$egap4 path " . $serv[$loop3][$loop4]['monitor']['http_path']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_digest']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_digest'] != "") {
-								fputs ($ngx_fd, "$gap4 digest " . $serv[$loop3][$loop4]['monitor']['http_digest']	. "\n", 80);
-								if ($debug) { echo "$egap4 digest " . $serv[$loop3][$loop4]['monitor']['http_digest']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_status_code']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_status_code'] != "") {
-								fputs ($ngx_fd, "$gap4 status_code " . $serv[$loop3][$loop4]['monitor']['http_status_code']	. "\n", 80);
-								if ($debug) { echo "$egap4 status_code " . $serv[$loop3][$loop4]['monitor']['http_status_code']	. "<BR>"; };
-							}
-
-
-                                                	fputs ($ngx_fd,"$gap3 }\n", 80);
-                                                	if ($debug) { echo "$egap3 }<BR>"; }
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_connect_timeout']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_connect_timeout'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['http_connect_timeout']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['http_connect_timeout']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_connect_port']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_connect_port'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_port " . $serv[$loop3][$loop4]['monitor']['http_connect_port']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_port " . $serv[$loop3][$loop4]['monitor']['http_connect_port']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_bindto']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_bindto'] != "") {
-								fputs ($ngx_fd, "$gap3 bindto " . $serv[$loop3][$loop4]['monitor']['http_bindto']	. "\n", 80);
-								if ($debug) { echo "$egap3 bindto " . $serv[$loop3][$loop4]['monitor']['http_bindto']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_nb_get_retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_nb_get_retry'] != "") {
-								fputs ($ngx_fd, "$gap3 nb_get_retry " . $serv[$loop3][$loop4]['monitor']['http_nb_get_retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 nb_get_retry " . $serv[$loop3][$loop4]['monitor']['http_nb_get_retry']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['http_delay_before_retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['http_delay_before_retry'] != "") {
-								fputs ($ngx_fd, "$gap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['http_delay_before_retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['http_delay_before_retry']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap2 }\n", 80);
-                                                	if ($debug) { echo "$egap2 }<BR>"; }
-
-						} else if ($serv[$loop3][$loop4]['monitor']['type'] == "SSL_GET") { 
-							fputs ($ngx_fd, "$gap2 SSL_GET " 	. " {\n", 80);
-							if ($debug) { echo "$egap2 SSL_GET "  . " {<BR>"; };
-
-							fputs ($ngx_fd, "$gap3 url " 	. " {\n", 80);
-							if ($debug) { echo "$egap3 url "  . " {<BR>"; };
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_path']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_path'] != "") {
-								fputs ($ngx_fd, "$gap4 path " . $serv[$loop3][$loop4]['monitor']['ssl_path']	. "\n", 80);
-								if ($debug) { echo "$egap4 path " . $serv[$loop3][$loop4]['monitor']['ssl_path']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_digest']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_digest'] != "") {
-								fputs ($ngx_fd, "$gap4 digest " . $serv[$loop3][$loop4]['monitor']['ssl_digest']	. "\n", 80);
-								if ($debug) { echo "$egap4 digest " . $serv[$loop3][$loop4]['monitor']['ssl_digest']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_status_code']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_status_code'] != "") {
-								fputs ($ngx_fd, "$gap4 status_code " . $serv[$loop3][$loop4]['monitor']['ssl_status_code']	. "\n", 80);
-								if ($debug) { echo "$egap4 status_code " . $serv[$loop3][$loop4]['monitor']['ssl_status_code']	. "<BR>"; };
-							}
-
-
-                                                	fputs ($ngx_fd,"$gap3 }\n", 80);
-                                                	if ($debug) { echo "$egap3 }<BR>"; }
-
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_connect_port']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_connect_port'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_port " . $serv[$loop3][$loop4]['monitor']['ssl_connect_port']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_port " . $serv[$loop3][$loop4]['monitor']['ssl_connect_port']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_bindto']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_bindto'] != "") {
-								fputs ($ngx_fd, "$gap3 bindto " . $serv[$loop3][$loop4]['monitor']['ssl_bindto']	. "\n", 80);
-								if ($debug) { echo "$egap3 bindto " . $serv[$loop3][$loop4]['monitor']['ssl_bindto']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_connect_timeout']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_connect_timeout'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['ssl_connect_timeout']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['ssl_connect_timeout']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_nb_get_retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_nb_get_retry'] != "") {
-								fputs ($ngx_fd, "$gap3 nb_get_retry " . $serv[$loop3][$loop4]['monitor']['ssl_nb_get_retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 nb_get_retry " . $serv[$loop3][$loop4]['monitor']['ssl_nb_get_retry']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['ssl_delay_before_retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['ssl_delay_before_retry'] != "") {
-								fputs ($ngx_fd, "$gap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['ssl_delay_before_retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['ssl_delay_before_retry']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap2 }\n", 80);
-                                                	if ($debug) { echo "$egap2 }<BR>"; }
-
-						} else if ($serv[$loop3][$loop4]['monitor']['type'] == "SMTP_CHECK") {
-                                                        fputs ($ngx_fd, "$gap2 SMTP_CHECK "    . " {\n", 80);
-                                                        if ($debug) { echo "$egap2 SMTP_CHECK "  . " {<BR>"; };
-
-							fputs ($ngx_fd, "$gap3 host " 	. " {\n", 80);
-							if ($debug) { echo "$egap3 host "  . " {<BR>"; };
-
-							if (isset($serv[$loop3][$loop4]['monitor']['connect_ip']) &&
-					    			$serv[$loop3][$loop4]['monitor']['connect_ip'] != "") {
-								fputs ($ngx_fd, "$gap4 connect_ip " . $serv[$loop3][$loop4]['monitor']['connect_ip']	. "\n", 80);
-								if ($debug) { echo "$egap4 connect_ip " . $serv[$loop3][$loop4]['monitor']['connect_ip']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['smtp_connect_port']) &&
-					    			$serv[$loop3][$loop4]['monitor']['smtp_connect_port'] != "") {
-								fputs ($ngx_fd, "$gap4 connect_port " . $serv[$loop3][$loop4]['monitor']['smtp_connect_port']	. "\n", 80);
-								if ($debug) { echo "$egap4 connect_port " . $serv[$loop3][$loop4]['monitor']['smtp_connect_port']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['smtp_bindto']) &&
-					    			$serv[$loop3][$loop4]['monitor']['smtp_bindto'] != "") {
-								fputs ($ngx_fd, "$gap4 bindto " . $serv[$loop3][$loop4]['monitor']['smtp_bindto']	. "\n", 80);
-								if ($debug) { echo "$egap4 bindto " . $serv[$loop3][$loop4]['monitor']['smtp_bindto']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap3 }\n", 80);
-                                                	if ($debug) { echo "$egap3 }<BR>"; }
-
-							if (isset($serv[$loop3][$loop4]['monitor']['smtp_connect_timeout']) &&
-					    			$serv[$loop3][$loop4]['monitor']['smtp_connect_timeout'] != "") {
-								fputs ($ngx_fd, "$gap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['smtp_connect_timeout']	. "\n", 80);
-								if ($debug) { echo "$egap3 connect_timeout " . $serv[$loop3][$loop4]['monitor']['smtp_connect_timeout']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['retry'] != "") {
-								fputs ($ngx_fd, "$gap3 retry " . $serv[$loop3][$loop4]['monitor']['retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 retry " . $serv[$loop3][$loop4]['monitor']['retry']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['smtp_delay_before_retry']) &&
-					    			$serv[$loop3][$loop4]['monitor']['smtp_delay_before_retry'] != "") {
-								fputs ($ngx_fd, "$gap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['smtp_delay_before_retry']	. "\n", 80);
-								if ($debug) { echo "$egap3 delay_before_retry " . $serv[$loop3][$loop4]['monitor']['smtp_delay_before_retry']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['helo_name']) &&
-					    			$serv[$loop3][$loop4]['monitor']['helo_name'] != "") {
-								fputs ($ngx_fd, "$gap3 helo_name " . $serv[$loop3][$loop4]['monitor']['helo_name']	. "\n", 80);
-								if ($debug) { echo "$egap3 helo_name " . $serv[$loop3][$loop4]['monitor']['helo_name']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap2 }\n", 80);
-                                                	if ($debug) { echo "$egap2 }<BR>"; }
-
-						} else if ($serv[$loop3][$loop4]['monitor']['type'] == "MISC_CHECK") {
-                                                        fputs ($ngx_fd, "$gap2 MISC_CHECK "    . " {\n", 80);
-                                                        if ($debug) { echo "$egap2 MISC_CHECK "  . " {<BR>"; };
-
-							if (isset($serv[$loop3][$loop4]['monitor']['misc_path']) &&
-					    			$serv[$loop3][$loop4]['monitor']['misc_path'] != "") {
-								fputs ($ngx_fd, "$gap3 misc_path " . $serv[$loop3][$loop4]['monitor']['misc_path']	. "\n", 80);
-								if ($debug) { echo "$egap3 misc_path " . $serv[$loop3][$loop4]['monitor']['misc_path']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['misc_timeout']) &&
-					    			$serv[$loop3][$loop4]['monitor']['misc_timeout'] != "") {
-								fputs ($ngx_fd, "$gap3 misc_timeout " . $serv[$loop3][$loop4]['monitor']['misc_timeout']	. "\n", 80);
-								if ($debug) { echo "$egap3 misc_timeout " . $serv[$loop3][$loop4]['monitor']['misc_timeout']	. "<BR>"; };
-							}
-
-							if (isset($serv[$loop3][$loop4]['monitor']['misc_dynamic']) &&
-					    			$serv[$loop3][$loop4]['monitor']['misc_dynamic'] != "") {
-								fputs ($ngx_fd, "$gap3 misc_dynamic" . "\n", 80);
-								if ($debug) { echo "$egap3 misc_dynamic " . $serv[$loop3][$loop4]['monitor']['misc_dynamic']	. "<BR>"; };
-							}
-
-                                                	fputs ($ngx_fd,"$gap2 }\n", 80);
-                                                	if ($debug) { echo "$egap2 }<BR>"; }
-						}
-
-					}
 	
 				
 					$loop4++;
