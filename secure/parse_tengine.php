@@ -4,7 +4,7 @@ $TENGINE	=	"/etc/sysconfig/ha/nginx.conf";	/* Global */
 //$TENGINE	=	"/etc/sysconfig/ha/keepalived.conf";	/* Global */
 
 /* 1 = debuging, 0 or undefined = no debuging */
-$debug=1;
+//$debug=1;
 
 $main = array (
 		"serial_no"			=> "",
@@ -131,6 +131,7 @@ $serv = array ( );
 
 /* Global file descriptor for use as a pointer to the lvs.cf file */
 $ngx_fd = 0;
+$level = 0;
 $service = "tengine";
 $monitor_service="";
 $ip_of="";
@@ -172,7 +173,8 @@ function parse_tengine($name, $datum) {
 	static $script_regex = 'chk_*'; //vrrp_script name convention start with 'chk_'
 	static $sync_group_regex = '\w*'; //vrrp sync group name
 	static $laddrgname;
-	static $level = 0 ;
+//	static $level = 0 ;
+	global $level;
 	static $server_count = 0;
 	static $upstream_count = 0;
 	static $virt_count = 0;
@@ -193,6 +195,8 @@ function parse_tengine($name, $datum) {
 	if (strstr($buffer,"{")) { 
 		if ($name == "global_defs"
 		    or $name == "http"
+		    or $name == "least_conn"
+		    or $name == "ip_hash"
 		) {
 			$datum = "";
 		}
@@ -214,7 +218,6 @@ function parse_tengine($name, $datum) {
 		if ($level == 1) { $upstream_count = -1; };
 		if (($level >  1) && ($name == "real_server")) { $server_count++ ; }; 
 		if (($level >  1) && ($name == "upstream")) { $upstream_count++ ; }; 
-//		if ($level >  1) { $server_count++ ; }; 
 
 		parse_tengine($name, $datum);
 		return; /* <--- HIGHLY IMPORTANT! do **NOT** remove this VITAL command */
@@ -537,13 +540,33 @@ function parse_tengine($name, $datum) {
 									"]</B></FONT><BR>"; };
 							$upstream[$upstream_count+1]['name']		= $datum;
 							break;
-			case "notify_up"		:	$serv[$virt_count][$server_count+1]['notify_up']		= $datum;
+			case "consistent_hash"	:	$upstream[$upstream_count+1]['lb'] =  $name . " " . $datum;
 							break;
-			case "notify_down"		:	$serv[$virt_count][$server_count+1]['notify_down']		= $datum;
+			case "session_sticky"	:	$upstream[$upstream_count+1]['lb'] =  $name . " " . $datum;
 							break;
-//			case "active"		:	$serv[$virt_count][$server_count+1]['active']		= $datum;
+			case "least_conn"	:	$upstream[$upstream_count+1]['lb'] =  $name;
 							break;
-			case "weight"		:	$serv[$virt_count][$server_count+1]['weight']		= $datum;
+			case "ip_hash"		:	$upstream[$upstream_count+1]['lb'] =  $name;
+							break;
+			case "dynamic_resolve"	:	$upstream[$upstream_count+1]['dynamic_resolve'] =  $name . " " . $datum;
+							break;
+			case "keepalive"	:	$upstream[$upstream_count+1]['keepalive'] =  $name . " " . $datum;
+							break;
+			case "keepalive_timeout"	:	$upstream[$upstream_count+1]['keepalive_timeout'] =  $datum;
+							break;
+			case "server"		:	$upstream[$upstream_count+1]['server'][] = $name . " " . $datum;
+							break;
+			case "check"		:	$upstream[$upstream_count+1]['check'] = $name . " " . $datum;
+							break;
+			case "check_keepalive_requests"		:	$upstream[$upstream_count+1]['check_keepalive_requests'] = $datum;
+							break;
+			case "check_http_send"	:	$upstream[$upstream_count+1]['check_http_send'] = $datum;
+							break;
+			case "check_http_expect"	:	$upstream[$upstream_count+1]['check_http_expect'] = $datum;
+							break;
+			case "check_http_expect_alive"	:	$upstream[$upstream_count+1]['check_http_expect_alive'] = $name . " " . $datum;
+							break;
+			case "check_fastcgi_param"	:	$upstream[$upstream_count+1]['check_fastcgi_param'] = $name . " " . $datum;
 							break;
 
 			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = true; 
@@ -880,6 +903,7 @@ function read_config() {
 	global $name;
 	global $datum;
 	global $debug;
+	global $level;
 
 
 	while (!feof($ngx_fd)) {
@@ -901,9 +925,6 @@ function read_config() {
 			//$pieces = explode(" ", $buffer);
 			//reference http://fr2.php.net/manual/en/function.preg-split.php#92632 for following regex
 			if ( strstr($buffer,"notify_fault" )
-			     or strstr($buffer,"misc_path" )
-			     or strstr($buffer,"notify_master" )
-			     or strstr($buffer,"notify_backup" )
 			     or strstr($buffer,"notify" )
 			     or preg_match("/^script/", $buffer) //since strstr returns true for string "script" and "vrrp_script", so use preg_match
 				) { //!!! if strings contains quote and space in quote use following regex!!!
@@ -917,23 +938,27 @@ function read_config() {
 				echo "pieces[1] = [$pieces[1]]<BR>";
 				echo "pieces[2] = [$pieces[2]]<BR>";
 				echo "pieces[3] = [$pieces[3]]<BR>";
+				echo "pieces[4] = [$pieces[4]]<BR>";
+				echo "pieces[5] = [$pieces[5]]<BR>";
+				echo "pieces[6] = [$pieces[6]]<BR>";
 			}
-
 */
+
 			$name = $pieces[0];
-			if (strstr($buffer,"=")) {
-				if (isset($pieces[2]))
-					$datum = $pieces[2];
-			}
-			else if ( $pieces[0] == "src"
-				  or $pieces[1] == "via"
-				  or $pieces[1] == "gw" ) { //virtual_routes
+
+			if ( $pieces[0] == "server" && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
-				
 			}
-			else if (isset($pieces[2]) and $pieces[1] == "dev") {
+			else if (isset($pieces[2]) and $pieces[0] == "session_sticky") {
 					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
+			}
+			else if (isset($pieces[2]) 
+				and ( $pieces[0] == "dynamic_resolve" 
+				      || $pieces[0] == "keepalive" 
+				      || $pieces[0] == "check_fastcgi_param" 
+				    ) ) {
+                        	$datum = $pieces[1] . " " . $pieces[2];
 			}
 			else if (isset($pieces[2]) and $pieces[1] == "weight") {
 					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
@@ -1084,6 +1109,13 @@ function print_arrays() {
 
         while ($upstream[++$loop1]['name'] != "" ) { /* NOTE: must use *pre*incrempent not post */
                 echo "<BR>upstream [$loop1] [name] = "        . $upstream[$loop1]['name'];
+                echo "<BR>upstream [$loop1] [lb] = "        . $upstream[$loop1]['lb'];
+                echo "<P><B>server</B>";
+                foreach ($upstream[$loop1]['server'] as $server) {
+                                if ($debug) { echo "$egap1" . $server . "<BR>"; };
+                }
+
+
 
         }
 
@@ -1164,7 +1196,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	if ($debug) { echo "<BR>Delete array number = $delete_item from level = $level<BR>"; }
 
 	//too many loop variable :), two is engough
-	$loop1 = $loop2 = 1;
+	$loop1 = 1;
+	$loop2 = 0;
 	$loop3 = $loop4 = 1;
 	$loop5 = 0; //static_ipaddress
 	$loop6 = 1;
@@ -1201,15 +1234,15 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		// data in it, for this we use '&'. It's not absolutely bulletproof, however it does for
 		// our purposes
 		if (isset($_SERVER['QUERY_STRING']) && strstr($_SERVER['QUERY_STRING'], '&' ) ) {
-			fputs ($ngx_fd, "serial_no = "			. (1 + $main['serial_no'])		. "\n", 80);
-			if ($debug) { echo "serial_no = "		. (1 + $main['serial_no'])		. "<BR>"; };
+			fputs ($ngx_fd, "serial_no "			. (1 + $main['serial_no'])		. "\n", 80);
+			if ($debug) { echo "serial_no "		. (1 + $main['serial_no'])		. "<BR>"; };
 		} else {
-			fputs ($ngx_fd, "serial_no = "			. $main['serial_no']			. "\n", 80);
-			if ($debug) { echo "serial_no = "		. $main['serial_no']			. "<BR>"; };		
+			fputs ($ngx_fd, "serial_no "			. $main['serial_no']			. "\n", 80);
+			if ($debug) { echo "serial_no "		. $main['serial_no']			. "<BR>"; };		
 		};
 	} else {
-		fputs ($ngx_fd, "serial_no = 1\n");
-		if ($debug) { echo "serial_no = 1<BR>"; };
+		fputs ($ngx_fd, "serial_no 1\n");
+		if ($debug) { echo "serial_no 1<BR>"; };
 	}
 
 	//hard code the worker processes and  cpu affinity here
@@ -1247,19 +1280,49 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "") {
 
 			if (($loop1 == $delete_item) && ($level == "2") && ($delete_service == "upstream")) { 
-				$loop1++;
+				$loop1++; 
 			} else {
 
 				
 				if (isset($upstream[$loop1]['name']) &&
 		    			$upstream[$loop1]['name'] != "") { 
-						fputs ($ngx_fd, "$gap1 upstream " . $upstream[$loop1]['name']	.  " {\n", 80);
-						if ($debug) { echo "$egap1 upstream " . $upstream[$loop1]['name'] . " {<BR>"; };
+					fputs ($ngx_fd, "$gap1 upstream " . $upstream[$loop1]['name']	.  " {\n", 80);
+					if ($debug) { echo "$egap1 upstream " . $upstream[$loop1]['name'] . " {<BR>"; };
+
+/*
+  lb session_sticky have long paramemter options, use strlen+10 and print extra newline to resolve
+  issue that end of options get cut out and appended with the next line entry, weird, no idea with the cause. 
+*/
+					if (isset($upstream[$loop1]['lb']) 
+						&& $upstream[$loop1]['lb'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 " . $upstream[$loop1]['lb'] . ";\n", strlen($upstream[$loop1]['lb'])+10);
+                                               	if ($debug) { echo "$egap2 " . $upstream[$loop1]['lb'] . ";<BR>"; };
+					}
+                                        fputs ($ngx_fd, "$gap2 " .  "\n", 80);
+
+					$loop2 = 0;
+                                	foreach ($upstream[$loop1]['server'] as $server) {
+
+                                        	if (($loop2 == $delete_item)
+								&& ($loop1 == $delete_virt) 
+								&& ($level == "2") 	
+								&& ($delete_service == "upstream_server")) {
+                                                	$loop2++;
+
+                                        	}
+                                        	else {
+                                                	fputs ($ngx_fd, "$gap2 " . $server . ";\n", 80);
+                                                	if ($debug) { echo "$egap2 " . $server . ";<BR>"; };
+                                                	$loop2++;
+                                        	}
+                                	}
+
+
+					fputs ($ngx_fd,"$gap1 }\n", 80);
+					if ($debug) { echo "$egap1 }<BR>"; }
 				}
 			
 				$loop1++;
-				fputs ($ngx_fd,"$gap1 }\n", 80);
-				if ($debug) { echo "$egap1 }<BR>"; }
 			}
 		} //end upstream loop
 
