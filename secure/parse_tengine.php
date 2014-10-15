@@ -564,7 +564,7 @@ function parse_tengine($name, $datum) {
 							break;
 			case "check_http_expect"	:	$upstream[$upstream_count+1]['check_http_expect'] = $datum;
 							break;
-			case "check_http_expect_alive"	:	$upstream[$upstream_count+1]['check_http_expect_alive'] = $name . " " . $datum;
+			case "check_http_expect_alive"	:	$upstream[$upstream_count+1]['check_http_expect_alive'] = $datum;
 							break;
 			case "check_fastcgi_param"	:	$upstream[$upstream_count+1]['check_fastcgi_param'] = $name . " " . $datum;
 							break;
@@ -924,15 +924,14 @@ function read_config() {
 			/* explode! oh boy! */
 			//$pieces = explode(" ", $buffer);
 			//reference http://fr2.php.net/manual/en/function.preg-split.php#92632 for following regex
-			if ( strstr($buffer,"notify_fault" )
-			     or strstr($buffer,"notify" )
+			if ( strstr($buffer,"check_http_send" )
 			     or preg_match("/^script/", $buffer) //since strstr returns true for string "script" and "vrrp_script", so use preg_match
+			     or preg_match("/^check_http_expect$/", $buffer) //match check_http_expect exactly,otherwise messed with check_http_expect_alive
 				) { //!!! if strings contains quote and space in quote use following regex!!!
 				$pieces = preg_split("/[\s,]*(\"[^\"]+\")[\s,]*/", $buffer, 0, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 			} else {
 				$pieces = preg_split('/\s+/', $buffer);
 			}
-/*
 			if ($debug) {
 				echo "pieces[0] = [$pieces[0]]<BR>";
 				echo "pieces[1] = [$pieces[1]]<BR>";
@@ -942,29 +941,26 @@ function read_config() {
 				echo "pieces[5] = [$pieces[5]]<BR>";
 				echo "pieces[6] = [$pieces[6]]<BR>";
 			}
-*/
 
 			$name = $pieces[0];
 
-			if ( $pieces[0] == "server" && $level == 2 ) { //virtual_routes
+			if ( ( $pieces[0] == "server" 
+			       || $pieces[0] == "session_sticky"
+			       || $pieces[0] == "check"
+				) && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
-			}
-			else if (isset($pieces[2]) and $pieces[0] == "session_sticky") {
-					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
 			else if (isset($pieces[2]) 
 				and ( $pieces[0] == "dynamic_resolve" 
 				      || $pieces[0] == "keepalive" 
 				      || $pieces[0] == "check_fastcgi_param" 
+				      || $pieces[0] == "check_http_expect_alive" 
 				    ) ) {
                         	$datum = $pieces[1] . " " . $pieces[2];
 			}
 			else if (isset($pieces[2]) and $pieces[1] == "weight") {
 					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
-			}
-			else if (isset($pieces[2]) and $pieces[0] == "virtual_server") {
-                                        $datum = $pieces[1] . " " . $pieces[2];
 			}
 			else if (isset($pieces[2]) and $pieces[0] == "real_server") {
                                         $datum = $pieces[1] . " " . $pieces[2];
@@ -972,14 +968,6 @@ function read_config() {
 				$datum = $pieces[1];
 					
 			}
-
-			//if (!empty($pieces[3])) { $datum = $pieces[2] . " " . $pieces[3] ; }
-/*
-			if (!empty($pieces[4]) ) { // must be a send or expect string 
-				$datum = strstr($buffer, "\"");
-				$test = $datum;
-			}
-*/
 
 		}
 		parse_tengine($name, $datum);
@@ -1114,6 +1102,11 @@ function print_arrays() {
                 foreach ($upstream[$loop1]['server'] as $server) {
                                 if ($debug) { echo "$egap1" . $server . "<BR>"; };
                 }
+                echo "<BR>upstream [$loop1] [check] = "        . $upstream[$loop1]['check'];
+                echo "<BR>upstream [$loop1] [check_keepalive_requests] = "        . $upstream[$loop1]['check_keepalive_requests'];
+                echo "<BR>upstream [$loop1] [check_http_send] = "        . $upstream[$loop1]['check_http_send'];
+                echo "<BR>upstream [$loop1] [check_http_expect_alive] = "        . $upstream[$loop1]['check_http_expect_alive'];
+                echo "<BR>upstream [$loop1] [check_http_expect] = "        . $upstream[$loop1]['check_http_expect'];
 
 
 
@@ -1316,6 +1309,35 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
                                                 	$loop2++;
                                         	}
                                 	}
+
+					if (isset($upstream[$loop1]['check']) 
+						&& $upstream[$loop1]['check'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 " . $upstream[$loop1]['check'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 " . $upstream[$loop1]['check'] . ";<BR>"; };
+					}
+					if (isset($upstream[$loop1]['check_keepalive_requests']) 
+						&& $upstream[$loop1]['check_keepalive_requests'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 check_keepalive_requests " . $upstream[$loop1]['check_keepalive_requests'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 check_keepalive_requests " . $upstream[$loop1]['check_keepalive_requests'] . ";<BR>"; };
+					}
+					if (isset($upstream[$loop1]['check_http_send']) 
+						&& $upstream[$loop1]['check_http_send'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 check_http_send " . $upstream[$loop1]['check_http_send'] . ";\n", strlen($upstream[$loop1]['check_http_send'])+30);
+                                               	if ($debug) { echo "$egap2 check_http_send " . $upstream[$loop1]['check_http_send'] . ";<BR>"; };
+					}
+
+                                        fputs ($ngx_fd, "$gap2 " .  "\n", 80);
+
+					if (isset($upstream[$loop1]['check_http_expect_alive']) 
+						&& $upstream[$loop1]['check_http_expect_alive'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 check_http_expect_alive " . $upstream[$loop1]['check_http_expect_alive'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 check_http_expect_alive" . $upstream[$loop1]['check_http_expect_alive'] . ";<BR>"; };
+					}
+					if (isset($upstream[$loop1]['check_http_expect']) 
+						&& $upstream[$loop1]['check_http_expect'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 check_http_expect " . $upstream[$loop1]['check_http_expect'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 check_http_expect " . $upstream[$loop1]['check_http_expect'] . ";<BR>"; };
+					}
 
 
 					fputs ($ngx_fd,"$gap1 }\n", 80);
