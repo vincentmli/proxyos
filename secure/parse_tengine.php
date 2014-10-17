@@ -1502,6 +1502,22 @@ function add_local_address_group() {
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
+function add_upstream() {
+
+	global $upstream;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while (isset($upstream[$loop2]['name']) &&
+	       $upstream[$loop2]['name'] != "") {
+		$loop2++;
+	}
+
+	$upstream[$loop2]['name']	= "[name]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
 function add_virtual() {
 
 	global $virt;
@@ -1514,26 +1530,6 @@ function add_virtual() {
 	}
 
 	$virt[$loop2]['ip']	= "[ip]";
-	$virt[$loop2]['port']	= "[port]";
-	$virt[$loop2]['group']	= "[group]";
-	$virt[$loop2]['fwmark']	= "[fwmark]";
-	$virt[$loop2]['delay_loop']	= "5";
-	$virt[$loop2]['lb_algo']		= "wrr";
-	$virt[$loop2]['lb_kind']		= "FNAT";
-	$virt[$loop2]['syn_proxy']		= "no";
-	$virt[$loop2]['laddr_group_name']	= "none";
-	$virt[$loop2]['protocol']	= "tcp";
-	$virt[$loop2]['persistence_timeout']	= "";
-	$virt[$loop2]['persistence_granularity']		= "";
-	//$virt[$loop2]['send']		= "\"GET / HTTP/1.0\\r\\n\\r\\n\"";
-	$virt[$loop2]['ha_suspend']		= "";
-	//$virt[$loop2]['expect']		= "\"HTTP\"";	
-	$virt[$loop2]['virtualhost']	= "";	
-	$virt[$loop2]['quorum']	= "";
-	$virt[$loop2]['hysteresis']	= "";
-	$virt[$loop2]['quorum_up']	= "1";
-	$virt[$loop2]['quorum_down']	= "";
-	$virt[$loop2]['est_timeout']	= "15";
 	$virt[$loop2]['sorry_server']	= "0";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */

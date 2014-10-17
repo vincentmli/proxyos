@@ -82,6 +82,8 @@ A.logolink      {
 
                 <A HREF="ngx_main_settings.php" NAME="Tengine Main Settings">MAIN SETTING</A>
                 &nbsp;|&nbsp;
+                <A HREF="ngx_http_upstream.php" NAME="UPSTREAM">UPSTREAM</A>
+                &nbsp;|&nbsp;
 
                 </TD>
 
