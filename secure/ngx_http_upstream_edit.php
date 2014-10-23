@@ -34,24 +34,35 @@
 
 		$upstream[$selected_host]['name'] 	= $_GET['name']; 
                 $upstream[$selected_host]['lb']		= $_GET['lb'];
+		$interval = trim($_GET['interval']);
+		$rise = trim($_GET['rise']);
+		$fall = trim($_GET['fall']);
+		$timeout = trim($_GET['timeout']);
+		$type = trim($_GET['type']);
 
-		$check = "check";
-		if ($_GET['interval'] != "") {
-			$check = $check . " interval=" . trim($_GET['interval']); 
+		$check = "";
+
+		if ($interval != "") {
+			$check = $check . " interval=" . $interval; 
 		}
-		if ($_GET['rise'] != "") {
-			$check = $check . " rise=" . trim($_GET['rise']); 
+		if ($rise != "") {
+			$check = $check . " rise=" . $rise; 
 		}
-		if ($_GET['fall'] != "") {
-			$check = $check . " fall=" . trim($_GET['fall']); 
+		if ($fall != "") {
+			$check = $check . " fall=" . $fall; 
 		}
-		if ($_GET['timeout'] != "") {
-			$check = $check . " timeout=" . trim($_GET['timeout']); 
+		if ($timeout != "") {
+			$check = $check . " timeout=" . $timeout; 
 		}
-		if ($_GET['type'] != "") {
-			$check = $check . " type=" . trim($_GET['type']); 
+		if ($type != "") {
+			$check = $check . " type=" . $type; 
 		}
-                $upstream[$selected_host]['check']			= $check;
+
+		if ($check != "") {
+                	$upstream[$selected_host]['check']			= $check;
+		} else {
+                	$upstream[$selected_host]['check']			= "";
+		}
                 $upstream[$selected_host]['check_http_send']		= $_GET['send'];
                 $upstream[$selected_host]['check_http_expect_alive']	= $_GET['expect_alive'];
                 $upstream[$selected_host]['check_http_expect']		= $_GET['expect'];
@@ -181,16 +192,16 @@ A.logolink      {
 		<TD><INPUT TYPE="TEXT" NAME="name" VALUE= <?php echo $name; ?>></TD>
 	</TR>
 	<TR>
-		<TD>load balance:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="lb" VALUE= <?php echo $lb; ?>></TD>
+		<TD style="width:10%">load balance:</TD>
+		<TD><INPUT TYPE="TEXT" style="width:160%" NAME="lb" VALUE="<?php echo $lb; ?>"></TD>
 	</TR>
 	<TR>
 		<TD>check interval:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="interval" VALUE=" <?php echo $interval; ?>"></TD>
+		<TD><INPUT TYPE="TEXT" NAME="interval" VALUE="<?php echo $interval; ?>"></TD>
 	</TR>
 	<TR>
 		<TD>check rise:</TD>
-		<TD><INPUT TYPE="TEXT" NAME="rise" VALUE=" <?php echo $rise; ?>"></TD>
+		<TD><INPUT TYPE="TEXT" NAME="rise" VALUE="<?php echo $rise; ?>"></TD>
 	</TR>
 	<TR>
 		<TD>check fall:</TD>

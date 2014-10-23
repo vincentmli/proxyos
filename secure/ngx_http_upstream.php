@@ -141,7 +141,7 @@ A.logolink      {
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
 		<TR>
 			<TD></TD>
-			       	<TD CLASS="title">NAME</TD>
+			       	<TD CLASS="title">UPSTREAM NAME</TD>
 		</TR>
 
 <?php

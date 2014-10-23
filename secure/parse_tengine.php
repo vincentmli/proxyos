@@ -128,13 +128,16 @@ $local_address_group = array ( "",
 
 $serv = array ( );
 
+$ups_serv = array();
+
 
 /* Global file descriptor for use as a pointer to the lvs.cf file */
 $ngx_fd = 0;
-$level = 0;
+$level = 0 ;
 $service = "tengine";
 $monitor_service="";
 $ip_of="";
+$upstream_name;
 
 if (empty($debug)) { $debug = 0; } /* if unset, leave debugging off */
 
@@ -147,12 +150,14 @@ function parse_tengine($name, $datum) {
 	global $main;
 	global $http;
 	global $upstream;
+	global $upstream_name;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
 	global $vrrp_sync_group;
 	global $virt_server_group;
 	global $serv;
+	global $ups_serv;
 	global $service;
 	global $monitor_service;
 	global $global_defs;
@@ -173,10 +178,11 @@ function parse_tengine($name, $datum) {
 	static $script_regex = 'chk_*'; //vrrp_script name convention start with 'chk_'
 	static $sync_group_regex = '\w*'; //vrrp sync group name
 	static $laddrgname;
-//	static $level = 0 ;
+	#static $level = 0 ;
 	global $level;
 	static $server_count = 0;
 	static $upstream_count = 0;
+	static $upstream_server_count = 0;
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
@@ -216,8 +222,10 @@ function parse_tengine($name, $datum) {
 		/* Note to self: NEVER TOUCH THESE TWO LINES AGAIN (I REALLY MEAN THAT)	*/
 		if ($level == 1) { $server_count = -1; };
 		if ($level == 1) { $upstream_count = -1; };
+		if ($level == 1) { $upstream_server_count = -1; };
 		if (($level >  1) && ($name == "real_server")) { $server_count++ ; }; 
 		if (($level >  1) && ($name == "upstream")) { $upstream_count++ ; }; 
+		if (($level >  1) && ($name == "server")) { $upstream_server_count++ ; }; 
 
 		parse_tengine($name, $datum);
 		return; /* <--- HIGHLY IMPORTANT! do **NOT** remove this VITAL command */
@@ -538,6 +546,7 @@ function parse_tengine($name, $datum) {
 									")</I> - <B>\$upstream["
 									. ($upstream_count+1) .  
 									"]</B></FONT><BR>"; };
+							$upstream_name = $datum;
 							$upstream[$upstream_count+1]['name']		= $datum;
 							break;
 			case "consistent_hash"	:	$upstream[$upstream_count+1]['lb'] =  $name . " " . $datum;
@@ -554,9 +563,18 @@ function parse_tengine($name, $datum) {
 							break;
 			case "keepalive_timeout"	:	$upstream[$upstream_count+1]['keepalive_timeout'] =  $datum;
 							break;
-			case "server"		:	$upstream[$upstream_count+1]['server'][] = $name . " " . $datum;
+	
+			case "server"		:	if ($debug) {
+                                                        echo "<FONT COLOR=\"yellow\"><I>UPSTREAM SERVER" . $datum .  "</FONT><BR>"; 
+							}
+							$datum = trim($datum);
+							$temp = explode(' ', $datum);
+                                                        //echo "<FONT COLOR=\"yellow\"><I>TEMP" . $temp[0] .  "</FONT><BR>"; 
+							$upstream_server_count++;
+							$upstream[$upstream_count+1]['server'][$temp[0]] = $datum;
+
 							break;
-			case "check"		:	$upstream[$upstream_count+1]['check'] = $name . " " . $datum;
+			case "check"		:	$upstream[$upstream_count+1]['check'] = $datum;
 							break;
 			case "check_keepalive_requests"		:	$upstream[$upstream_count+1]['check_keepalive_requests'] = $datum;
 							break;
@@ -932,6 +950,7 @@ function read_config() {
 			} else {
 				$pieces = preg_split('/\s+/', $buffer);
 			}
+/*
 			if ($debug) {
 				echo "pieces[0] = [$pieces[0]]<BR>";
 				echo "pieces[1] = [$pieces[1]]<BR>";
@@ -941,16 +960,33 @@ function read_config() {
 				echo "pieces[5] = [$pieces[5]]<BR>";
 				echo "pieces[6] = [$pieces[6]]<BR>";
 			}
+*/
 
 			$name = $pieces[0];
+			
 
-			if ( ( $pieces[0] == "server" 
-			       || $pieces[0] == "session_sticky"
+			if ( (  $pieces[0] == "session_sticky"
 			       || $pieces[0] == "check"
+			       || $pieces[0] == "server"
 				) && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
+/*
+			 else if ( $pieces[0] == "server" && ) {
+				$count = 0;
+				$datum = "";
+				foreach ($pieces as $value) {
+					if($count == 0) {
+						$count++;
+						continue;
+					} 
+					$datum = $datum . " " . $value;
+					$count++;
+				}
+				echo "datum server  = [$datum]<BR>";
+			}
+*/
 			else if (isset($pieces[2]) 
 				and ( $pieces[0] == "dynamic_resolve" 
 				      || $pieces[0] == "keepalive" 
@@ -1051,6 +1087,7 @@ function print_arrays() {
 	global $main;
 	global $http;
 	global $upstream;
+	global $ups_serv;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1075,42 +1112,62 @@ function print_arrays() {
 	echo "<BR>error_log = "			. $main['error_log'];
 	echo "<BR>pid = "			. $main['pid'];
 
-	echo "<P><B>Global_defs</B>";
-	echo "<P><B>notification_email</B><BR>";
-        foreach ($global_defs['notification_email'] as $email) {
-		if ($debug) { echo "$egap1" . $email . "<BR>"; };
-	}
-	echo "<BR>Global_defs  [notification_email_from] = "	. $global_defs['notification_email_from'];
-	echo "<BR>Global_defs  [smtp_server] = "		. $global_defs['smtp_server'];
-	echo "<BR>Global_defs  [smtp_connect_timeout] = "	. $global_defs['smtp_connect_timeout'];
-	echo "<BR>Global_defs  [router_id] = "			. $global_defs['router_id'];
-	echo "<BR>Global_defs  [vrrp_mcast_group4] = "			. $global_defs['vrrp_mcast_group4'];
-	echo "<BR>Global_defs  [vrrp_mcast_group6] = "			. $global_defs['vrrp_mcast_group6'];
-	echo "<BR>Global_defs  [enable_traps] = "			. $global_defs['enable_traps'];
-
 	echo "<P><B>http</B>";
 	
 	$loop1 = $loop2 = 0;
 
 	echo "<P><B>upstream</B>";
-        echo "<BR>" .  var_dump($upstream);
+        //echo "<BR>" .  var_dump($upstream);
 
         while ($upstream[++$loop1]['name'] != "" ) { /* NOTE: must use *pre*incrempent not post */
+		$name = $upstream[$loop1]['name'];
                 echo "<BR>upstream [$loop1] [name] = "        . $upstream[$loop1]['name'];
                 echo "<BR>upstream [$loop1] [lb] = "        . $upstream[$loop1]['lb'];
                 echo "<P><B>server</B>";
-                foreach ($upstream[$loop1]['server'] as $server) {
-                                if ($debug) { echo "$egap1" . $server . "<BR>"; };
+		echo "<BR>";
+/*
+                foreach ($ups_serv[$name] as $server) {
+			echo "$egap1" . $server['host'] . ":" . $server['port'] . 
+				" weight=" . $server['weight'] .  
+				" max_fails=" . $server['max_fails'] . 
+				" fail_timeout=" . $server['fail_timeout'] .
+				"<BR>";
                 }
+*/
+		foreach ($upstream[$loop1]['server'] as $key => $value) {
+			echo $key . "=>" . $value . "<BR>";
+		}
                 echo "<BR>upstream [$loop1] [check] = "        . $upstream[$loop1]['check'];
                 echo "<BR>upstream [$loop1] [check_keepalive_requests] = "        . $upstream[$loop1]['check_keepalive_requests'];
                 echo "<BR>upstream [$loop1] [check_http_send] = "        . $upstream[$loop1]['check_http_send'];
                 echo "<BR>upstream [$loop1] [check_http_expect_alive] = "        . $upstream[$loop1]['check_http_expect_alive'];
                 echo "<BR>upstream [$loop1] [check_http_expect] = "        . $upstream[$loop1]['check_http_expect'];
+		echo "<BR>";
 
 
 
         }
+
+	$loop1 = 1; /* reuse loop1 */
+	$loop2 = 1;
+
+/*
+	while ( $ups_serv[$loop1][$loop2]['host'] != "" ) { 
+		while ($ups_serv[$loop1][$loop2]['host'] != "") {
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host'] "	. $ups_serv[$loop1][$loop2]['host'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['port'] "	. $ups_serv[$loop1][$loop2]['port'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_weight'] "	. $ups_serv[$loop1][$loop2]['host_weight'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_max_fails'] "	. $ups_serv[$loop1][$loop2]['host_max_fails'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_fail_timeout'] " . $ups_serv[$loop1][$loop2]['host_fail_timeout'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_down'] " . $ups_serv[$loop1][$loop2]['host_down'];
+			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_backup'] " . $ups_serv[$loop1][$loop2]['host_backup'];
+			echo "<BR>";
+			$loop2++;
+		}
+		$loop1++;
+		$loop2 = 1;
+	}
+*/
 
 	
 
@@ -1124,38 +1181,6 @@ function print_arrays() {
 			echo "<BR>Server [$loop1]:[$loop2]['port'] "	. $serv[$loop1][$loop2]['port'];
 			echo "<BR>Server [$loop1]:[$loop2]['notify_up'] "	. $serv[$loop1][$loop2]['notify_up'];
 			echo "<BR>Server [$loop1]:[$loop2]['notify_down'] = "		. $serv[$loop1][$loop2]['notify_down'];
-//			echo "<BR>Server [$loop1]:[$loop2]['active'] = "	. $serv[$loop1][$loop2]['active'];
-			echo "<BR>Server [$loop1]:[$loop2]['weight'] = "	. $serv[$loop1][$loop2]['weight'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['type'] = "	. $serv[$loop1][$loop2]['monitor']['type'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['tcp_connect_port'] = "	. $serv[$loop1][$loop2]['monitor']['tcp_connect_port'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_connect_port'] = "	. $serv[$loop1][$loop2]['monitor']['http_connect_port'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_connect_port'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_connect_port'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['tcp_bindto'] = "	. $serv[$loop1][$loop2]['monitor']['tcp_bindto'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_bindto'] = "	. $serv[$loop1][$loop2]['monitor']['http_bindto'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_bindto'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_bindto'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['tcp_connect_timeout'] = " . $serv[$loop1][$loop2]['monitor']['tcp_connect_timeout'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_connect_timeout'] = " . $serv[$loop1][$loop2]['monitor']['http_connect_timeout'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_connect_timeout'] = " . $serv[$loop1][$loop2]['monitor']['ssl_connect_timeout'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['smtp_connect_timeout'] = " . $serv[$loop1][$loop2]['monitor']['ssl_connect_timeout'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_nb_get_retry'] = "	. $serv[$loop1][$loop2]['monitor']['http_nb_get_retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_nb_get_retry'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_nb_get_retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_delay_before_retry'] = "	. $serv[$loop1][$loop2]['monitor']['http_delay_before_retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_delay_before_retry'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_delay_before_retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['smtp_delay_before_retry'] = "	. $serv[$loop1][$loop2]['monitor']['smtp_delay_before_retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_path'] = "	. $serv[$loop1][$loop2]['monitor']['http_path'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_path'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_path'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_digest'] = "	. $serv[$loop1][$loop2]['monitor']['http_digest'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_digest'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_digest'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['http_status_code'] = "	. $serv[$loop1][$loop2]['monitor']['http_status_code'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['ssl_status_code'] = "	. $serv[$loop1][$loop2]['monitor']['ssl_status_code'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['retry'] = "	. $serv[$loop1][$loop2]['monitor']['retry'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['helo_name'] = "	. $serv[$loop1][$loop2]['monitor']['helo_name'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['connect_ip'] = "	. $serv[$loop1][$loop2]['monitor']['connect_ip'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['smtp_connect_port'] = "	. $serv[$loop1][$loop2]['monitor']['smtp_connect_port'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['smtp_bindto'] = "	. $serv[$loop1][$loop2]['monitor']['smtp_bindto'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['misc_path'] = "	. $serv[$loop1][$loop2]['monitor']['misc_path'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['misc_timeout'] = "	. $serv[$loop1][$loop2]['monitor']['misc_timeout'];
-			echo "<BR>Server [$loop1]:[$loop2]['monitor']['misc_dynamic'] = "	. $serv[$loop1][$loop2]['monitor']['misc_dynamic'];
 			echo "<BR>";
 			$loop2++;
 		}
@@ -1171,6 +1196,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $main;
 	global $http;
 	global $upstream;
+	global $upstream_name;
+	global $ups_serv;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1186,11 +1213,11 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	
 	$old_debug=$debug;
 
-	if ($debug) { echo "<BR>Delete array number = $delete_item from level = $level<BR>"; }
+	if ($debug) { echo "<BR>Delete array selected_host = $delete_virt selected = $delete_item from level = $level delete_service = $delete_service<BR>"; }
 
 	//too many loop variable :), two is engough
 	$loop1 = 1;
-	$loop2 = 0;
+	$loop2 = 1;
 	$loop3 = $loop4 = 1;
 	$loop5 = 0; //static_ipaddress
 	$loop6 = 1;
@@ -1271,14 +1298,18 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		if ($debug) { echo "http "			. $http['http'] 	. " {<BR>"; };
 
 		while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "") {
+	
+			$name = $upstream[$loop1]['name'];
+			if ($debug) { echo "upstream name "	. $name  . " <BR>"; };
 
 			if (($loop1 == $delete_item) && ($level == "2") && ($delete_service == "upstream")) { 
-				$loop1++; 
+				$loop1++; $loop2=0; 
 			} else {
 
-				
 				if (isset($upstream[$loop1]['name']) &&
 		    			$upstream[$loop1]['name'] != "") { 
+
+
 					fputs ($ngx_fd, "$gap1 upstream " . $upstream[$loop1]['name']	.  " {\n", 80);
 					if ($debug) { echo "$egap1 upstream " . $upstream[$loop1]['name'] . " {<BR>"; };
 
@@ -1293,27 +1324,26 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 					}
                                         fputs ($ngx_fd, "$gap2 " .  "\n", 80);
 
-					$loop2 = 0;
-                                	foreach ($upstream[$loop1]['server'] as $server) {
+/* 
+   use host or host:port as key of array and delete server entry if key matches, 
+   using index number in array cause weird bug either unable to remove server entry
+   or server entry were added automatically from GUI.  
+*/
+                			foreach ($upstream[$loop1]['server'] as $key => $value) {
+						if (($key == $delete_item)
+                                                                && ($loop1 == $delete_virt) 
+                                                                && ($level == "2")      
+                                                                && ($delete_service == "upstream_server"))
+                                                        continue;
 
-                                        	if (($loop2 == $delete_item)
-								&& ($loop1 == $delete_virt) 
-								&& ($level == "2") 	
-								&& ($delete_service == "upstream_server")) {
-                                                	$loop2++;
-
-                                        	}
-                                        	else {
-                                                	fputs ($ngx_fd, "$gap2 " . $server . ";\n", 80);
-                                                	if ($debug) { echo "$egap2 " . $server . ";<BR>"; };
-                                                	$loop2++;
-                                        	}
-                                	}
+                                               	fputs ($ngx_fd, "$gap2 server " . $value . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 server " . $value . ";<BR>"; };
+                			}
 
 					if (isset($upstream[$loop1]['check']) 
 						&& $upstream[$loop1]['check'] != "") { 
-                                               	fputs ($ngx_fd, "$gap2 " . $upstream[$loop1]['check'] . ";\n", 80);
-                                               	if ($debug) { echo "$egap2 " . $upstream[$loop1]['check'] . ";<BR>"; };
+                                               	fputs ($ngx_fd, "$gap2 check " . $upstream[$loop1]['check'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 check " . $upstream[$loop1]['check'] . ";<BR>"; };
 					}
 					if (isset($upstream[$loop1]['check_keepalive_requests']) 
 						&& $upstream[$loop1]['check_keepalive_requests'] != "") { 
@@ -1345,6 +1375,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				}
 			
 				$loop1++;
+				$loop2=0;
 			}
 		} //end upstream loop
 
@@ -1562,6 +1593,14 @@ function add_service($virt_idx) {
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */;
 
+}
+
+function add_http_upstream_server($ups_idx) {
+
+	global $upstream;
+	$upstream[$ups_idx]['server']['host:port'] = "host:port";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
 
 function add_vrrp_virtual_ipaddress($vrrp_idx) {
