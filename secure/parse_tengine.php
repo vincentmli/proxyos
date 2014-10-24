@@ -32,6 +32,8 @@ $http = array ();
 
 $upstream = array();
 
+$http_server = array();
+
 $events = array (
 		"worker_connections" => "",
 		"connections" => "",
@@ -128,7 +130,6 @@ $local_address_group = array ( "",
 
 $serv = array ( );
 
-$ups_serv = array();
 
 
 /* Global file descriptor for use as a pointer to the lvs.cf file */
@@ -137,7 +138,6 @@ $level = 0 ;
 $service = "tengine";
 $monitor_service="";
 $ip_of="";
-$upstream_name;
 
 if (empty($debug)) { $debug = 0; } /* if unset, leave debugging off */
 
@@ -149,15 +149,14 @@ function parse_tengine($name, $datum) {
 	global $ngx_fd;
 	global $main;
 	global $http;
+	global $http_server;
 	global $upstream;
-	global $upstream_name;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
 	global $vrrp_sync_group;
 	global $virt_server_group;
 	global $serv;
-	global $ups_serv;
 	global $service;
 	global $monitor_service;
 	global $global_defs;
@@ -181,8 +180,8 @@ function parse_tengine($name, $datum) {
 	#static $level = 0 ;
 	global $level;
 	static $server_count = 0;
+	static $http_server_count = 0;
 	static $upstream_count = 0;
-	static $upstream_server_count = 0;
 	static $virt_count = 0;
 	static $ip_count = 0;
 	static $vrrp_instance_count = 0;
@@ -203,6 +202,7 @@ function parse_tengine($name, $datum) {
 		    or $name == "http"
 		    or $name == "least_conn"
 		    or $name == "ip_hash"
+		    or $name == "server" 
 		) {
 			$datum = "";
 		}
@@ -221,11 +221,11 @@ function parse_tengine($name, $datum) {
 		/* I'm sure my logic is flawed, however, this works			*/
 		/* Note to self: NEVER TOUCH THESE TWO LINES AGAIN (I REALLY MEAN THAT)	*/
 		if ($level == 1) { $server_count = -1; };
+		if ($level == 1) { $http_server_count = -1; };
 		if ($level == 1) { $upstream_count = -1; };
-		if ($level == 1) { $upstream_server_count = -1; };
 		if (($level >  1) && ($name == "real_server")) { $server_count++ ; }; 
+		if (($level >  1) && ($name == "server")) { $http_server_count++ ; }; 
 		if (($level >  1) && ($name == "upstream")) { $upstream_count++ ; }; 
-		if (($level >  1) && ($name == "server")) { $upstream_server_count++ ; }; 
 
 		parse_tengine($name, $datum);
 		return; /* <--- HIGHLY IMPORTANT! do **NOT** remove this VITAL command */
@@ -430,18 +430,6 @@ function parse_tengine($name, $datum) {
 								}
 							}
 							break;
-			case "sorry_server"	:	if ($service == "lvs") $virt[$virt_count]['sorry_server']	= $datum;
-							break;
-			case "delay_loop"	:	if ($service == "lvs") $virt[$virt_count]['delay_loop']	= $datum;
-							break;
-			case "lb_algo"		:	if ($service == "lvs") $virt[$virt_count]['lb_algo']	= $datum;
-							break;
-			case "lb_kind"		:	if ($service == "lvs") $virt[$virt_count]['lb_kind']	= $datum;
-							break;
-			case "syn_proxy"		:	if ($service == "lvs") $virt[$virt_count]['syn_proxy']	= 'yes';
-							break;
-			case "protocol"		:	if ($service == "lvs") $virt[$virt_count]['protocol']	= $datum;
-							break;
 			case "laddr_group_name"	:	if ($service == "lvs") $virt[$virt_count]['laddr_group_name']	= $datum;
 							break;
 			case "persistence_timeout"	:	if ($service == "lvs") $virt[$virt_count]['persistence_timeout']	= $datum;
@@ -464,7 +452,9 @@ function parse_tengine($name, $datum) {
 							break;							
 			case "real_server"		:	/* ignored (compatibility) */
 							break;
-			case "upstream"		:	/* ignored (compatibility) */
+			case "upstream"		:	
+							break;
+			case "server"		:	
 							break;
 
 			case "virtual_server_group"	:	$virt_server_group_count++;
@@ -546,7 +536,6 @@ function parse_tengine($name, $datum) {
 									")</I> - <B>\$upstream["
 									. ($upstream_count+1) .  
 									"]</B></FONT><BR>"; };
-							$upstream_name = $datum;
 							$upstream[$upstream_count+1]['name']		= $datum;
 							break;
 			case "consistent_hash"	:	$upstream[$upstream_count+1]['lb'] =  $name . " " . $datum;
@@ -564,14 +553,14 @@ function parse_tengine($name, $datum) {
 			case "keepalive_timeout"	:	$upstream[$upstream_count+1]['keepalive_timeout'] =  $datum;
 							break;
 	
-			case "server"		:	if ($debug) {
-                                                        echo "<FONT COLOR=\"yellow\"><I>UPSTREAM SERVER" . $datum .  "</FONT><BR>"; 
+			case "upstream_server_config"		:
+							if ($debug) {
+                                                        echo "<FONT COLOR=\"yellow\"><I>service $service server datum" . $datum .  "</FONT><BR>"; 
 							}
-							$datum = trim($datum);
-							$temp = explode(' ', $datum);
-                                                        //echo "<FONT COLOR=\"yellow\"><I>TEMP" . $temp[0] .  "</FONT><BR>"; 
-							$upstream_server_count++;
-							$upstream[$upstream_count+1]['server'][$temp[0]] = $datum;
+								$datum = trim($datum);
+								$temp = explode(" ", $datum);
+                                                        	//echo "<FONT COLOR=\"yellow\"><I>TEMP" . $temp[0] .  "</FONT><BR>"; 
+								$upstream[$upstream_count+1]['server'][$temp[0]] = $datum;
 
 							break;
 			case "check"		:	$upstream[$upstream_count+1]['check'] = $datum;
@@ -585,6 +574,8 @@ function parse_tengine($name, $datum) {
 			case "check_http_expect_alive"	:	$upstream[$upstream_count+1]['check_http_expect_alive'] = $datum;
 							break;
 			case "check_fastcgi_param"	:	$upstream[$upstream_count+1]['check_fastcgi_param'] = $name . " " . $datum;
+							break;
+			case "listen"	:			$http_server[$http_server_count+1]['listen'] = $datum;
 							break;
 
 			case "authentication"		:  if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['authentication'] = true; 
@@ -922,6 +913,7 @@ function read_config() {
 	global $datum;
 	global $debug;
 	global $level;
+	global $service;
 
 
 	while (!feof($ngx_fd)) {
@@ -967,13 +959,15 @@ function read_config() {
 
 			if ( (  $pieces[0] == "session_sticky"
 			       || $pieces[0] == "check"
-			       || $pieces[0] == "server"
+//			       || $pieces[0] == "server"
 				) && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
-/*
-			 else if ( $pieces[0] == "server" && ) {
+			//a trick to differ the upstream server and http server block config
+			//change the $name value so in parse to match the artificial value instead of the real input $name value
+			 else if ( $pieces[0] == "server" && $pieces[1] != "{" && $level == 2) {
+				$name = "upstream_server_config";
 				$count = 0;
 				$datum = "";
 				foreach ($pieces as $value) {
@@ -984,9 +978,7 @@ function read_config() {
 					$datum = $datum . " " . $value;
 					$count++;
 				}
-				echo "datum server  = [$datum]<BR>";
 			}
-*/
 			else if (isset($pieces[2]) 
 				and ( $pieces[0] == "dynamic_resolve" 
 				      || $pieces[0] == "keepalive" 
@@ -1086,8 +1078,8 @@ function print_arrays() {
 	/* debugging function only */
 	global $main;
 	global $http;
+	global $http_server;
 	global $upstream;
-	global $ups_serv;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1125,15 +1117,7 @@ function print_arrays() {
                 echo "<BR>upstream [$loop1] [lb] = "        . $upstream[$loop1]['lb'];
                 echo "<P><B>server</B>";
 		echo "<BR>";
-/*
-                foreach ($ups_serv[$name] as $server) {
-			echo "$egap1" . $server['host'] . ":" . $server['port'] . 
-				" weight=" . $server['weight'] .  
-				" max_fails=" . $server['max_fails'] . 
-				" fail_timeout=" . $server['fail_timeout'] .
-				"<BR>";
-                }
-*/
+
 		foreach ($upstream[$loop1]['server'] as $key => $value) {
 			echo $key . "=>" . $value . "<BR>";
 		}
@@ -1148,27 +1132,11 @@ function print_arrays() {
 
         }
 
-	$loop1 = 1; /* reuse loop1 */
-	$loop2 = 1;
-
-/*
-	while ( $ups_serv[$loop1][$loop2]['host'] != "" ) { 
-		while ($ups_serv[$loop1][$loop2]['host'] != "") {
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host'] "	. $ups_serv[$loop1][$loop2]['host'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['port'] "	. $ups_serv[$loop1][$loop2]['port'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_weight'] "	. $ups_serv[$loop1][$loop2]['host_weight'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_max_fails'] "	. $ups_serv[$loop1][$loop2]['host_max_fails'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_fail_timeout'] " . $ups_serv[$loop1][$loop2]['host_fail_timeout'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_down'] " . $ups_serv[$loop1][$loop2]['host_down'];
-			echo "<BR>UPSTREAM Server [$loop1]:[$loop2]['host_backup'] " . $ups_serv[$loop1][$loop2]['host_backup'];
-			echo "<BR>";
-			$loop2++;
-		}
-		$loop1++;
-		$loop2 = 1;
+	$loop1 = 0;
+	echo "<P><B>HTTP Server Block</B><BR>";
+        while (isset($http_server[++$loop1])) { /* NOTE: must use *pre*incrempent not post */
+                echo "<BR>http server [$loop1] [listen] = "        . $http_server[$loop1]['listen'];
 	}
-*/
-
 	
 
 	$loop1 = 1; /* reuse loop1 */
@@ -1195,9 +1163,8 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	global $ngx_fd;
 	global $main;
 	global $http;
+	global $http_server;
 	global $upstream;
-	global $upstream_name;
-	global $ups_serv;
 	global $virt;
 	global $vrrp_instance;
 	global $vrrp_script;
@@ -1298,9 +1265,6 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 		if ($debug) { echo "http "			. $http['http'] 	. " {<BR>"; };
 
 		while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "") {
-	
-			$name = $upstream[$loop1]['name'];
-			if ($debug) { echo "upstream name "	. $name  . " <BR>"; };
 
 			if (($loop1 == $delete_item) && ($level == "2") && ($delete_service == "upstream")) { 
 				$loop1++; $loop2=0; 
@@ -1336,7 +1300,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
                                                                 && ($delete_service == "upstream_server"))
                                                         continue;
 
-                                               	fputs ($ngx_fd, "$gap2 server " . $value . ";\n", 80);
+                                              	fputs ($ngx_fd, "$gap2 server " . $value . ";\n", 80);
                                                	if ($debug) { echo "$egap2 server " . $value . ";<BR>"; };
                 			}
 
@@ -1378,6 +1342,30 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				$loop2=0;
 			}
 		} //end upstream loop
+		
+		$loop1 = 1;
+
+		while ( isset($http_server[$loop1])) {
+                        if (($loop1 == $delete_item) && ($level == "2") && ($delete_service == "http_server")) {
+                                $loop1++; 
+                        } else {
+				if (isset($http_server[$loop1])) { 
+
+					fputs ($ngx_fd, "$gap1 server " .  " {\n", 80);
+					if ($debug) { echo "$egap1 server " . " {<BR>"; };
+
+					if (isset($http_server[$loop1]['listen']) 
+						&& $http_server[$loop1]['listen'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 listen " . $http_server[$loop1]['listen'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 listen " . $http_server[$loop1]['listen'] . ";<BR>"; };
+					}
+
+				        fputs ($ngx_fd,"$gap1 }\n", 80);
+                                       	if ($debug) { echo "$egap1 }<BR>"; }
+				}
+				$loop1++;
+			}
+		} //end http server block
 
 		fputs ($ngx_fd,"}\n", 80);
 		if ($debug) { echo "}<BR>"; };
