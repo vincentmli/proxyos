@@ -138,6 +138,7 @@ $level = 0 ;
 $service = "tengine";
 $monitor_service="";
 $ip_of="";
+$location_key="";
 
 if (empty($debug)) { $debug = 0; } /* if unset, leave debugging off */
 
@@ -703,9 +704,11 @@ function parse_tengine($name, $datum) {
 							$datum = trim($datum);
 							$temp_loc = explode(' ', $datum);
 							if(count($temp_loc) < 2) {
-								$http_server[$http_server_count+1]['location'][$temp_loc[0]] = $datum;
+								$location_key = $temp_loc[0];
+								$http_server[$http_server_count+1]['location'][$location_key] = $datum;
 							} else {
-								$http_server[$http_server_count+1]['location'][$temp_loc[1]] = $datum;
+								$location_key = $temp_loc[1];
+								$http_server[$http_server_count+1]['location'][$location_key] = $datum;
 							}
 							break;
 			case "TCP_CHECK"	:	if ($debug) { 
@@ -1380,6 +1383,20 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
                                                	if ($debug) { echo "$egap2 listen " . $http_server[$loop1]['listen'] . ";<BR>"; };
 					}
 
+                			foreach ($http_server[$loop1]['location'] as $key => $value) {
+						if (($key == $delete_item)
+                                                                && ($loop1 == $delete_virt) 
+                                                                && ($level == "3")      
+                                                                && ($delete_service == "http_server_location"))
+                                                        continue;
+
+                                              	fputs ($ngx_fd, "$gap2 location " . $value . " {\n", 80);
+                                               	if ($debug) { echo "$egap2 location " . $value . " {<BR>"; };
+
+                                              	fputs ($ngx_fd, "$gap2 }\n", 80);
+                                               	if ($debug) { echo "$egap2 }<BR>"; };
+                			}
+
 				        fputs ($ngx_fd,"$gap1 }\n", 80);
                                        	if ($debug) { echo "$egap1 }<BR>"; }
 				}
@@ -1553,6 +1570,30 @@ function add_upstream() {
 	}
 
 	$upstream[$loop2]['name']	= "[name]";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_http_server() {
+
+	global $http_server;
+	$loop2 = 1;	
+
+	/* find end of existing data */
+	while (isset($http_server[$loop2]['listen']) &&
+	       $http_server[$loop2]['listen'] != "") {
+		$loop2++;
+	}
+
+	$http_server[$loop2]['listen']	= "host:port";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_http_server_location($http_server_idx) {
+
+	global $http_server;
+	$http_server[$http_server_idx]['location']['/location'] = "/location";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
