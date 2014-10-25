@@ -158,7 +158,7 @@ A.logolink      {
 
 	foreach ($http_server[$selected_host]['location'] as $key => $value) {
 
-		$temp = explode(" ", $value);
+		$temp = explode(" ", $value['name']);
 
 		$match = ""; $location = "";
 		if(count($temp) < 2) {

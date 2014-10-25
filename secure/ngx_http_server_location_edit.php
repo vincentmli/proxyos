@@ -20,6 +20,7 @@
 
                 $match     =       $_GET['match'];
                 $loc  =       $_GET['location'];
+                $proxy_pass  =       $_GET['proxy_pass'];
 		$location = "";
 		if($match != "") {
 			if ($loc != "") {
@@ -32,9 +33,13 @@
 		}
 
 		if ($location != "") {
-			
-			$http_server[$selected_host]['location'][$selected] = $location;
+			$http_server[$selected_host]['location'][$selected]['name'] = $location;
 		}
+
+		if ($proxy_pass != "") {
+			$http_server[$selected_host]['location'][$selected]['proxy_pass'] = $proxy_pass;
+		}
+	
 		
 
 		header("Location: ngx_http_server_location.php?selected_host=$selected_host&selected=$selected");		
@@ -147,7 +152,8 @@ A.logolink      {
 	<TABLE>
 
 	<?php	
-                $strings = explode(" ", $http_server[$selected_host]['location'][$selected]);
+                $strings = explode(" ", $http_server[$selected_host]['location'][$selected]['name']);
+		$proxy_pass = $http_server[$selected_host]['location'][$selected]['proxy_pass']; 
 		$match = ""; $location = "";
 		if(count($strings) < 2 ) {
 			$location = $strings[0];
@@ -168,6 +174,11 @@ A.logolink      {
 		echo "<TR>";
 			echo "<TD>location: </TD>";
 			echo "<TD><INPUT TYPE=TEXT NAME=location VALUE=\""; echo $location . "\""  . ">"; echo "</TD>";
+		echo "</TR>";
+
+		echo "<TR>";
+			echo "<TD>proxy pass: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=proxy_pass VALUE=\""; echo $proxy_pass . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 

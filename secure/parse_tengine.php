@@ -151,6 +151,7 @@ function parse_tengine($name, $datum) {
 	global $main;
 	global $http;
 	global $http_server;
+	global $location_key;
 	global $upstream;
 	global $virt;
 	global $vrrp_instance;
@@ -703,13 +704,18 @@ function parse_tengine($name, $datum) {
 			case "location"		:    	if ($debug) { echo "<FONT COLOR=\"yellow\"><I>location datum" . $datum .  "</FONT><BR>"; }
 							$datum = trim($datum);
 							$temp_loc = explode(' ', $datum);
-							if(count($temp_loc) < 2) {
-								$location_key = $temp_loc[0];
-								$http_server[$http_server_count+1]['location'][$location_key] = $datum;
-							} else {
-								$location_key = $temp_loc[1];
-								$http_server[$http_server_count+1]['location'][$location_key] = $datum;
+							if(count($temp_loc) == 1) {
+								$location_key = trim($temp_loc[0]);
+								$http_server[$http_server_count+1]['location'][$location_key]['name'] = $datum;
+							} else if (count($temp_loc) == 2) {
+								$location_key = trim($temp_loc[1]);
+								$http_server[$http_server_count+1]['location'][$location_key]['name'] = $datum;
 							}
+							//if ($debug) { echo "<FONT COLOR=\"yellow\"><I>location key" . $location_key .  "</FONT><BR>"; }
+							break;
+			case "proxy_pass"	:	//if ($debug) { echo "<FONT COLOR=\"yellow\"><I>proxy_pass location key" . $location_key .  "</FONT><BR>"; }
+							$http_server[$http_server_count+1]['location'][$location_key]['proxy_pass'] = $datum;
+							//if ($debug) { echo "<FONT COLOR=\"yellow\"><I>proxy_pass " . $http_server[$http_server_count+1]['location'][$location_key]['proxy_pass']  .  "</FONT><BR>"; }
 							break;
 			case "TCP_CHECK"	:	if ($debug) { 
 							echo "<FONT COLOR=\"yellow\"><I>Asked for vitual.server (" 
@@ -1157,8 +1163,11 @@ function print_arrays() {
                 echo "<BR>http server [$loop1] [listen] = "        . $http_server[$loop1]['listen'];
 		echo "<BR>";
 		foreach ($http_server[$loop1]['location'] as $key => $value) {
-			echo $key . " => " . $value . "<BR>";
+			echo "key: " . " => " . $key . "<BR>";
+			echo "name: " . " => " . $value['name'] . "<BR>";
+			echo "proxy_pass:" . " => " . $value['proxy_pass'] . "<BR>";
 		}
+		
 	}
 	
 
@@ -1390,8 +1399,14 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
                                                                 && ($delete_service == "http_server_location"))
                                                         continue;
 
-                                              	fputs ($ngx_fd, "$gap2 location " . $value . " {\n", 80);
-                                               	if ($debug) { echo "$egap2 location " . $value . " {<BR>"; };
+                                              	fputs ($ngx_fd, "$gap2 location " . $value['name'] . " {\n", 80);
+                                               	if ($debug) { echo "$egap2 location " . $value['name'] . " {<BR>"; };
+
+						if (isset($value['proxy_pass']) 
+							&& $value['proxy_pass'] != "") { 
+                                               		fputs ($ngx_fd, "$gap3 proxy_pass " . $value['proxy_pass'] . ";\n", 80);
+                                               		if ($debug) { echo "$egap3 proxy_pass " . $value['proxy_pass'] . ";<BR>"; };
+						}
 
                                               	fputs ($ngx_fd, "$gap2 }\n", 80);
                                                	if ($debug) { echo "$egap2 }<BR>"; };
@@ -1593,7 +1608,7 @@ function add_http_server() {
 function add_http_server_location($http_server_idx) {
 
 	global $http_server;
-	$http_server[$http_server_idx]['location']['/location'] = "/location";
+	$http_server[$http_server_idx]['location']['/location']['name'] = "/location";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }
