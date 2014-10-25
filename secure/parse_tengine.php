@@ -203,11 +203,18 @@ function parse_tengine($name, $datum) {
 		    or $name == "least_conn"
 		    or $name == "ip_hash"
 		    or $name == "server" 
-		) {
-			$datum = "";
+		) { 
+			$datum = ""; 
+		} else if ($name == "location") { // if 'location test {' appears, for some reason parse fail to strip the '{', thus here to strip it. 
+			if(strstr($datum, "{")){
+				$datum = trim($datum, "{");
+			}
+			$buffer = "$name $datum";
+			
 		}
+			
 		$buffer = "$name $datum";
-		if ($debug) { echo "<FONT COLOR=\"GOLD\">Striping the \"{\". Level changed up. Calling parse() with name $name datum $datum. <BR></FONT>"; };
+		if ($debug) { echo "<FONT COLOR=\"GOLD\">Striping the \"{\". Level changed up. Calling parse() with buffer $buffer name $name datum $datum. <BR></FONT>"; };
 		$level++;
 
 		/* the following /mess/ is because I want to generate 'structures' ie	*/
@@ -692,6 +699,15 @@ function parse_tengine($name, $datum) {
 	if ($level == 3 ) {
 		switch ($name) {
 	
+			case "location"		:    	if ($debug) { echo "<FONT COLOR=\"yellow\"><I>location datum" . $datum .  "</FONT><BR>"; }
+							$datum = trim($datum);
+							$temp_loc = explode(' ', $datum);
+							if(count($temp_loc) < 2) {
+								$http_server[$http_server_count+1]['location'][$temp_loc[0]] = $datum;
+							} else {
+								$http_server[$http_server_count+1]['location'][$temp_loc[1]] = $datum;
+							}
+							break;
 			case "TCP_CHECK"	:	if ($debug) { 
 							echo "<FONT COLOR=\"yellow\"><I>Asked for vitual.server (" 
 									. ($server_count+1) . 
@@ -959,7 +975,6 @@ function read_config() {
 
 			if ( (  $pieces[0] == "session_sticky"
 			       || $pieces[0] == "check"
-//			       || $pieces[0] == "server"
 				) && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
@@ -980,10 +995,11 @@ function read_config() {
 				}
 			}
 			else if (isset($pieces[2]) 
-				and ( $pieces[0] == "dynamic_resolve" 
+				&& ( $pieces[0] == "dynamic_resolve" 
 				      || $pieces[0] == "keepalive" 
 				      || $pieces[0] == "check_fastcgi_param" 
 				      || $pieces[0] == "check_http_expect_alive" 
+				      || $pieces[0] == "location" 
 				    ) ) {
                         	$datum = $pieces[1] . " " . $pieces[2];
 			}
@@ -1119,7 +1135,7 @@ function print_arrays() {
 		echo "<BR>";
 
 		foreach ($upstream[$loop1]['server'] as $key => $value) {
-			echo $key . "=>" . $value . "<BR>";
+			echo $key . " => " . $value . "<BR>";
 		}
                 echo "<BR>upstream [$loop1] [check] = "        . $upstream[$loop1]['check'];
                 echo "<BR>upstream [$loop1] [check_keepalive_requests] = "        . $upstream[$loop1]['check_keepalive_requests'];
@@ -1136,6 +1152,10 @@ function print_arrays() {
 	echo "<P><B>HTTP Server Block</B><BR>";
         while (isset($http_server[++$loop1])) { /* NOTE: must use *pre*incrempent not post */
                 echo "<BR>http server [$loop1] [listen] = "        . $http_server[$loop1]['listen'];
+		echo "<BR>";
+		foreach ($http_server[$loop1]['location'] as $key => $value) {
+			echo $key . " => " . $value . "<BR>";
+		}
 	}
 	
 

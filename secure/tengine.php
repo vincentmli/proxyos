@@ -84,6 +84,9 @@ A.logolink      {
                 &nbsp;|&nbsp;
                 <A HREF="ngx_http_upstream.php" NAME="UPSTREAM">UPSTREAM</A>
                 &nbsp;|&nbsp;
+                <A HREF="ngx_http_server.php" NAME="HTTP SERVER">HTTP VIRTUAL SERVER</A>
+                &nbsp;|&nbsp;
+
 
                 </TD>
 

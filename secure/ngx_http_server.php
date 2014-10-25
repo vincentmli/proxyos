@@ -1,18 +1,18 @@
 <?php
 	$selected_host="";
-	$upstream_service="";
+	$http_server_service="";
 
 	if (isset($_POST['selected_host'])) {
         	$selected_host=$_POST['selected_host'];
 	}
-	if (isset($_POST['upstream_service'])) {
-		$upstream_service=$_POST['upstream_service'];
+	if (isset($_POST['http_server_service'])) {
+		$http_server_service=$_POST['http_server_service'];
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ($upstream_service == "EDIT") {
+	if ($http_server_service == "EDIT") {
 		/* Redirect browser to editing page */
-		header("Location: ngx_http_upstream_edit.php?selected_host=$selected_host");
+		header("Location: ngx_http_server_edit.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -30,7 +30,7 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML Strict Level 3//EN">
 
 <HEAD>
-<TITLE>Piranha (HTTP Upstream)</TITLE>
+<TITLE>Piranha (HTTP Server)</TITLE>
 <STYLE TYPE="text/css">
 <!-- 
 
@@ -79,27 +79,27 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">UPSTREAM</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">HTTP VIRTUAL SERVER</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD BGCOLOR="#FFFFFF">
 
 <?php
-	$upstream_service = "";
-	if (isset($_POST['upstream_service'])) {
-		$upstream_service = $_POST['upstream_service'];
+	$http_server_service = "";
+	if (isset($_POST['http_server_service'])) {
+		$http_server_service = $_POST['http_server_service'];
 	}
 
-	if ($upstream_service == "ADD") {
+	if ($http_server_service == "ADD") {
 		
-		add_upstream(); /* append new data */
+		add_http_server(); /* append new data */
 		
 	}
-	if ($upstream_service == "DELETE" ) {
-		$delete_service = "upstream";
+	if ($http_server_service == "DELETE" ) {
+		$delete_service = "http_server";
 		/* if ($debug) { echo "About to delete entry number $selected_host<BR>"; } */
-		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"ngx_http_upstream.php\" NAME=\"Upstream\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
+		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"ngx_http_server.php\" NAME=\"Upstream\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
 		open_file("w+");
 		write_config("2", "", $selected_host, $delete_service);
 		exit;
@@ -107,7 +107,7 @@ A.logolink      {
 
 /*
 
-	if ($upstream_service == "(DE)ACTIVATE" ) {
+	if ($http_server_service == "(DE)ACTIVATE" ) {
 		switch ($virt[$selected_host]['active']) {
 			case ""		:	$virt[$selected_host]['active'] = "0";	break;
 			case "0"	:	$virt[$selected_host]['active'] = "1";	break;
@@ -138,18 +138,18 @@ A.logolink      {
 </TABLE>
 
 
-<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="ngx_http_upstream.php">
+<FORM METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" ACTION="ngx_http_server.php">
 
 	<TABLE BORDER="1" CELLSPACING="2" CELLPADDING="6">
 		<TR>
 			<TD></TD>
-			       	<TD CLASS="title">UPSTREAM NAME</TD>
+			       	<TD CLASS="title">HTTP SERVER</TD>
 		</TR>
 
 <?php
 	$loop1 = 1;
 	
-	while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "" ) { /* for all virtual items... */
+	while ( isset($http_server[$loop1]['listen']) && $http_server[$loop1]['listen'] != "" ) { /* for all virtual items... */
 
 		/* lhh - this CONFIRM is never made by any form
 		if ($virtual_action == "CONFIRM") { $virt[$loop1t]['protocol'] = $index; };
@@ -172,8 +172,8 @@ A.logolink      {
 	 		echo "</TD>";
 */
 
-		echo "<TD><INPUT TYPE=HIDDEN 	NAME=name		SIZE=16	COLS=10	VALUE="	. $upstream[$loop1]['name']	. ">";
-		echo $upstream[$loop1]['name']	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN 	NAME=listen		SIZE=16	COLS=10	VALUE="	. $http_server[$loop1]['listen']	. ">";
+		echo $http_server[$loop1]['listen']	. "</TD>";
 
 		echo "</TR>";
 		$loop1++;
@@ -189,10 +189,10 @@ A.logolink      {
 
 	<TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="upstream_service" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="upstream_service" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="upstream_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="upstream_service" VALUE="(DE)ACTIVATE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="http_server_service" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="http_server_service" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="http_server_service" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="http_server_service" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 	</TABLE>
 	<P>
@@ -200,7 +200,7 @@ A.logolink      {
 <?php // echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>" ?>
 
 <?php
-	if ($upstream_service != "DELETE") {
+	if ($http_server_service != "DELETE") {
 		open_file("w+");
 		write_config("");
 	}
