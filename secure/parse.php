@@ -1,6 +1,7 @@
 <?php
 
-$LVS	=	"/etc/sysconfig/ha/web/lvs.cf";	/* Global */
+$LVS	=	"/etc/sysconfig/ha/lvs.cf";	/* Global */
+#$LVS	=	"/etc/sysconfig/ha/web/lvs.cf";	/* Global */
 //$LVS	=	"/etc/sysconfig/ha/keepalived.conf";	/* Global */
 
 /* 1 = debuging, 0 or undefined = no debuging */

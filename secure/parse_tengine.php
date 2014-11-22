@@ -193,6 +193,30 @@ function parse_tengine($name, $datum) {
 								if ($debug) { echo "<FONT COLOR=\"yellow\"><I>start of global definition </I><B>$service</B></FONT><BR>"; };
 								break;
 
+			case "ssl"		:	$http['ssl'] = $datum;	
+							break;
+			case "ssl_prefer_servers_cipher"	:	$http['ssl_prefer_server_ciphers'] = $datum;	
+							break;
+			case "ssl_protocols"	:	$http['ssl_protocols'] = $datum;	
+							break;
+			case "ssl_certificate"	:	$http['ssl_certificate'] = $datum;	
+							break;
+			case "ssl_certificate_key"	:$http['ssl_certificate_key'] = $datum;	
+							break;
+			case "ssl_ciphers"	:	$http['ssl_ciphers'] = $datum;	
+							break;
+			case "ssl_verify_client"	:	$http['ssl_verify_client'] = $datum;	
+							break;
+			case "ssl_verify_depth"	:	$http['ssl_verify_depth'] = $datum;	
+							break;
+			case "ssl_client_certificate"	:	$http['ssl_client_certificate'] = $datum;	
+							break;
+			case "ssl_trusted_certificate"	:	$http['ssl_trusted_certificate'] = $datum;	
+							break;
+			case "ssl_session_cache"	:	$http['ssl_session_cache'] = $datum;	
+							break;
+			case "ssl_session_timeout"	:	$http['ssl_session_timeout'] = $datum;	
+							break;
 			case "upstream"		:	
 							break;
 			case "server"		:	
@@ -256,6 +280,31 @@ function parse_tengine($name, $datum) {
 							break;
 			case "listen"	:			$http_server[$http_server_count+1]['listen'] = $datum;
 							break;
+			case "ssl"	:			$http_server[$http_server_count+1]['ssl'] = $datum;
+							break;
+                        case "ssl_prefer_server_cipher"        :       $http_server[$http_server_count+1]['ssl_prefer_server_ciphers'] = $datum;
+                                                        break;
+                        case "ssl_protocols"    :       $http_server[$http_server_count+1]['ssl_protocols'] = $datum;
+                                                        break;
+                        case "ssl_certificate"  :       $http_server[$http_server_count+1]['ssl_certificate'] = $datum;
+                                                        break;
+                        case "ssl_certificate_key"      :$http_server[$http_server_count+1]['ssl_certificate_key'] = $datum;
+                                                        break;
+                        case "ssl_ciphers"      :       $http_server[$http_server_count+1]['ssl_ciphers'] = $datum;
+                                                        break;
+                        case "ssl_verify_client"        :       $http_server[$http_server_count+1]['ssl_verify_client'] = $datum;
+                                                        break;
+                        case "ssl_verify_depth" :       $http_server[$http_server_count+1]['ssl_verify_depth'] = $datum;
+                                                        break;
+                        case "ssl_client_certificate"   :       $http_server[$http_server_count+1]['ssl_client_certificate'] = $datum;
+                                                        break;
+                        case "ssl_trusted_certificate"  :       $http_server[$http_server_count+1]['ssl_trusted_certificate'] = $datum;
+                                                        break;
+                        case "ssl_session_cache"        :       $http_server[$http_server_count+1]['ssl_session_cache'] = $datum;
+                                                        break;
+                        case "ssl_session_timeout"      :       $http_server[$http_server_count+1]['ssl_session_timeout'] = $datum;
+                                                        break;
+
 
 			case ""			:	break;
 			default			:	if ($debug) { echo "<FONT COLOR=\"BLUE\">Level2 - garbage [$name] (ignored line [$buffer])</FONT><BR>"; }
@@ -381,10 +430,10 @@ function read_config() {
 */
 
 			$name = $pieces[0];
-			
 
 			if ( (  $pieces[0] == "session_sticky"
 			       || $pieces[0] == "check"
+//			       || $pieces[0] == "ssl_protocols"
 				) && $level == 2 ) { //virtual_routes
 			// http://stackoverflow.com/questions/3591867/how-to-get-the-last-n-items-in-a-php-array-as-another-array
 				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
@@ -416,9 +465,12 @@ function read_config() {
 			else if (isset($pieces[2]) and $pieces[1] == "weight") {
 					$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
 			}
-			else if (isset($pieces[2]) and $pieces[0] == "real_server") {
-                                        $datum = $pieces[1] . " " . $pieces[2];
-                        } else {
+			else if ( $pieces[0] == "ssl_protocols"
+				  || $pieces[0] == "resolver"
+				) {
+				$datum = implode(" ", array_slice($pieces, -(count($pieces)-1)));
+			}
+			else {
 				$datum = $pieces[1];
 					
 			}
@@ -520,6 +572,8 @@ function print_arrays() {
 	echo "<BR>pid = "			. $main['pid'];
 
 	echo "<P><B>http</B>";
+        echo "<BR>http [ssl] = " . $http['ssl'];
+        echo "<BR>http [ssl_protocols] = " . $http['ssl_protocols'];
 	
 	$loop1 = $loop2 = 0;
 
@@ -551,6 +605,9 @@ function print_arrays() {
 	echo "<P><B>HTTP Server Block</B><BR>";
         while (isset($http_server[++$loop1])) { /* NOTE: must use *pre*incrempent not post */
                 echo "<BR>http server [$loop1] [listen] = "        . $http_server[$loop1]['listen'];
+                echo "<BR>http server [$loop1] [ssl] = "        . $http_server[$loop1]['ssl'];
+                echo "<BR>http server [$loop1] [ssl_protocols] = "        . $http_server[$loop1]['ssl_protocols'];
+                echo "<BR>http server [$loop1] [ssl_ciphers] = "        . $http_server[$loop1]['ssl_ciphers'];
 		echo "<BR>";
 		foreach ($http_server[$loop1]['location'] as $key => $value) {
 			echo "key: " . " => " . $key . "<BR>";
@@ -639,6 +696,68 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	if (isset($http)) {
 		fputs ($ngx_fd, "http "				. $http['http'] 	. " {\n", 80);
 		if ($debug) { echo "http "			. $http['http'] 	. " {<BR>"; };
+
+		if (isset($http['ssl']) && $http['ssl'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl " . $http['ssl'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl " . $http['ssl'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_ciphers']) && $http['ssl_ciphers'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_ciphers " . $http['ssl_ciphers'] . ";\n", strlen($http['ssl_ciphers'])+27);
+                	if ($debug) { echo "$egap1 ssl_ciphers " . $http['ssl_ciphers'] . ";<BR>"; };
+		}
+
+                fputs ($ngx_fd, "$gap1 " .  "\n", 80);
+
+		if (isset($http['ssl_protocols']) && $http['ssl_protocols'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_protocols " . $http['ssl_protocols'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_protocols " . $http['ssl_protocols'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_prefer_server_ciphers']) && $http['ssl_prefer_server_ciphers'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_prefer_server_ciphers " . $http['ssl_prefer_server_ciphers'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_prefer_server_ciphers " . $http['ssl_prefer_server_ciphers'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_certificate']) && $http['ssl_certificate'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_certificate " . $http['ssl_certificate'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_certificate " . $http['ssl_certificate'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_certificate_key']) && $http['ssl_certificate_key'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_certificate_key " . $http['ssl_certificate_key'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_certificate_key " . $http['ssl_certificate_key'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_verify_client']) && $http['ssl_verify_client'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_verify_client " . $http['ssl_verify_client'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_verify_client " . $http['ssl_verify_client'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_verify_depth']) && $http['ssl_verify_depth'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_verify_depth " . $http['ssl_verify_depth'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_verify_depth " . $http['ssl_verify_depth'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_client_certificate']) && $http['ssl_client_certificate'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_client_certificate " . $http['ssl_client_certificate'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_client_certificate " . $http['ssl_client_certificate'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_trusted_certificate']) && $http['ssl_trusted_certificate'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_trusted_certificate " . $http['ssl_trusted_certificate'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_trusted_certificate " . $http['ssl_trusted_certificate'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_session_cache']) && $http['ssl_session_cache'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_session_cache " . $http['ssl_session_cache'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_session_cache " . $http['ssl_session_cache'] . ";<BR>"; };
+		}
+
+		if (isset($http['ssl_session_timeout']) && $http['ssl_session_timeout'] != "") { 
+                	fputs ($ngx_fd, "$gap1 ssl_session_timeout " . $http['ssl_session_timeout'] . ";\n", 80);
+                	if ($debug) { echo "$egap1 ssl_session_timeout " . $http['ssl_session_timeout'] . ";<BR>"; };
+		}
 
 		while ( isset($upstream[$loop1]['name']) && $upstream[$loop1]['name'] != "") {
 
@@ -735,6 +854,72 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
                                                	fputs ($ngx_fd, "$gap2 listen " . $http_server[$loop1]['listen'] . ";\n", 80);
                                                	if ($debug) { echo "$egap2 listen " . $http_server[$loop1]['listen'] . ";<BR>"; };
 					}
+
+					if (isset($http_server[$loop1]['ssl']) 
+						&& $http_server[$loop1]['ssl'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 ssl " . $http_server[$loop1]['ssl'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 ssl " . $http_server[$loop1]['ssl'] . ";<BR>"; };
+					}
+
+					if (isset($http_server[$loop1]['ssl_protocols']) 
+						&& $http_server[$loop1]['ssl_protocols'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 ssl_protocols " . $http_server[$loop1]['ssl_protocols'] . ";\n", 80);
+                                               	if ($debug) { echo "$egap2 ssl_protocols " . $http_server[$loop1]['ssl_protocols'] . ";<BR>"; };
+					}
+
+					if (isset($http_server[$loop1]['ssl_ciphers']) 
+						&& $http_server[$loop1]['ssl_ciphers'] != "") { 
+                                               	fputs ($ngx_fd, "$gap2 ssl_ciphers " . $http_server[$loop1]['ssl_ciphers'] . ";\n", strlen($http_server[$loop1]['ssl_ciphers'])+27);
+                                               	if ($debug) { echo "$egap2 ssl_ciphers " . $http_server[$loop1]['ssl_ciphers'] . ";<BR>"; };
+					}
+                                        fputs ($ngx_fd, "$gap2 " .  "\n", 80);
+
+			                if (isset($http_server[$loop1]['ssl_prefer_server_ciphers']) && $http_server[$loop1]['ssl_prefer_server_ciphers'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_prefer_server_ciphers " . $http_server[$loop1]['ssl_prefer_server_ciphers'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_prefer_server_ciphers " . $http_server[$loop1]['ssl_prefer_server_ciphers'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_certificate']) && $http_server[$loop1]['ssl_certificate'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_certificate " . $http_server[$loop1]['ssl_certificate'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_certificate " . $http_server[$loop1]['ssl_certificate'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_certificate_key']) && $http_server[$loop1]['ssl_certificate_key'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_certificate_key " . $http_server[$loop1]['ssl_certificate_key'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_certificate_key " . $http_server[$loop1]['ssl_certificate_key'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_verify_client']) && $http_server[$loop1]['ssl_verify_client'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_verify_client " . $http_server[$loop1]['ssl_verify_client'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_verify_client " . $http_server[$loop1]['ssl_verify_client'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_verify_depth']) && $http_server[$loop1]['ssl_verify_depth'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_verify_depth " . $http_server[$loop1]['ssl_verify_depth'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_verify_depth " . $http_server[$loop1]['ssl_verify_depth'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_client_certificate']) && $http_server[$loop1]['ssl_client_certificate'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_client_certificate " . $http_server[$loop1]['ssl_client_certificate'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_client_certificate " . $http_server[$loop1]['ssl_client_certificate'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_trusted_certificate']) && $http_server[$loop1]['ssl_trusted_certificate'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_trusted_certificate " . $http_server[$loop1]['ssl_trusted_certificate'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_trusted_certificate " . $http_server[$loop1]['ssl_trusted_certificate'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_session_cache']) && $http_server[$loop1]['ssl_session_cache'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_session_cache " . $http_server[$loop1]['ssl_session_cache'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_session_cache " . $http_server[$loop1]['ssl_session_cache'] . ";<BR>"; };
+                			}    
+
+                			if (isset($http_server[$loop1]['ssl_session_timeout']) && $http_server[$loop1]['ssl_session_timeout'] != "") { 
+                        			fputs ($ngx_fd, "$gap2 ssl_session_timeout " . $http_server[$loop1]['ssl_session_timeout'] . ";\n", 80); 
+                        			if ($debug) { echo "$egap2 ssl_session_timeout " . $http_server[$loop1]['ssl_session_timeout'] . ";<BR>"; };
+                			}    
+
+
 
                 			foreach ($http_server[$loop1]['location'] as $key => $value) {
 						if (($key == $delete_item)

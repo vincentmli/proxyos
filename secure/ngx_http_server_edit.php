@@ -33,6 +33,9 @@
 
 
 		$http_server[$selected_host]['listen'] 	= $_GET['listen']; 
+		$http_server[$selected_host]['ssl'] 	= $_GET['ssl']; 
+		$http_server[$selected_host]['ssl_protocols'] 	= $_GET['ssl_protocols']; 
+		$http_server[$selected_host]['ssl_ciphers'] 	= $_GET['ssl_ciphers']; 
 
 	}
 
@@ -128,6 +131,9 @@ A.logolink      {
 <TABLE>
 	<?php
 		$listen = $http_server[$selected_host]['listen'] ;
+		$ssl = $http_server[$selected_host]['ssl'] ;
+		$ssl_protocols = $http_server[$selected_host]['ssl_protocols'] ;
+		$ssl_ciphers = $http_server[$selected_host]['ssl_ciphers'] ;
 	?>
 		
 	<TR>
@@ -135,9 +141,18 @@ A.logolink      {
 		<TD><INPUT TYPE="TEXT" NAME="listen" VALUE="<?php echo $listen; ?>"></TD>
 	</TR>
 	<TR>
-		<TD style="width:10%">send:</TD>
-		<TD><INPUT TYPE="TEXT" style="width:140%" NAME="send" VALUE="<?php echo htmlspecialchars($send, ENT_QUOTES) ?>"></TD>
+		<TD>ssl:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="ssl" VALUE="<?php echo $ssl; ?>"></TD>
 	</TR>
+	<TR>
+		<TD>ssl protocols:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="ssl_protocols" VALUE="<?php echo $ssl_protocols; ?>"></TD>
+	</TR>
+	<TR>
+		<TD style="width:10%">ssl ciphers:</TD>
+		<TD><INPUT TYPE="TEXT" style="width:100%" NAME="ssl_ciphers" VALUE="<?php echo $ssl_ciphers; ?>"></TD>
+	</TR>
+
 
 
 </TABLE>

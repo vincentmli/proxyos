@@ -32,11 +32,11 @@
 	if ($control_action == "LOAD CONFIG") {
 		$temp = tempnam(sys_get_temp_dir(), 'ipvs');
 		$today = date("Y-m-d-H:i:s"); 
-		exec("/usr/bin/sudo /usr/bin/rsync -p -o --backup --backup-dir=/etc/sysconfig/ha/web --suffix $today /etc/sysconfig/ha/web/lvs.cf /etc/keepalived/keepalived.conf>>".$temp." 2>&1");
+		exec("/usr/bin/sudo /usr/bin/rsync -p -o --backup --backup-dir=/etc/sysconfig/ha --suffix $today /etc/sysconfig/ha/lvs.cf /etc/keepalived/keepalived.conf>>".$temp." 2>&1");
                 exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1', $output, $rc);
 		if ($rc == 0) {
-			exec("/usr/bin/sudo /bin/cp -f /etc/sysconfig/ha/web/lvs.cf /etc/sysconfig/ha/web/keepalived.conf>>".$temp." 2>&1");
-			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/web/keepalived.conf>>".$temp." 2>&1");
+			exec("/usr/bin/sudo /bin/cp -f /etc/sysconfig/ha/lvs.cf /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
+			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
 		}
 		#unlink($temp);
 
@@ -49,8 +49,8 @@
 		exec("/usr/bin/sudo /bin/cp -f $backup /etc/keepalived/keepalived.conf>>".$temp." 2>&1");
                 exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1', $output, $rc);
 		if ($rc == 0) {
-			exec("/usr/bin/sudo /bin/cp -f $backup /etc/sysconfig/ha/web/keepalived.conf>>".$temp." 2>&1");
-			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/web/keepalived.conf>>".$temp." 2>&1");
+			exec("/usr/bin/sudo /bin/cp -f $backup /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
+			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
 		}
 		#unlink($temp);
 
@@ -227,7 +227,7 @@ A.logolink      {
 	</TABLE>
 
 	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
-	<?php $conf = file_get_contents('/etc/sysconfig/ha/web/lvs.cf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
+	<?php $conf = file_get_contents('/etc/sysconfig/ha/lvs.cf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
 	&nbsp;	
 	</TT> </TD> </TR>
 	<TR> <TD ALIGN=left>
@@ -242,7 +242,7 @@ A.logolink      {
 	</TABLE>
 
 	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> <TR> <TD> <TT>
-	<?php $conf = file_get_contents('/etc/sysconfig/ha/web/keepalived.conf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
+	<?php $conf = file_get_contents('/etc/sysconfig/ha/keepalived.conf');echo "<pre>" . htmlspecialchars($conf) . "</pre>"; ?>
 	&nbsp;	
 	</TT> </TD> </TR>
 	 </TABLE>
@@ -256,7 +256,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BGCOLOR="#eeeeee"> 
 	<TR> <TD> <TT>
 	<?php
-		$backups = glob("/etc/sysconfig/ha/web/keepalived.conf2014*");
+		$backups = glob("/etc/sysconfig/ha/keepalived.conf2014*");
                 echo "<SELECT NAME=\"backup\">";
                         foreach($backups as $element) {
                                 if ($backup == $element) {
