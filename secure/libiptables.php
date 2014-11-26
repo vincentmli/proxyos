@@ -149,6 +149,13 @@ class IptablesConfig
 		$this->fileTree = array();
 		$this->parseFile();
 	}
+
+	public function dumpFiletree()
+	{
+		$fileTreeDump = $this->fileTree;
+		return $fileTreeDump;
+	}
+
 	/**
 	 * Returns an array of strings containing the list of all tables defined in the file.
 	 * @access public

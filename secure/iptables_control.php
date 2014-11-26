@@ -157,6 +157,7 @@ A.logolink      {
     // Path of iptables rules. Yours may differ.
     	$rules_file = '/etc/sysconfig/ha/iptables';
     	$ipt = new IptablesConfig($rules_file);
+	$fileTree = $ipt->dumpFiletree();
     	foreach ($ipt->getAllTables() as $t) {
         	echo "<pre>Table <b>$t</b><br/>";
         	foreach ($ipt->getTableChains($t) as $c) {
@@ -167,6 +168,8 @@ A.logolink      {
         	}
         	echo '</pre>';
     	}
+
+	echo  var_dump($fileTree) ;
 	?>
 
 	</TT> </TD> </TR>
