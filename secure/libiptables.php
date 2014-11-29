@@ -101,7 +101,7 @@ class IptablesConfig
 		'raw'    => array('PREROUTING', 'OUTPUT')
 		);
 
-		$this->sudo_cmd = '';
+		$this->sudo_cmd = ' ';
 		if ($sudo_cmd)
 			$this->sudo_cmd = $sudo_cmd.' ';
 
@@ -112,12 +112,13 @@ class IptablesConfig
 		$this->ipt_restore = '/sbin/iptables-restore';
 		if ($ipversion == 6)
 			$this->ipt_restore = '/sbin/ip6tables-restore';
+		$this->sudo_cmd = '/usr/bin/sudo';
 
 		$fileString = '';
 		if ($rulesFile == NULL) {
 			$this->rulesFile = NULL;
 			if (is_executable($this->ipt_save)) {
-				exec($this->sudo_cmd.$this->ipt_save.' -c', $output, $return_val);
+				exec($this->sudo_cmd.' '.$this->ipt_save.' -c', $output, $return_val);
 				if ($return_val == 0) {
 					foreach ($output as $line)
 						$fileString .= $line."\n";
@@ -811,7 +812,7 @@ class IptablesConfig
 			$this->commit($tmp_path);
 			if ($restoreCounters)
 				$iptRestore .= ' -c';
-			exec($this->sudo_cmd.$iptRestore.' '.$tmp_path, $output, $return_val);
+			exec($this->sudo_cmd.' '.$iptRestore.' '.$tmp_path, $output, $return_val);
 			if ($return_val == 0)
 				return true;
 			else {

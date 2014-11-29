@@ -7,56 +7,6 @@
 	if (isset($_GET['control_action'])) {
         	$control_action = $_GET['control_action'];
 	}
-	if (isset($_GET['auto_update'])) {
-        	$auto_update = $_GET['auto_update'];
-	}
-	if (isset($_GET['rate'])) {
-        	$rate = $_GET['rate'];
-	}
-	if (isset($_GET['backup'])) {
-		$backup = $_GET['backup'];
-	}
-
-	if ($auto_update == 1) {
-        	if ($rate == '' || $rate < 10) { 
-			$rate=10; 
-		}
-        }
-	if ($control_action == "CHANGE PASSWORD") {
-		header("Location: passwd.php");
-		exit;
-	}
-	
-	
-
-	if ($control_action == "LOAD CONFIG") {
-		$temp = tempnam(sys_get_temp_dir(), 'ipvs');
-		$today = date("Y-m-d-H:i:s"); 
-		exec("/usr/bin/sudo /usr/bin/rsync -p -o --backup --backup-dir=/etc/sysconfig/ha --suffix $today /etc/sysconfig/ha/lvs.cf /etc/keepalived/keepalived.conf>>".$temp." 2>&1");
-                exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1', $output, $rc);
-		if ($rc == 0) {
-			exec("/usr/bin/sudo /bin/cp -f /etc/sysconfig/ha/lvs.cf /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
-			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
-		}
-		#unlink($temp);
-
-		header("Location: control.php");
-		exit;
-	}
-
-	if ($control_action == "RESTORE CONFIG") {
-		$temp = tempnam(sys_get_temp_dir(), 'keepalived');
-		exec("/usr/bin/sudo /bin/cp -f $backup /etc/keepalived/keepalived.conf>>".$temp." 2>&1");
-                exec('/usr/bin/sudo /sbin/service keepalived reload >>'.$temp.' 2>&1', $output, $rc);
-		if ($rc == 0) {
-			exec("/usr/bin/sudo /bin/cp -f $backup /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
-			exec("/usr/bin/sudo /bin/chown root.piranha /etc/sysconfig/ha/keepalived.conf>>".$temp." 2>&1");
-		}
-		#unlink($temp);
-
-		header("Location: control.php");
-		exit;
-	}
 
 		
 	header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");             // Date in the past
@@ -64,14 +14,7 @@
 	header("Cache-Control: no-cache, must-revalidate");           // HTTP/1.1
 	header("Pragma: no-cache");                                   // HTTP/1.0
 
-	require('parse.php'); /* read in the config! Hurragh! */
     	require('libiptables.php');
-	if ($auto_update == "1") {
-		echo "<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"$rate;control.php?auto_update=1&rate=$rate\"> ";
-	}
-	if ($prim['service'] == "") {
-		$prim['service'] = "lvs";
-	}
 ?>
 
 
@@ -128,7 +71,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">CONTROL / MONITORING</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">FIREWALL</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -141,7 +84,7 @@ A.logolink      {
 
 <?php include 'menu.php'; ?>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="control.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="iptables_control.php">
 	<P>
 
 
@@ -170,6 +113,18 @@ A.logolink      {
     	}
 
 	echo  var_dump($fileTree) ;
+	$ruleArray =  array (
+		'A' => 'INPUT',
+		'p' => 'tcp',
+		'dport' => '888',
+		'j' => 'ACCEPT',
+	);
+	$ipt->appendRule("filter", "INPUT", $ruleArray); 
+	$fileName = $rules_file;
+	$ipt->applyNow(false, NULL, $fileName);
+
+	#echo  var_dump($fileTree) ;
+	
 	?>
 
 	</TT> </TD> </TR>
