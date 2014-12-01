@@ -112,14 +112,14 @@ A.logolink      {
         	echo '</pre>';
     	}
 
-	echo  var_dump($fileTree) ;
+	#echo  var_dump($fileTree) ;
 	$ruleArray =  array (
 		'A' => 'INPUT',
 		'p' => 'tcp',
 		'dport' => '888',
 		'j' => 'ACCEPT',
 	);
-	$ipt->appendRule("filter", "INPUT", $ruleArray); 
+	#$ipt->appendRule("filter", "INPUT", $ruleArray); 
 	$fileName = $rules_file;
 	$ipt->applyNow(false, NULL, $fileName);
 
