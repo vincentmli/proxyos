@@ -94,9 +94,17 @@ A.logolink      {
 		$iptables_service = $_POST['iptables_service'];
 	}
 
-	if ($iptables_service == "ADD") {
-		
-		add_iptables(); /* append new data */
+	if ($iptables_service == "ADD") { 
+		$ruleA = array ( 
+			'A' => 'INPUT',
+			'p' => 'tcp',
+			'dport' => '888',
+			'j' => 'ACCEPT',
+		);	
+		echo "</TD></TR></TABLE><TABLE WIDTH=\"100%\" BORDER=\"0\" CELLSPACING=\"1\" CELLPADDING=\"5\"><TR><TD BGCOLOR=\"ffffff\"><HR><H2><FONT COLOR=\"#cc0000\" CLASS=\"title\">Click <A HREF=\"iptables_main.php\" NAME=\"iptables\">HERE</A> for refresh</FONT></H2><HR></TD></TR></TABLE>";
+		$ipt->appendRule("filter", "INPUT", $ruleA);
+		$ipt->applyNow(false, NULL, $rules_file);
+		exit;
 		
 	}
 	if ($iptables_service == "DELETE" ) {
@@ -146,8 +154,13 @@ A.logolink      {
 			       	<TD CLASS="title">TABLE</TD>
 			       	<TD CLASS="title">CHAIN</TD>
 			       	<TD CLASS="title">COMMAND</TD>
-			       	<TD CLASS="title">PARAMETERS</TD>
 			       	<TD CLASS="title">MATCH</TD>
+			       	<TD CLASS="title">STATE</TD>
+			       	<TD CLASS="title">PROTOCOL</TD>
+			       	<TD CLASS="title">SOURCE</TD>
+			       	<TD CLASS="title">SPORT</TD>
+			       	<TD CLASS="title">DESTINATION</TD>
+			       	<TD CLASS="title">DPORT</TD>
   		              	<TD CLASS="title">TARGET</TD>
 		</TR>
 
@@ -159,7 +172,78 @@ A.logolink      {
 	
 	foreach ($ipt->getAllTables() as $table) {
 		foreach ($ipt->getTableChains($table) as $chain) {
-			foreach ($ipt->getAllRuleStrings($table, $chain) as $rule) {
+			#foreach ($ipt->getAllRuleStrings($table, $chain) as $rule) {
+			foreach ($ipt->getAllRules($table, $chain) as $ruleArray) {
+				$command = $interface_in = $interface_out = $protocol = "";
+				$match = $state = $source = $source_port = $protocol = "";
+				$destination = $dport = $target = "";
+				
+				if (array_key_exists('A', $ruleArray)) {
+					$command = "append";
+				} else if (array_key_exists('I', $ruleArray)) {
+					$command = "insert";
+				} else if (array_key_exists('R', $ruleArray)) {
+                                        $command = "replace";
+                                }
+
+				if (array_key_exists('i', $ruleArray)) {
+					$interface_in = $ruleArray['i'];
+				} else if (array_key_exists('in-interface', $ruleArray)) {
+                                        $interface_in = $ruleArray['in-interface'];
+                                }
+
+				if (array_key_exists('o', $ruleArray)) {
+					$interface_out = $ruleArray['o'];
+				} else if (array_key_exists('out-interface', $ruleArray)) {
+                                        $interface_out = $ruleArray['out-interface'];
+                                }
+
+				if (array_key_exists('p', $ruleArray)) {
+					$protocol = $ruleArray['p'];
+				} else if (array_key_exists('protocol', $ruleArray)) {
+                                        $protocol = $ruleArray['protocol'];
+                                }
+				if (array_key_exists('m', $ruleArray)) {
+                                        $match = $ruleArray['m'];
+                                } else if (array_key_exists('match', $ruleArray)) {
+                                        $match = $ruleArray['match'];
+                                }
+
+				if (array_key_exists('state', $ruleArray)) {
+                                        $state = $ruleArray['state'];
+                                }
+
+				if (array_key_exists('s', $ruleArray)) {
+                                        $source = $ruleArray['s'];
+                                } else if (array_key_exists('source', $ruleArray)) {
+                                        $source = $ruleArray['source'];
+				}
+
+				if (array_key_exists('sport', $ruleArray)) {
+                                        $source_port = $ruleArray['sport'];
+                                } else if (array_key_exists('source-port', $ruleArray)) {
+                                        $source_port = $ruleArray['source-port'];
+				}
+
+				if (array_key_exists('d', $ruleArray)) {
+                                        $destination = $ruleArray['d'];
+                                } else if (array_key_exists('destination', $ruleArray)) {
+                                        $destination = $ruleArray['destination'];
+				}
+
+				if (array_key_exists('dport', $ruleArray)) {
+                                        $dport = $ruleArray['dport'];
+                                } else if (array_key_exists('destination-port', $ruleArray)) {
+                                        $dport = $ruleArray['destination-port'];
+                                } 
+
+				if (array_key_exists('j', $ruleArray)) {
+                                        $target = $ruleArray['j'];
+                                } else if (array_key_exists('jump', $ruleArray)) {
+                                        $target = $ruleArray['jump'];
+                                }
+				
+				//echo var_dump($ruleArray);
 
 				echo "<TR>";
 				echo "<TD><INPUT TYPE=RADIO	NAME=selected_host	VALUE=$loop1";
@@ -173,18 +257,33 @@ A.logolink      {
 				echo "<TD><INPUT TYPE=HIDDEN NAME=chain	SIZE=16	COLS=10	VALUE="	. $chain . ">";
 				echo $chain . "</TD>";
 
-				echo "<TD><INPUT TYPE=HIDDEN NAME=rule SIZE=16 COLS=10 VALUE=" . $rule . ">";
-				echo $rule . "</TD>";
-/*
+
 				echo "<TD><INPUT TYPE=HIDDEN NAME=command SIZE=16 COLS=10 VALUE=" . $command . ">";
 				echo $command . "</TD>";
 
-				echo "<TD><INPUT TYPE=HIDDEN NAME=parameters SIZE=16 COLS=10 VALUE=" . $parameters . ">";
-				echo $parameters . "</TD>";
+				echo "<TD><INPUT TYPE=HIDDEN NAME=match SIZE=16 COLS=10 VALUE=" . $match . ">";
+				echo $match . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=state SIZE=16 COLS=10 VALUE=" . $state . ">";
+				echo $state . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=protocol SIZE=16 COLS=10 VALUE=" . $protocol . ">";
+				echo $protocol . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=source SIZE=16 COLS=10 VALUE=" . $source . ">";
+				echo $source . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=sport SIZE=16 COLS=10 VALUE=" . $source_port . ">";
+				echo $source_port . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=destination SIZE=16 COLS=10 VALUE=" . $destination . ">";
+				echo $destination . "</TD>";
+
+				echo "<TD><INPUT TYPE=HIDDEN NAME=dport SIZE=16 COLS=10 VALUE=" . $dport . ">";
+				echo $dport . "</TD>";
 
 				echo "<TD><INPUT TYPE=HIDDEN NAME=target SIZE=16 COLS=10 VALUE=" . $target . ">";
 				echo $target . "</TD>";
-*/
 		
 				echo "</TR>";
 				$loop1++;
