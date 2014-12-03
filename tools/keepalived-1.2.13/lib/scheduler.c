@@ -40,6 +40,7 @@
 #include "utils.h"
 #include "signals.h"
 #include "logger.h"
+#include "epollwrapper.h"
 
 /* global vars */
 thread_master_t *master = NULL;
@@ -51,6 +52,7 @@ thread_make_master(void)
 	thread_master_t *new;
 
 	new = (thread_master_t *) MALLOC(sizeof (thread_master_t));
+	epoll_init(&new->epfd, &new->events);
 	return new;
 }
 
@@ -82,21 +84,50 @@ thread_list_add_before(thread_list_t * list, thread_t * point, thread_t * thread
 	list->count++;
 }
 
+/* Add a new thread to the head of list. */
+void
+thread_list_add_head(thread_list_t * list, thread_t * thread)
+{
+        thread->prev = NULL;
+        thread->next = list->head;
+        if (list->head)
+                list->head->prev = thread;
+        else
+                list->tail = thread;
+        list->head = thread;
+        list->count++;
+}
+
+/* Add a new thread to the list. after a point */
+void
+thread_list_add_after(thread_list_t * list, thread_t * point, thread_t * thread)
+{
+        thread->prev = point;
+        thread->next = point->next;
+        if (point->next)
+                point->next->prev = thread;
+        else
+                list->tail = thread;
+        point->next = thread;
+        list->count++;
+}
+
+
 /* Add a thread in the list sorted by timeval */
 void
 thread_list_add_timeval(thread_list_t * list, thread_t * thread)
 {
 	thread_t *tt;
 
-	for (tt = list->head; tt; tt = tt->next) {
-		if (timer_cmp(thread->sands, tt->sands) <= 0)
+	for (tt = list->tail; tt; tt = tt->prev) {
+		if (timer_cmp(thread->sands, tt->sands) >= 0)
 			break;
 	}
 
 	if (tt)
-		thread_list_add_before(list, tt, thread);
+		thread_list_add_after(list, tt, thread);
 	else
-		thread_list_add(list, thread);
+		thread_list_add_head(list, thread);
 }
 
 /* Delete a thread from the list. */
@@ -186,10 +217,8 @@ thread_cleanup_master(thread_master_t * m)
 	thread_destroy_list(m, m->event);
 	thread_destroy_list(m, m->ready);
 
-	/* Clear all FDs */
-	FD_ZERO(&m->readfd);
-	FD_ZERO(&m->writefd);
-	FD_ZERO(&m->exceptfd);
+	/* Clear epoll resources */
+	epoll_cleanup(&m->epfd, &m->events);
 
 	/* Clean garbage */
 	thread_clean_unuse(m);
@@ -239,10 +268,10 @@ thread_add_read(thread_master_t * m, int (*func) (thread_t *)
 
 	assert(m != NULL);
 
-	if (FD_ISSET(fd, &m->readfd)) {
-		log_message(LOG_WARNING, "There is already read fd [%d]", fd);
-		return NULL;
-	}
+        if (epoll_fdisset(fd, DIR_RD)) {
+                log_message(LOG_WARNING, "There is already read fd [%d]", fd);
+                return NULL;
+        }
 
 	thread = thread_new(m);
 	thread->type = THREAD_READ;
@@ -250,7 +279,7 @@ thread_add_read(thread_master_t * m, int (*func) (thread_t *)
 	thread->master = m;
 	thread->func = func;
 	thread->arg = arg;
-	FD_SET(fd, &m->readfd);
+        epoll_set_fd(m->epfd, DIR_RD, fd, thread);
 	thread->u.fd = fd;
 
 	/* Compute read timeout value */
@@ -272,10 +301,10 @@ thread_add_write(thread_master_t * m, int (*func) (thread_t *)
 
 	assert(m != NULL);
 
-	if (FD_ISSET(fd, &m->writefd)) {
-		log_message(LOG_WARNING, "There is already write fd [%d]", fd);
-		return NULL;
-	}
+        if (epoll_fdisset(fd, DIR_WR)) {
+                log_message(LOG_WARNING, "There is already write fd [%d]", fd);
+                return NULL;
+        }
 
 	thread = thread_new(m);
 	thread->type = THREAD_WRITE;
@@ -283,7 +312,7 @@ thread_add_write(thread_master_t * m, int (*func) (thread_t *)
 	thread->master = m;
 	thread->func = func;
 	thread->arg = arg;
-	FD_SET(fd, &m->writefd);
+        epoll_set_fd(m->epfd, DIR_WR, fd, thread);
 	thread->u.fd = fd;
 
 	/* Compute write timeout value */
@@ -400,13 +429,13 @@ thread_cancel(thread_t * thread)
 
 	switch (thread->type) {
 	case THREAD_READ:
-		assert(FD_ISSET(thread->u.fd, &thread->master->readfd));
-		FD_CLR(thread->u.fd, &thread->master->readfd);
+                assert(epoll_fdisset(thread->u.fd, DIR_RD));
+                epoll_clear_fd(thread->master->epfd, DIR_RD, thread->u.fd);
 		thread_list_delete(&thread->master->read, thread);
 		break;
 	case THREAD_WRITE:
-		assert(FD_ISSET(thread->u.fd, &thread->master->writefd));
-		FD_CLR(thread->u.fd, &thread->master->writefd);
+                assert(epoll_fdisset(thread->u.fd, DIR_WR));
+                epoll_clear_fd(thread->master->epfd, DIR_WR, thread->u.fd);
 		thread_list_delete(&thread->master->write, thread);
 		break;
 	case THREAD_TIMER:
@@ -508,11 +537,9 @@ thread_fetch(thread_master_t * m, thread_t * fetch)
 {
 	int ret, old_errno;
 	thread_t *thread;
-	fd_set readfd;
-	fd_set writefd;
-	fd_set exceptfd;
 	timeval_t timer_wait;
 	int signal_fd;
+	int i;
 #ifdef _WITH_SNMP_
 	timeval_t snmp_timer_wait;
 	int snmpblock = 0;
@@ -556,13 +583,11 @@ retry:	/* When thread can't fetch try to find next thread again. */
 	set_time_now();
 	thread_compute_timer(m, &timer_wait);
 
-	/* Call select function. */
-	readfd = m->readfd;
-	writefd = m->writefd;
-	exceptfd = m->exceptfd;
+        /* Call epoll function. */
+        signal_fd = signal_rfd();
+        epoll_set_fd(m->epfd, DIR_RD, signal_fd, NULL);
 
-	signal_fd = signal_rfd();
-	FD_SET(signal_fd, &readfd);
+        ret = epoll_handler(m->epfd, m->events, &timer_wait);
 
 #ifdef _WITH_SNMP_
 	/* When SNMP is enabled, we may have to select() on additional
@@ -578,7 +603,7 @@ retry:	/* When thread can't fetch try to find next thread again. */
 		memcpy(&timer_wait, &snmp_timer_wait, sizeof(timeval_t));
 #endif
 
-	ret = select(FD_SETSIZE, &readfd, &writefd, &exceptfd, &timer_wait);
+//	ret = select(FD_SETSIZE, &readfd, &writefd, &exceptfd, &timer_wait);
 
 	/* we have to save errno here because the next syscalls will set it */
 	old_errno = errno;
@@ -592,8 +617,6 @@ retry:	/* When thread can't fetch try to find next thread again. */
 #endif
 
 	/* handle signals synchronously, including child reaping */
-	if (FD_ISSET(signal_fd, &readfd))
-		signal_run_callback();
 
 	/* Update current time */
 	set_time_now();
@@ -602,9 +625,49 @@ retry:	/* When thread can't fetch try to find next thread again. */
 		if (old_errno == EINTR)
 			goto retry;
 		/* Real error. */
-		DBG("select error: %s", strerror(old_errno));
+		DBG("epoll error: %s", strerror(old_errno));
 		assert(0);
 	}
+
+        for (i = 0; i < ret; i++) {
+                int fd;
+                thread_t *t;
+
+                fd = m->events[i].data.fd;
+                if (signal_fd == fd) {
+                        epoll_clear_fd(m->epfd, DIR_RD, fd);
+                        signal_run_callback();
+                        continue;
+                }
+
+                /* process read fd */
+                if ((m->events[i].events & (EPOLLIN|EPOLLERR|EPOLLHUP)) &&
+                                                epoll_fdisset(fd, DIR_RD)) {
+                        t = (thread_t *)get_data_by_fd(fd, DIR_RD);
+                        if (t != NULL) {
+                                epoll_clear_fd(m->epfd, DIR_RD, fd);
+                                thread_list_delete(&m->read, t);
+                                thread_list_add(&m->ready, t);
+                                t->type = THREAD_READY_FD;
+                        }
+                }
+
+                /* process write fd */
+                if ((m->events[i].events & (EPOLLOUT|EPOLLERR|EPOLLHUP)) &&
+                                                epoll_fdisset(fd, DIR_WR)) {
+                        t = (thread_t *)get_data_by_fd(fd, DIR_WR);
+                        if (t != NULL) {
+                                epoll_clear_fd(m->epfd, DIR_WR, fd);
+                                thread_list_delete(&m->write, t);
+                                thread_list_add(&m->ready, t);
+                                t->type = THREAD_READY_FD;
+                        }
+                }
+
+                /* other fd */
+                /* ... */
+        }
+
 
 	/* Timeout children */
 	thread = m->child.head;
@@ -629,20 +692,15 @@ retry:	/* When thread can't fetch try to find next thread again. */
 		t = thread;
 		thread = t->next;
 
-		if (FD_ISSET(t->u.fd, &readfd)) {
-			assert(FD_ISSET(t->u.fd, &m->readfd));
-			FD_CLR(t->u.fd, &m->readfd);
-			thread_list_delete(&m->read, t);
-			thread_list_add(&m->ready, t);
-			t->type = THREAD_READY_FD;
-		} else {
-			if (timer_cmp(time_now, t->sands) >= 0) {
-				FD_CLR(t->u.fd, &m->readfd);
-				thread_list_delete(&m->read, t);
-				thread_list_add(&m->ready, t);
-				t->type = THREAD_READ_TIMEOUT;
-			}
-		}
+                if (timer_cmp(time_now, t->sands) >= 0) {
+                        epoll_clear_fd(m->epfd, DIR_RD, t->u.fd);
+                        thread_list_delete(&m->read, t);
+                        thread_list_add(&m->ready, t);
+                        t->type = THREAD_READ_TIMEOUT;
+                } else {
+                        break;
+                }
+
 	}
 
 	/* Write thead. */
@@ -653,20 +711,15 @@ retry:	/* When thread can't fetch try to find next thread again. */
 		t = thread;
 		thread = t->next;
 
-		if (FD_ISSET(t->u.fd, &writefd)) {
-			assert(FD_ISSET(t->u.fd, &writefd));
-			FD_CLR(t->u.fd, &m->writefd);
-			thread_list_delete(&m->write, t);
-			thread_list_add(&m->ready, t);
-			t->type = THREAD_READY_FD;
-		} else {
-			if (timer_cmp(time_now, t->sands) >= 0) {
-				FD_CLR(t->u.fd, &m->writefd);
-				thread_list_delete(&m->write, t);
-				thread_list_add(&m->ready, t);
-				t->type = THREAD_WRITE_TIMEOUT;
-			}
-		}
+                if (timer_cmp(time_now, t->sands) >= 0) {
+                        epoll_clear_fd(m->epfd, DIR_WR, t->u.fd);
+                        thread_list_delete(&m->write, t);
+                        thread_list_add(&m->ready, t);
+                        t->type = THREAD_WRITE_TIMEOUT;
+                } else {
+                        break;
+                }
+
 	}
 	/* Exception thead. */
 	/*... */

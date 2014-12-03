@@ -27,6 +27,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/epoll.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -69,9 +70,8 @@ typedef struct _thread_master {
 	thread_list_t event;
 	thread_list_t ready;
 	thread_list_t unuse;
-	fd_set readfd;
-	fd_set writefd;
-	fd_set exceptfd;
+	int epfd;	/* epoll fd */
+	struct epoll_event *events;     /* epoll events */
 	unsigned long alloc;
 } thread_master_t;
 
