@@ -825,6 +825,37 @@ class IptablesConfig
 		return false;
 	}
 	/**
+	 * Saves the current state of rules to iptables
+	 * @param boolean $saveCounters If set to true, current packet and byte counters will also be saved. If set to false, they will be ignored.
+	 * @param string $iptSave The path of iptables-save command. The default path is set to use save method established in constructor.
+	 * @return boolean true on success; false otherwise.
+	 */
+	public function saveNow($saveCounters = true, $iptSave = NULL, $fileName = NULL)
+	{
+		if ($iptSave === NULL)
+			$iptSave = $this->ipt_save;
+
+		if (is_executable($iptSave)) {
+			$tmp_path = $fileName;
+			if ($fileName === NULL) {
+				$date = rtrim(`/bin/date +"%s"`);
+				$tmp_path = "/tmp/rules_$date";
+			}
+			if ($saveCounters)
+				$iptSave .= ' -c';
+			exec($this->sudo_cmd.' '.$iptSave.' > '.$tmp_path, $output, $return_val);
+			if ($return_val == 0)
+				return true;
+			else {
+				$str = '';
+				foreach ($output as $line)
+					$str .= $line;
+				die ($str);
+			}
+		}
+		return false;
+	}
+	/**
 	 * Extracts packet and byte counters and puts the extracted values in an associative array
 	 * @access private
 	 * @param string $string The input string containing counters
