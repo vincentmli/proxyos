@@ -155,6 +155,13 @@ A.logolink      {
                 <A HREF="virtual_edit_real.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="REAL SERVER">REAL SERVER</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="virtual_edit_real_edit.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host&selected=$selected"; } ?> " CLASS="tabon" NAME="EDIT REAL SERVER">EDIT REAL SERVER</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="virtual_edit_real_edit_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host&selected=$selected"; } ?> " CLASS="tabon" NAME="HELP">HELP</A>
+                &nbsp;|&nbsp;
+
+
 		<!-- <TD WIDTH="30%" ALIGN="RIGHT"><A HREF="virtual_main.php">MAIN PAGE</A></TD> -->
         </TR>
 </TABLE>

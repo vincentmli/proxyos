@@ -189,6 +189,10 @@ A.logolink      {
                 <A HREF="virtual_edit_real.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="REAL SERVER">REAL SERVER</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="virtual_edit_virt_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?>" CLASS="tabon" NAME="HELP">HELP</A>
+                &nbsp;|&nbsp;
+
+
         </TR>
 </TABLE>
 <?php } ?>
