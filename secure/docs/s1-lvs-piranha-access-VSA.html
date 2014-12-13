@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>2.4. Limiting Access To the Piranha Configuration Tool</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-initial-setup-VSA.html" title="Chapter 2. Initial LVS Configuration" />
+    <link rel="prev" href="s2-lvs-piranha-port-VSA.html" title="2.3.1. Configuring the Piranha Configuration Tool Web Server Port" />
+    <link rel="next" href="s1-lvs-forwarding-VSA.html" title="2.5. Turning on Packet Forwarding" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>2.4. Limiting Access To the <span><strong class="application">Piranha Configuration Tool</strong></span></strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-piranha-port-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-forwarding-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-piranha-access-VSA"></a>2.4. Limiting Access To the <span><strong class="application">Piranha Configuration Tool</strong></span></h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2921483" class="indexterm"></a>
+      <a id="id2921494" class="indexterm"></a>
+      <p>
+			The <span><strong class="application">Piranha Configuration Tool</strong></span> prompts for a valid username and password combination. However, because all of the data passed to the <span><strong class="application">Piranha Configuration Tool</strong></span> is in plain text, it is recommended that you restrict access only to trusted networks or to the local machine.
+		</p>
+      <p>
+			The easiest way to restrict access is to use the Apache HTTP Server's built in access control mechanisms by editing <code class="filename">/etc/sysconfig/ha/web/secure/.htaccess</code>. After altering the file you do not have to restart the <code class="command">piranha-gui</code> service because the server checks the <code class="filename">.htaccess</code> file each time it accesses the directory.
+		</p>
+      <p>
+			By default, the access controls for this directory allow anyone to view the contents of the directory. Here is what the default access looks like:
+		</p>
+      <pre class="screen">
+Order deny,allow
+Allow from all
+</pre>
+      <p>
+			To limit access of the <span><strong class="application">Piranha Configuration Tool</strong></span> to only the localhost change the <code class="filename">.htaccess</code> file to allow access from only the loopback device (127.0.0.1). For more information on the loopback device, see the chapter titled <em class="citetitle">Network Scripts</em> in the <em class="citetitle">Red Hat Enterprise Linux Reference Guide</em>.
+		</p>
+      <pre class="screen">
+Order deny,allow
+Deny from all
+Allow from 127.0.0.1
+</pre>
+      <p>
+			You can also allow specific hosts or subnets as seen in this example:
+		</p>
+      <pre class="screen">
+Order deny,allow
+Deny from all
+Allow from 192.168.1.100
+Allow from 172.16.57
+</pre>
+      <p>
+			In this example, only Web browsers from the machine with the IP address of 192.168.1.100 and machines on the 172.16.57/24 network can access the <span><strong class="application">Piranha Configuration Tool</strong></span>.
+		</p>
+      <div class="caution">
+        <h2>Caution</h2>
+        <p>
+				Editing the <span><strong class="application">Piranha Configuration Tool</strong></span><code class="filename">.htaccess</code> file limits access to the configuration pages in the <code class="filename">/etc/sysconfig/ha/web/secure/</code> directory but not to the login and the help pages in <code class="filename">/etc/sysconfig/ha/web/</code>. To limit access to this directory, create a <code class="filename">.htaccess</code> file in the <code class="filename">/etc/sysconfig/ha/web/</code> directory with <strong class="userinput"><code>order</code></strong>, <strong class="userinput"><code>allow</code></strong>, and <strong class="userinput"><code>deny</code></strong> lines identical to <code class="filename">/etc/sysconfig/ha/web/secure/.htaccess</code>.
+			</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-piranha-port-VSA.html"><strong>Prev</strong>2.3.1. Configuring the Piranha Configuration Tool...</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-forwarding-VSA.html"><strong>Next</strong>2.5. Turning on Packet Forwarding</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

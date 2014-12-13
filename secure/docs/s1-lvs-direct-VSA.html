@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.2. LVS via Direct Routing</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-setup-VSA.html" title="Chapter 3. Setting Up LVS" />
+    <link rel="prev" href="s2-lvs-enabling-nat-VSA.html" title="3.1.3. Enabling NAT Routing on the LVS Routers" />
+    <link rel="next" href="s2-lvs-direct-arptables-VSA.html" title="3.2.1. Direct Routing and arptables_jf" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.2. LVS via Direct Routing</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-enabling-nat-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-direct-arptables-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-direct-VSA"></a>3.2. LVS via Direct Routing</h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2822863" class="indexterm"></a>
+      <a id="id2890669" class="indexterm"></a>
+      <a id="id2918562" class="indexterm"></a>
+      <p>
+			As mentioned in <a href="s2-lvs-directrouting-VSA.html" title="1.4.2. Direct Routing">Section 1.4.2, “Direct Routing”</a>, direct routing allows real servers to process and route packets directly to a requesting user rather than passing outgoing packets through the LVS router. Direct routing requires that the real servers be physically connected to a network segment with the LVS router and be able to process and direct outgoing packets as well.
+		</p>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">Network Layout</span>
+          </dt>
+          <dd>
+            <p>
+						In a direct routing LVS setup, the LVS router needs to receive incoming requests and route them to the proper real server for processing. The real servers then need to <span class="emphasis"><em>directly</em></span> route the response to the client. So, for example, if the client is on the Internet, and sends the packet through the LVS router to a real server, the real server must be able to go directly to the client via the Internet. This can be done by configuring a gateway for the real server to pass packets to the Internet. Each real server in the server pool can have its own separate gateway (and each gateway with its own connection to the Internet), allowing for maximum throughput and scalability. For typical LVS setups, however, the real servers can communicate through one gateway (and therefore one network connection).
+					</p>
+            <div class="important">
+              <h2>Important</h2>
+              <p>
+							<span class="emphasis"><em>It is not recommended</em></span> to use the LVS router as a gateway for the real servers, as that adds unneeded setup complexity as well as network load on the LVS router, which reintroduces the network bottleneck that exists in NAT routing.
+						</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">Hardware</span>
+          </dt>
+          <dd>
+            <p>
+						The hardware requirements of an LVS system using direct routing is similar to other LVS topologies. While the LVS router needs to be running Red Hat Enterprise Linux to process the incoming requests and perform load-balancing for the real servers, the real servers do not need to be Linux machines to function correctly. The LVS routers need one or two NICs each (depending on if there is a back-up router). You can use two NICs for ease of configuration and to distinctly separate traffic — incoming requests are handled by one NIC and routed packets to real servers on the other.
+					</p>
+            <p>
+						Since the real servers bypass the LVS router and send outgoing packets directly to a client, a gateway to the Internet is required. For maximum performance and availability, each real server can be connected to its own separate gateway which has its own dedicated connection to the carrier network to which the client is connected (such as the Internet or an intranet).
+					</p>
+          </dd>
+          <dt>
+            <span class="term">Software</span>
+          </dt>
+          <dd>
+            <p>
+						There is some configuration outside of <span><strong class="application">Piranha Configuration Tool</strong></span> that needs to be done, especially for administrators facing ARP issues when using LVS via direct routing. Refer to <a href="s2-lvs-direct-arptables-VSA.html" title="3.2.1. Direct Routing and arptables_jf">Section 3.2.1, “Direct Routing and <code class="command">arptables_jf</code>”</a> or <a href="s2-lvs-direct-iptables-VSA.html" title="3.2.2. Direct Routing and iptables">Section 3.2.2, “Direct Routing and <code class="command">iptables</code>”</a> for more information.
+					</p>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-enabling-nat-VSA.html"><strong>Prev</strong>3.1.3. Enabling NAT Routing on the LVS Routers</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-direct-arptables-VSA.html"><strong>Next</strong>3.2.1. Direct Routing and arptables_jf</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

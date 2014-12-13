@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.1.2. Routing on the Real Servers</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-nat-network-VSA.html" title="3.1. The NAT LVS Network" />
+    <link rel="prev" href="s1-nat-router-ifcfg-VSA.html" title="3.1.1. Configuring Network Interfaces for LVS with NAT" />
+    <link rel="next" href="s2-lvs-enabling-nat-VSA.html" title="3.1.3. Enabling NAT Routing on the LVS Routers" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.1.2. Routing on the Real Servers</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-nat-router-ifcfg-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-enabling-nat-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-nat-rout-real-VSA"></a>3.1.2. Routing on the Real Servers</h3>
+          </div>
+        </div>
+      </div>
+      <p>
+				The most important thing to remember when configuring the real servers network interfaces in a NAT topology is to set the gateway for the NAT floating IP address of the LVS router. In this example, that address is 10.11.12.10.
+			</p>
+      <div class="note">
+        <h2>Note</h2>
+        <p>
+					Once the network interfaces are up on the real servers, the machines will be unable to ping or connect in other ways to the public network. This is normal. You will, however, be able to ping the real IP for the LVS router's private interface, in this case 10.11.12.8.
+				</p>
+      </div>
+      <p>
+				So the real server's <code class="filename">/etc/sysconfig/network-scripts/ifcfg-eth0</code> file could look similar to this:
+			</p>
+      <pre class="screen">
+DEVICE=eth0
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=10.11.12.1
+NETMASK=255.255.255.0
+GATEWAY=10.11.12.10
+</pre>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+					If a real server has more than one network interface configured with a <code class="computeroutput">GATEWAY=</code> line, the first one to come up will get the gateway. Therefore if both <code class="filename">eth0</code> and <code class="filename">eth1</code> are configured and <code class="filename">eth1</code> is used for LVS, the real servers may not route requests properly.
+				</p>
+        <p>
+					It is best to turn off extraneous network interfaces by setting <code class="computeroutput">ONBOOT=<strong class="userinput"><code>no</code></strong></code> in their network scripts within the <code class="filename">/etc/sysconfig/network-scripts/</code> directory or by making sure the gateway is correctly set in the interface which comes up first.
+				</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-nat-router-ifcfg-VSA.html"><strong>Prev</strong>3.1.1. Configuring Network Interfaces for LVS wit...</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-enabling-nat-VSA.html"><strong>Next</strong>3.1.3. Enabling NAT Routing on the LVS Routers</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

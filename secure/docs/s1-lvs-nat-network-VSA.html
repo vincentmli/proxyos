@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.1. The NAT LVS Network</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-setup-VSA.html" title="Chapter 3. Setting Up LVS" />
+    <link rel="prev" href="ch-lvs-setup-VSA.html" title="Chapter 3. Setting Up LVS" />
+    <link rel="next" href="s1-nat-router-ifcfg-VSA.html" title="3.1.1. Configuring Network Interfaces for LVS with NAT" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.1. The NAT LVS Network</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="ch-lvs-setup-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-nat-router-ifcfg-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-nat-network-VSA"></a>3.1. The NAT LVS Network</h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2913796" class="indexterm"></a>
+      <a id="id2839834" class="indexterm"></a>
+      <a id="id2834111" class="indexterm"></a>
+      <p>
+			The NAT topology allows for great latitude in utilizing existing hardware, but it is limited in its ability to handle large loads because all packets going into and coming out of the pool pass through the LVS router.
+		</p>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">Network Layout</span>
+          </dt>
+          <dd>
+            <p>
+						The topology for LVS using NAT routing is the easiest to configure from a network layout perspective because only one access point to the public network is needed. The real servers pass all requests back through the LVS router so they are on their own private network.
+					</p>
+          </dd>
+          <dt>
+            <span class="term">Hardware</span>
+          </dt>
+          <dd>
+            <p>
+						The NAT topology is the most flexible in regards to hardware because the real servers do not need to be Linux machines to function correctly. In a NAT topology, each real server only needs one NIC since it will only be responding to the LVS router. The LVS routers, on the other hand, need two NICs each to route traffic between the two networks. Because this topology creates a network bottleneck at the LVS router, gigabit Ethernet NICs can be employed on each LVS router to increase the bandwidth the LVS routers can handle. If gigabit Ethernet is employed on the LVS routers, any switch connecting the real servers to the LVS routers must have at least two gigabit Ethernet ports to handle the load efficiently.
+					</p>
+          </dd>
+          <dt>
+            <span class="term">Software</span>
+          </dt>
+          <dd>
+            <p>
+						Because the NAT topology requires the use of <code class="command">iptables</code> for some configurations, there can be a fair amount of software configuration outside of <span><strong class="application">Piranha Configuration Tool</strong></span>. In particular, FTP services and the use of firewall marks requires extra manual configuration of the LVS routers to route requests properly.
+					</p>
+          </dd>
+        </dl>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="ch-lvs-setup-VSA.html"><strong>Prev</strong>Chapter 3. Setting Up LVS</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-nat-router-ifcfg-VSA.html"><strong>Next</strong>3.1.1. Configuring Network Interfaces for LVS wit...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

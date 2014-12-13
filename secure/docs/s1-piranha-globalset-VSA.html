@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>4.4. GLOBAL SETTINGS</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-piranha-VSA.html" title="Chapter 4. Configuring the LVS Routers with Piranha Configuration Tool" />
+    <link rel="prev" href="s1-piranha-ctrlmon-VSA.html" title="4.3. CONTROL/MONITORING" />
+    <link rel="next" href="s1-piranha-redun-VSA.html" title="4.5. REDUNDANCY" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>4.4. <span><strong class="guilabel">GLOBAL SETTINGS</strong></span></strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-piranha-ctrlmon-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-piranha-redun-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-piranha-globalset-VSA"></a>4.4. <span><strong class="guilabel">GLOBAL SETTINGS</strong></span></h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2912507" class="indexterm"></a>
+      <p>
+			The <span><strong class="guilabel">GLOBAL SETTINGS</strong></span> panel is where the you define the networking details for the primary LVS router's public and private network interfaces.
+		</p>
+      <div class="figure">
+        <a id="gr-global-settings-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/ha-piranha-gui/global-settings.png" alt="The GLOBAL SETTINGS Panel" />
+            <div class="longdesc">
+              <p>
+						The <span><strong class="guilabel">GLOBAL SETTINGS</strong></span> Panel
+					</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 4.3. The <span>GLOBAL SETTINGS</span> Panel</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+			The top half of this panel sets up the primary LVS router's public and private network interfaces. These are the interfaces already configured in <a href="s1-nat-router-ifcfg-VSA.html" title="3.1.1. Configuring Network Interfaces for LVS with NAT">Section 3.1.1, “Configuring Network Interfaces for LVS with NAT”</a>.
+		</p>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Primary server public IP</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						In this field, enter the publicly routable real IP address for the primary LVS node.
+					</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Primary server private IP</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						Enter the real IP address for an alternative network interface on the primary LVS node. This address is used solely as an alternative heartbeat channel for the backup router and does not have to correlate to the real private IP address assigned in <a href="s1-nat-router-ifcfg-VSA.html" title="3.1.1. Configuring Network Interfaces for LVS with NAT">Section 3.1.1, “Configuring Network Interfaces for LVS with NAT”</a>. You may leave this field blank, but doing so will mean there is no alternate heartbeat channel for the backup LVS router to use and therefore will create a single point of failure.
+					</p>
+            <div class="tip">
+              <h2>Tip</h2>
+              <p>
+							The private IP address is not needed for <span><strong class="guibutton">Direct Routing</strong></span> configurations, as all real servers as well as the LVS directors share the same virtual IP addresses and should have the same IP route configuration.
+						</p>
+            </div>
+            <div class="tip">
+              <h2>Tip</h2>
+              <p>
+							The primary LVS router's private IP can be configured on any interface that accepts TCP/IP, whether it be an Ethernet adapter or a serial port.
+						</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Use network type</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						Click the <span><strong class="guibutton">NAT</strong></span> button to select NAT routing.
+					</p>
+            <p>
+						Click the <span><strong class="guibutton">Direct Routing</strong></span> button to select direct routing.
+					</p>
+          </dd>
+        </dl>
+      </div>
+      <p>
+			The next three fields deal specifically with the NAT router's virtual network interface connecting the private network with the real servers. These fields <span class="emphasis"><em>do not</em></span> apply to the direct routing network type.
+		</p>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">NAT Router IP</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						Enter the private floating IP in this text field. This floating IP should be used as the gateway for the real servers.
+					</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">NAT Router netmask</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						If the NAT router's floating IP needs a particular netmask, select it from drop-down list.
+					</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">NAT Router device</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+						Use this text field to define the device name of the network interface for the floating IP address, such as <strong class="userinput"><code>eth1:1</code></strong>.
+					</p>
+            <div class="tip">
+              <h2>Tip</h2>
+              <p>
+							You should alias the NAT floating IP address to the Ethernet interface connected to the private network. In this example, the private network is on the <code class="filename">eth1</code> interface, so <strong class="userinput"><code>eth1:1</code></strong> is the floating IP address.
+						</p>
+            </div>
+          </dd>
+        </dl>
+      </div>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+				After completing this page, click the <span><strong class="guibutton">ACCEPT</strong></span> button to make sure you do not lose any changes when selecting a new panel.
+			</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-piranha-ctrlmon-VSA.html"><strong>Prev</strong>4.3. CONTROL/MONITORING</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-piranha-redun-VSA.html"><strong>Next</strong>4.5. REDUNDANCY</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

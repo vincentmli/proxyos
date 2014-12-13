@@ -222,7 +222,7 @@ A.logolink      {
 		<TD><INPUT TYPE="TEXT" NAME="delay_loop" VALUE=<?php echo  $virt[$selected_host]['delay_loop'] ?>></TD>
 	</TR>
 	<TR>
-		<TD> Scheduling: </TD>
+		<TD> Load Balance Algorithm: </TD>
 		<TD>
 		<SELECT NAME="sched">
 			<OPTION <?php if ($virt[$selected_host]['lb_algo'] == "rr")	{ echo "SELECTED"; } ?>> Round robin
@@ -345,10 +345,10 @@ A.logolink      {
 		<TD>Quorum DOWN: </TD>
 		<TD> <INPUT TYPE="TEXT" NAME="quorum_down" VALUE=<?php echo $virt[$selected_host]['quorum_down'] ?>></TD>
 	</TR>
-	<TR>
+	<!--TR>
 		<TD>Timeout: </TD>
 		<TD> <INPUT TYPE="TEXT" NAME="est_timeout" VALUE=<?php echo $virt[$selected_host]['est_timeout'] ?>></TD>
-	</TR>
+	</TR-->
 
 </TABLE>
 <?php echo "<INPUT TYPE=HIDDEN NAME=selected_host VALUE=$selected_host>" ?>

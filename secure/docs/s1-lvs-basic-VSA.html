@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>1.1. A Basic LVS Configuration</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-overview-VSA.html" title="Chapter 1. Linux Virtual Server Overview" />
+    <link rel="prev" href="ch-lvs-overview-VSA.html" title="Chapter 1. Linux Virtual Server Overview" />
+    <link rel="next" href="s2-lvs-rsync-VSA.html" title="1.1.1. Data Replication and Data Sharing Between Real Servers" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>1.1. A Basic LVS Configuration</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="ch-lvs-overview-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-rsync-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-basic-VSA"></a>1.1. A Basic LVS Configuration</h2>
+          </div>
+        </div>
+      </div>
+      <p>
+			<a href="s1-lvs-basic-VSA.html#gr-lvs-basic-VSA" title="Figure 1.1. A Basic LVS Configuration">Figure 1.1, “A Basic LVS Configuration”</a> shows a simple LVS configuration consisting of two layers. On the first layer are two LVS routers — one active and one backup. Each of the LVS routers has two network interfaces, one interface on the Internet and one on the private network, enabling them to regulate traffic between the two networks. For this example the active router is using <em class="firstterm">Network Address Translation</em> or <em class="firstterm">NAT</em> to direct traffic from the Internet to a variable number of real servers on the second layer, which in turn provide the necessary services. Therefore, the real servers in this example are connected to a dedicated private network segment and pass all public traffic back and forth through the active LVS router. To the outside world, the servers appears as one entity.
+		</p>
+      <div class="figure">
+        <a id="gr-lvs-basic-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/lvs-two-tier.png" alt="A Basic LVS Configuration" />
+            <div class="longdesc">
+              <p>
+						A Basic LVS Configuration
+					</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 1.1. A Basic LVS Configuration</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+			Service requests arriving at the LVS routers are addressed to a <em class="firstterm">virtual IP</em> address, or <em class="firstterm">VIP</em>. This is a publicly-routable address the administrator of the site associates with a fully-qualified domain name, such as www.example.com, and is assigned to one or more <em class="firstterm">virtual servers</em>. A virtual server is a service configured to listen on a specific virtual IP. Refer to <a href="s1-piranha-virtservs-VSA.html" title="4.6. VIRTUAL SERVERS">Section 4.6, “<span><strong class="guilabel">VIRTUAL SERVERS</strong></span>”</a> for more information on configuring a virtual server using the <span><strong class="application">Piranha Configuration Tool</strong></span>. A VIP address migrates from one LVS router to the other during a failover, thus maintaining a presence at that IP address (also known as <span class="emphasis"><em>floating IP addresses</em></span>).
+		</p>
+      <p>
+			VIP addresses may be aliased to the same device which connects the LVS router to the Internet. For instance, if eth0 is connected to the Internet, than multiple virtual servers can be aliased to <code class="filename">eth0:1</code>. Alternatively, each virtual server can be associated with a separate device per service. For example, HTTP traffic can be handled on <code class="filename">eth0:1</code>, and FTP traffic can be handled on <code class="filename">eth0:2</code>.
+		</p>
+      <p>
+			Only one LVS router is active at a time. The role of the active router is to redirect service requests from virtual IP addresses to the real servers. The redirection is based on one of eight supported load-balancing algorithms described further in <a href="s1-lvs-scheduling-VSA.html" title="1.3. LVS Scheduling Overview">Section 1.3, “LVS Scheduling Overview”</a>.
+		</p>
+      <p>
+			The active router also dynamically monitors the overall health of the specific services on the real servers through simple <em class="firstterm">send/expect scripts</em>. To aid in detecting the health of services that require dynamic data, such as HTTPS or SSL, the administrator can also call external executables. If a service on a real server malfunctions, the active router stops sending jobs to that server until it returns to normal operation.
+		</p>
+      <p>
+			The backup router performs the role of a standby system. Periodically, the LVS routers exchange heartbeat messages through the primary external public interface and, in a failover situation, the private interface. Should the backup node fail to receive a heartbeat message within an expected interval, it initiates a failover and assumes the role of the active router. During failover, the backup router takes over the VIP addresses serviced by the failed router using a technique known as <em class="firstterm">ARP spoofing</em> — where the backup LVS router announces itself as the destination for IP packets addressed to the failed node. When the failed node returns to active service, the backup node assumes its hot-backup role again.
+		</p>
+      <p>
+			The simple, two-layered configuration used in <a href="s1-lvs-basic-VSA.html#gr-lvs-basic-VSA" title="Figure 1.1. A Basic LVS Configuration">Figure 1.1, “A Basic LVS Configuration”</a> is best for serving data which does not change very frequently — such as static webpages — because the individual real servers do not automatically sync data between each node.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="ch-lvs-overview-VSA.html"><strong>Prev</strong>Chapter 1. Linux Virtual Server Overview</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-rsync-VSA.html"><strong>Next</strong>1.1.1. Data Replication and Data Sharing Between ...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

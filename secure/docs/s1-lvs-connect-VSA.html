@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.3. Putting the Configuration Together</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-setup-VSA.html" title="Chapter 3. Setting Up LVS" />
+    <link rel="prev" href="s2-lvs-direct-iptables-VSA.html" title="3.2.2. Direct Routing and iptables" />
+    <link rel="next" href="s2-lvs-net-tip-VSA.html" title="3.3.1. General LVS Networking Tips" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.3. Putting the Configuration Together</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-direct-iptables-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-net-tip-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-connect-VSA"></a>3.3. Putting the Configuration Together</h2>
+          </div>
+        </div>
+      </div>
+      <p>
+			After determining which of the preceding routing methods to use, the hardware should be linked together on the network.
+		</p>
+      <div class="important">
+        <h2>Important</h2>
+        <p>
+				The adapter devices on the LVS routers must be configured to access the same networks. For instance if <code class="filename">eth0</code> connects to public network and <code class="filename">eth1</code> connects to the private network, then these same devices on the backup LVS router must connect to the same networks.
+			</p>
+        <p>
+				Also the gateway listed in the first interface to come up at boot time is added to the routing table and subsequent gateways listed in other interfaces are ignored. This is especially important to consider when configuring the real servers.
+			</p>
+      </div>
+      <p>
+			After physically connecting together the hardware, configure the network interfaces on the primary and backup LVS routers. This can be done using a graphical application such as <span><strong class="application">system-config-network</strong></span> or by editing the network scripts manually. For more information about adding devices using <span><strong class="application">system-config-network</strong></span>, see the chapter titled <em class="citetitle">Network Configuration</em> in the <em class="citetitle">Red Hat Enterprise Linux Deployment Guide</em>. For the remainder of the chapter, example alterations to network interfaces are made either manually or through the <span><strong class="application">Piranha Configuration Tool</strong></span>.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-direct-iptables-VSA.html"><strong>Prev</strong>3.2.2. Direct Routing and iptables</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-net-tip-VSA.html"><strong>Next</strong>3.3.1. General LVS Networking Tips</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

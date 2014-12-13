@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>1.6.1.1. pulse</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s2-lvs-components-VSA.html" title="1.6.1. LVS Components" />
+    <link rel="prev" href="s2-lvs-components-VSA.html" title="1.6.1. LVS Components" />
+    <link rel="next" href="s3-lvs-lvs-VSA.html" title="1.6.1.2. lvs" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>1.6.1.1. <code class="command">pulse</code></strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-components-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s3-lvs-lvs-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h4 class="title"><a id="s3-lvs-pulse-VSA"></a>1.6.1.1. <code class="command">pulse</code></h4>
+          </div>
+        </div>
+      </div>
+      <a id="id2878821" class="indexterm"></a>
+      <a id="id2878833" class="indexterm"></a>
+      <p>
+					This is the controlling process which starts all other daemons related to LVS routers. At boot time, the daemon is started by the <code class="filename">/etc/rc.d/init.d/pulse</code> script. It then reads the configuration file <code class="filename">/etc/sysconfig/ha/lvs.cf</code>. On the active router, <code class="command">pulse</code> starts the LVS daemon. On the backup router, <code class="command">pulse</code> determines the health of the active router by executing a simple heartbeat at a user-configurable interval. If the active router fails to respond after a user-configurable interval, it initiates failover. During failover, <code class="command">pulse</code> on the backup router instructs the <code class="command">pulse</code> daemon on the active router to shut down all LVS services, starts the <code class="command">send_arp</code> program to reassign the floating IP addresses to the backup router's MAC address, and starts the <code class="command">lvs</code> daemon.
+				</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-components-VSA.html"><strong>Prev</strong>1.6.1. LVS Components</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s3-lvs-lvs-VSA.html"><strong>Next</strong>1.6.1.2. lvs</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

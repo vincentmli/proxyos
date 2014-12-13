@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>1.4.1. NAT Routing</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-routing-VSA.html" title="1.4. Routing Methods" />
+    <link rel="prev" href="s1-lvs-routing-VSA.html" title="1.4. Routing Methods" />
+    <link rel="next" href="s2-lvs-directrouting-VSA.html" title="1.4.2. Direct Routing" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>1.4.1. NAT Routing</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-routing-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-directrouting-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-lvs-nat-VSA"></a>1.4.1. NAT Routing</h3>
+          </div>
+        </div>
+      </div>
+      <p>
+				<a href="s2-lvs-nat-VSA.html#gr-lvs-nat-VSA" title="Figure 1.3. LVS Implemented with NAT Routing">Figure 1.3, “LVS Implemented with NAT Routing”</a>, illustrates LVS utilizing NAT routing to move requests between the Internet and a private network.
+			</p>
+      <div class="figure">
+        <a id="gr-lvs-nat-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/lvs-nat-routing.png" alt="LVS Implemented with NAT Routing" />
+            <div class="longdesc">
+              <p>
+							LVS Implemented with NAT Routing
+						</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 1.3. LVS Implemented with NAT Routing</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+				In the example, there are two NICs in the active LVS router. The NIC for the Internet has a <em class="firstterm">real IP address</em> on eth0 and has a floating IP address aliased to eth0:1. The NIC for the private network interface has a real IP address on eth1 and has a floating IP address aliased to eth1:1. In the event of failover, the virtual interface facing the Internet and the private facing virtual interface are taken-over by the backup LVS router simultaneously. All of the real servers located on the private network use the floating IP for the NAT router as their default route to communicate with the active LVS router so that their abilities to respond to requests from the Internet is not impaired.
+			</p>
+      <p>
+				In this example, the LVS router's public LVS floating IP address and private NAT floating IP address are aliased to two physical NICs. While it is possible to associate each floating IP address to its own physical device on the LVS router nodes, having more than two NICs is not a requirement.
+			</p>
+      <p>
+				Using this topology, the active LVS router receives the request and routes it to the appropriate server. The real server then processes the request and returns the packets to the LVS router which uses network address translation to replace the address of the real server in the packets with the LVS routers public VIP address. This process is called <em class="firstterm">IP masquerading</em> because the actual IP addresses of the real servers is hidden from the requesting clients.
+			</p>
+      <p>
+				Using this NAT routing, the real servers may be any kind of machine running various operating systems. The main disadvantage is that the LVS router may become a bottleneck in large cluster deployments because it must process outgoing as well as incoming requests.
+			</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-routing-VSA.html"><strong>Prev</strong>1.4. Routing Methods</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-directrouting-VSA.html"><strong>Next</strong>1.4.2. Direct Routing</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

@@ -101,9 +101,14 @@ A.logolink      {
 <TABLE>	
 </TABLE>
 <P>
-You could also browse through the maillist archives to check the old piranha
+You could also browse through Redhat Linux Virtual Server Administration for LVS reference
+it  applies to layer 4 loadbalancing configuration in this project
 <BR>
-<A HREF="https://listman.redhat.com/mailman/listinfo/piranha-list">https://listman.redhat.com/mailman/listinfo/piranha-list</A>
+Please note this project has competely rewritten the GUI to use keepalived as interface to 
+LVS, so the GUI configuration section in the Redhat Linux Virtual Server Administration does not apply here.  
+<BR>
+<!--A HREF="https://listman.redhat.com/mailman/listinfo/piranha-list">https://listman.redhat.com/mailman/listinfo/piranha-list</A-->
+<A HREF="./docs/">Redhat Linux Virtual Server Administration Reference</A>
 <P>
 &nbsp;
 </TD></TR></TABLE>

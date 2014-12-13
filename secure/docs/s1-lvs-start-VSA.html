@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>4.8. Starting LVS</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-piranha-VSA.html" title="Chapter 4. Configuring the LVS Routers with Piranha Configuration Tool" />
+    <link rel="prev" href="s2-lvs-sync-net-VSA.html" title="4.7.3. Synchronizing Network Packet Filtering Rules" />
+    <link rel="next" href="ch-clumanager-piranha-VSA.html" title="Appendix A. Using LVS with Red Hat Cluster" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>4.8. Starting LVS</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-sync-net-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ch-clumanager-piranha-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-start-VSA"></a>4.8. Starting LVS</h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2878202" class="indexterm"></a>
+      <p>
+			To start LVS, it is best to have two root terminals open simultaneously or two simultaneous root open <code class="command">ssh</code> sessions to the primary LVS router.
+		</p>
+      <p>
+			In one terminal, watch the kernel log messages with the command:
+		</p>
+      <p>
+			<code class="command">tail -f /var/log/messages</code>
+		</p>
+      <p>
+			Then start LVS by typing the following command into the other terminal:
+		</p>
+      <p>
+			<code class="command">/sbin/service pulse start</code>
+		</p>
+      <p>
+			Follow the progress of the <code class="command">pulse</code> service's startup in the terminal with the kernel log messages. When you see the following output, the pulse daemon has started properly:
+		</p>
+      <p>
+			<code class="computeroutput">gratuitous lvs arps finished</code>
+		</p>
+      <p>
+			To stop watching <code class="filename">/var/log/messages</code>, type <span><strong class="keycap">Ctrl</strong></span>-<span><strong class="keycap">c</strong></span>.
+		</p>
+      <p>
+			From this point on, the primary LVS router is also the active LVS router. While you can make requests to LVS at this point, you should start the backup LVS router before putting LVS into service. To do this, simply repeat the process described above on the backup LVS router node.
+		</p>
+      <p>
+			After completing this final step, LVS will be up and running.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-sync-net-VSA.html"><strong>Prev</strong>4.7.3. Synchronizing Network Packet Filtering Rul...</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ch-clumanager-piranha-VSA.html"><strong>Next</strong>Appendix A. Using LVS with Red Hat Cluster</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

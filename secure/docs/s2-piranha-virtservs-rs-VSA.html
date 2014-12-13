@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>4.6.2. REAL SERVER Subsection</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-piranha-virtservs-VSA.html" title="4.6. VIRTUAL SERVERS" />
+    <link rel="prev" href="s2-piranha-virtserv-sub-VSA.html" title="4.6.1. The VIRTUAL SERVER Subsection" />
+    <link rel="next" href="s2-piranha-virtservs-ems-VSA.html" title="4.6.3. EDIT MONITORING SCRIPTS Subsection" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>4.6.2. <span><strong class="guilabel">REAL SERVER</strong></span> Subsection</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-piranha-virtserv-sub-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-piranha-virtservs-ems-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-piranha-virtservs-rs-VSA"></a>4.6.2. <span><strong class="guilabel">REAL SERVER</strong></span> Subsection</h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2918771" class="indexterm"></a>
+      <p>
+				Clicking on the <span><strong class="guilabel">REAL SERVER</strong></span> subsection link at the top of the panel displays the <span><strong class="guilabel">EDIT REAL SERVER</strong></span> subsection. It displays the status of the physical server hosts for a particular virtual service.
+			</p>
+      <div class="figure">
+        <a id="gr-real-server-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/ha-piranha-gui/real-server-sub.png" alt="The REAL SERVER Subsection" />
+            <div class="longdesc">
+              <p>
+							The <span><strong class="guilabel">REAL SERVER</strong></span> Subsection
+						</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 4.7. The <span>REAL SERVER</span> Subsection</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+				Click the <span><strong class="guibutton">ADD</strong></span> button to add a new server. To delete an existing server, select the radio button beside it and click the <span><strong class="guibutton">DELETE</strong></span> button. Click the <span><strong class="guibutton">EDIT</strong></span> button to load the <span><strong class="guilabel">EDIT REAL SERVER</strong></span> panel, as seen in <a href="s2-piranha-virtservs-rs-VSA.html#gr-real-server-config-VSA" title="Figure 4.8. The REAL SERVER Configuration Panel">Figure 4.8, “The <span>REAL SERVER</span> Configuration Panel”</a>.
+			</p>
+      <div class="figure">
+        <a id="gr-real-server-config-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/ha-piranha-gui/real-server-sub-2.png" alt="The REAL SERVER Configuration Panel" />
+            <div class="longdesc">
+              <p>
+							The <span><strong class="guilabel">REAL SERVER</strong></span> Configuration Panel
+						</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 4.8. The <span>REAL SERVER</span> Configuration Panel</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+				This panel consists of three entry fields:
+			</p>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Name</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							A descriptive name for the real server.
+						</p>
+            <div class="tip">
+              <h2>Tip</h2>
+              <p>
+								This name is <span class="emphasis"><em>not</em></span> the hostname for the machine, so make it descriptive and easily identifiable.
+							</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Address</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							The real server's IP address. Since the listening port is already specified for the associated virtual server, do not add a port number.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Weight</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							An integer value indicating this host's capacity relative to that of other hosts in the pool. The value can be arbitrary, but treat it as a ratio in relation to other real servers in the pool. For more on server weight, see <a href="s2-lvs-sched-weight-VSA.html" title="1.3.2. Server Weight and Scheduling">Section 1.3.2, “Server Weight and Scheduling”</a>.
+						</p>
+          </dd>
+        </dl>
+      </div>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+					Remember to click the <span><strong class="guibutton">ACCEPT</strong></span> button after making any changes in this panel. To make sure you do not lose any changes when selecting a new panel.
+				</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-piranha-virtserv-sub-VSA.html"><strong>Prev</strong>4.6.1. The VIRTUAL SERVER Subsection</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-piranha-virtservs-ems-VSA.html"><strong>Next</strong>4.6.3. EDIT MONITORING SCRIPTS Subsection</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

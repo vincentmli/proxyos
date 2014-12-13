@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Chapter 1. Linux Virtual Server Overview</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="prev" href="s1-intro-feedback-VSA.html" title="2. Feedback" />
+    <link rel="next" href="s1-lvs-basic-VSA.html" title="1.1. A Basic LVS Configuration" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>Chapter 1. Linux Virtual Server Overview</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-intro-feedback-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-basic-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="chapter" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="ch-lvs-overview-VSA"></a>Chapter 1. Linux Virtual Server Overview</h2>
+          </div>
+        </div>
+      </div>
+      <div class="toc">
+        <dl>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-basic-VSA.html">1.1. A Basic LVS Configuration</a>
+            </span>
+          </dt>
+          <dd>
+            <dl>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-rsync-VSA.html">1.1.1. Data Replication and Data Sharing Between Real Servers</a>
+                </span>
+              </dt>
+            </dl>
+          </dd>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-cm-VSA.html">1.2. A Three-Tier LVS Configuration</a>
+            </span>
+          </dt>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-scheduling-VSA.html">1.3. LVS Scheduling Overview</a>
+            </span>
+          </dt>
+          <dd>
+            <dl>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-sched-VSA.html">1.3.1. Scheduling Algorithms</a>
+                </span>
+              </dt>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-sched-weight-VSA.html">1.3.2. Server Weight and Scheduling</a>
+                </span>
+              </dt>
+            </dl>
+          </dd>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-routing-VSA.html">1.4. Routing Methods</a>
+            </span>
+          </dt>
+          <dd>
+            <dl>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-nat-VSA.html">1.4.1. NAT Routing</a>
+                </span>
+              </dt>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-directrouting-VSA.html">1.4.2. Direct Routing</a>
+                </span>
+              </dt>
+            </dl>
+          </dd>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-persistance-VSA.html">1.5. Persistence and Firewall Marks</a>
+            </span>
+          </dt>
+          <dd>
+            <dl>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-persitence-VSA.html">1.5.1. Persistence</a>
+                </span>
+              </dt>
+              <dt>
+                <span class="section">
+                  <a href="s2-lve-fwmarks-VSA.html">1.5.2. Firewall Marks</a>
+                </span>
+              </dt>
+            </dl>
+          </dd>
+          <dt>
+            <span class="section">
+              <a href="s1-lvs-block-diagram-VSA.html">1.6. LVS — A Block Diagram</a>
+            </span>
+          </dt>
+          <dd>
+            <dl>
+              <dt>
+                <span class="section">
+                  <a href="s2-lvs-components-VSA.html">1.6.1. LVS Components</a>
+                </span>
+              </dt>
+            </dl>
+          </dd>
+        </dl>
+      </div>
+      <a id="id2845556" class="indexterm"></a>
+      <a id="id2822650" class="indexterm"></a>
+      <p>
+		Linux Virtual Server (LVS) is a set of integrated software components for balancing the IP load across a set of real servers. LVS runs on a pair of equally configured computers: one that is an <em class="firstterm">active LVS router</em> and one that is a <em class="firstterm">backup LVS router</em>. The active LVS router serves two roles:
+	</p>
+      <div class="itemizedlist">
+        <ul>
+          <li>
+            <p>
+				To balance the load across the real servers.
+			</p>
+          </li>
+          <li>
+            <p>
+				To check the integrity of the services on each real server.
+			</p>
+          </li>
+        </ul>
+      </div>
+      <p>
+		The backup LVS router monitors the active LVS router and takes over from it in case the active LVS router fails.
+	</p>
+      <p>
+		This chapter provides an overview of LVS components and functions, and consists of the following sections:
+	</p>
+      <div class="itemizedlist">
+        <ul>
+          <li>
+            <p>
+				<a href="s1-lvs-basic-VSA.html" title="1.1. A Basic LVS Configuration">Section 1.1, “A Basic LVS Configuration”</a>
+			</p>
+          </li>
+          <li>
+            <p>
+				<a href="s1-lvs-cm-VSA.html" title="1.2. A Three-Tier LVS Configuration">Section 1.2, “A Three-Tier LVS Configuration”</a>
+			</p>
+          </li>
+          <li>
+            <p>
+				<a href="s1-lvs-scheduling-VSA.html" title="1.3. LVS Scheduling Overview">Section 1.3, “LVS Scheduling Overview”</a>
+			</p>
+          </li>
+          <li>
+            <p>
+				<a href="s1-lvs-routing-VSA.html" title="1.4. Routing Methods">Section 1.4, “Routing Methods”</a>
+			</p>
+          </li>
+          <li>
+            <p>
+				<a href="s1-lvs-persistance-VSA.html" title="1.5. Persistence and Firewall Marks">Section 1.5, “Persistence and Firewall Marks”</a>
+			</p>
+          </li>
+          <li>
+            <p>
+				<a href="s1-lvs-block-diagram-VSA.html" title="1.6. LVS — A Block Diagram">Section 1.6, “LVS — A Block Diagram”</a>
+			</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-intro-feedback-VSA.html"><strong>Prev</strong>2. Feedback</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-basic-VSA.html"><strong>Next</strong>1.1. A Basic LVS Configuration</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>
