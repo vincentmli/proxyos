@@ -180,7 +180,7 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 
-                <A HREF="virtual_main.php" NAME="VIRTUAL SERVER">VIRTUAL SERVER</A>
+                <A HREF="virtual_edit_virt_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?>" CLASS="tabon" NAME="VIRTUAL HELP">VIRTUAL HELP</A>
                 &nbsp;|&nbsp;
 		
 		<A HREF="virtual_edit_virt.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="EDIT VIRTUAL SERVER">EDIT VIRTUAL SERVER</A>
@@ -189,9 +189,8 @@ A.logolink      {
                 <A HREF="virtual_edit_real.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="REAL SERVER">REAL SERVER</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="virtual_edit_virt_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?>" CLASS="tabon" NAME="HELP">HELP</A>
+                <A HREF="virtual_main.php" NAME="VIRTUAL SERVER">VIRTUAL SERVER</A>
                 &nbsp;|&nbsp;
-
 
         </TR>
 </TABLE>

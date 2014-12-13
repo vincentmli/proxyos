@@ -79,12 +79,11 @@ A.logolink      {
 <TABLE BORDER="0" CELLSPACING="0" width=90%>
 	<TR>
 		<TD WIDTH=10% align=center><A HREF="help.php">Help</A> </TR>
-		<TD WIDTH=10% align=center><A HREF="mailto:vincent.mc.li@gmail.com">Vincent Li</A></TR>
-<!--		<TD WIDTH=10% align=center><A HREF="http://ha.redhat.com">Piranha Project</A> </TR>
--->
-		<TD WIDTH=10% align=center><A HREF="http://www.linuxvirtualserver.org/">The Linux Virtual Server Project</A> </TR>
-		<TD WIDTH=10% align=center><A HREF="http://www.keepalived.org/">Keepalived</A> </TR>
-		<TD WIDTH=10% align=center><A HREF="http://www.nginx.org/">Ngnix</A> </TR>
+		<!--TD WIDTH=10% align=center><A HREF="http://ha.redhat.com" target="_blank">Piranha Project</A> </TR-->
+		<TD WIDTH=10% align=center><A HREF="http://www.linuxvirtualserver.org/" target="_blank">The Linux Virtual Server Project</A> </TR>
+		<TD WIDTH=10% align=center><A HREF="http://www.keepalived.org/" target="_blank">Keepalived</A> </TR>
+		<TD WIDTH=10% align=center><A HREF="http://www.nginx.org/" target="_blank">Ngnix</A> </TR>
+		<TD WIDTH=10% align=center><A HREF="http://linux.die.net/man/8/iptables" target="_blank">iptables</A> </TR>
 	</TR>
 </TABLE>
 <P>
@@ -97,10 +96,6 @@ A.logolink      {
 	</TR>
 </TABLE>
 <P>
-<SPAN CLASS=title>CONTRIBUTORS</SPAN>
-<TABLE>	
-</TABLE>
-<P>
 You could also browse through Redhat Linux Virtual Server Administration for LVS reference
 it  applies to layer 4 loadbalancing configuration in this project
 <BR>
@@ -108,7 +103,7 @@ Please note this project has competely rewritten the GUI to use keepalived as in
 LVS, so the GUI configuration section in the Redhat Linux Virtual Server Administration does not apply here.  
 <BR>
 <!--A HREF="https://listman.redhat.com/mailman/listinfo/piranha-list">https://listman.redhat.com/mailman/listinfo/piranha-list</A-->
-<A HREF="./docs/">Redhat Linux Virtual Server Administration Reference</A>
+<A HREF="./docs/" target="_blank">Redhat Linux Virtual Server Administration Reference</A>
 <P>
 &nbsp;
 </TD></TR></TABLE>

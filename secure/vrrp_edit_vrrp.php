@@ -142,30 +142,14 @@ A.logolink      {
 
 <?php include 'menu.php'; ?>
 
-<?php
-	// echo "Query = $QUERY_STRING";
-
-?>
-
-<?php if ($prim['service'] == "fos") { ?>
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
+
+               <A HREF="vrrp_edit_vrrp_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP HELP">VRRP HELP</A>
+                &nbsp;|&nbsp;
 		
 		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP instance">VRRP INSTANCE</A>
-		&nbsp;|&nbsp;
-
-                <A HREF="virtual_edit_services.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="MONITORING SCRIPTS">MONITORING SCRIPTS</A></TD>
-
-        </TR>
-</TABLE>
-
-<?php } else { ?>
-<TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
-        <TR BGCOLOR="#EEEEEE">
-                <TD WIDTH="60%">EDIT:
-		
-		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP instance">INSTANCE</A>
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL IPADDRESS">VIRTUAL IPADDRESS</A>
@@ -185,7 +169,6 @@ A.logolink      {
 
         </TR>
 </TABLE>
-<?php } ?>
 
 <FORM METHOD="GET" id="vrrp_form" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_vrrp.php">
 <TABLE>
