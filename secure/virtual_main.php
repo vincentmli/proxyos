@@ -230,7 +230,7 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="(DE)ACTIVATE"></TD>
+			<!--TD><INPUT TYPE="SUBMIT" NAME="virtual_service" VALUE="(DE)ACTIVATE"></TD-->
 		</TR>
 	</TABLE>
 	<P>

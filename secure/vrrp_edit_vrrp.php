@@ -146,7 +146,7 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 
-               <A HREF="vrrp_edit_vrrp_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP HELP">VRRP HELP</A>
+               <A HREF="vrrp_edit_vrrp_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="HELP">HELP</A>
                 &nbsp;|&nbsp;
 		
 		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP instance">VRRP INSTANCE</A>

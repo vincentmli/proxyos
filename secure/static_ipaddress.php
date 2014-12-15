@@ -214,7 +214,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="static_ipaddress_service" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

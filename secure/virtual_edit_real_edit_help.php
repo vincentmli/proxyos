@@ -90,7 +90,7 @@ A.logolink      {
                 <A HREF="virtual_edit_real_edit.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host&selected=$selected"; } ?> " CLASS="tabon" NAME="EDIT REAL SERVER">EDIT REAL SERVER</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="virtual_edit_real_edit_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host&selected=$selected"; } ?> " CLASS="tabon" NAME="HELP">REAL SERVER HELP</A>
+                <A HREF="virtual_edit_real_edit_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host&selected=$selected"; } ?> " CLASS="tabon" NAME="HELP">HELP</A>
 		&nbsp;|&nbsp;
 
         </TR>

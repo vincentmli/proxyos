@@ -43,15 +43,6 @@
 		exit;
 	}
 
-	if ((isset($_GET['global_notification_email'])) && ($_GET['global_notification_email'] == "(DE)ACTIVATE")) {
-		switch ($serv[$selected_host][$selected]['active']) {
-			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
-			case	"1"	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			default		:	$serv[$selected_host][$selected]['active'] = "0"; break;
-		}
-	}
-
 	/* Umm,... just in case someone is dumb enuf to fiddle */
 	if (empty($selected)) { $selected=1; }
 
@@ -191,7 +182,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="global_notification_email" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

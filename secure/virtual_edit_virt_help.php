@@ -80,7 +80,7 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">MENU:
 
-                <A HREF="virtual_edit_virt_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?>" CLASS="tabon" NAME="VIRTUAL HELP">VIRTUAL HELP</A>
+                <A HREF="virtual_edit_virt_help.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?>" CLASS="tabon" NAME="HELP">HELP</A>
                 &nbsp;|&nbsp;
 		
 		<A HREF="virtual_edit_virt.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="EDIT VIRTUAL SERVER">EDIT VIRTUAL SERVER</A>

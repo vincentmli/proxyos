@@ -46,14 +46,6 @@
 		exit;
 	}
 
-	if ((isset($_GET['vrrp_virtual_ipaddress'])) && ($_GET['vrrp_virtual_ipaddress'] == "(DE)ACTIVATE")) {
-		switch ($serv[$selected_host][$selected]['active']) {
-			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
-			case	"1"	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			default		:	$serv[$selected_host][$selected]['active'] = "0"; break;
-		}
-	}
 
 	/* Umm,... just in case someone is dumb enuf to fiddle */
 	if (empty($selected_host)) { $selected_host=1; }
@@ -230,7 +222,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_virtual_ipaddress" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

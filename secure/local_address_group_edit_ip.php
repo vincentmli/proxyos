@@ -46,15 +46,6 @@
 		exit;
 	}
 
-	if ((isset($_GET['local_address_group_ip'])) && ($_GET['local_address_group_ip'] == "(DE)ACTIVATE")) {
-		switch ($serv[$selected_host][$selected]['active']) {
-			case	""	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			case	"0"	:	$serv[$selected_host][$selected]['active'] = "1"; break;
-			case	"1"	:	$serv[$selected_host][$selected]['active'] = "0"; break;
-			default		:	$serv[$selected_host][$selected]['active'] = "0"; break;
-		}
-	}
-
 	/* Umm,... just in case someone is dumb enuf to fiddle */
 	if (empty($selected_host)) { $selected_host=1; }
 
@@ -192,7 +183,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="local_address_group_ip" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="local_address_group_ip" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="local_address_group_ip" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="local_address_group_ip" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

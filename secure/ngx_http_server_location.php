@@ -197,7 +197,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="http_server_location" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="http_server_location" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="http_server_location" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="http_server_location" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

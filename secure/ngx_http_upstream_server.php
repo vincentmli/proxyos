@@ -230,7 +230,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="http_upstream_server" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="http_upstream_server" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="http_upstream_server" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="http_upstream_server" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 </TABLE>
 

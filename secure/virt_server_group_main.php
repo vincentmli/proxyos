@@ -105,17 +105,6 @@ A.logolink      {
 		exit;
 	}
 
-/*
-
-	if ($virtual_service == "(DE)ACTIVATE" ) {
-		switch ($virt[$selected_host]['active']) {
-			case ""		:	$virt[$selected_host]['active'] = "0";	break;
-			case "0"	:	$virt[$selected_host]['active'] = "1";	break;
-			case "1"	:	$virt[$selected_host]['active'] = "0";	break;
-			default		:	$virt[$selected_host]['active'] = "0";	break;
-		}
-	}
-*/
 ?>
 
 <?php include 'menu.php'; ?>
@@ -190,7 +179,6 @@ A.logolink      {
 			<TD><INPUT TYPE="SUBMIT" NAME="virt_server_group_service" VALUE="ADD"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="virt_server_group_service" VALUE="DELETE"></TD>
 			<TD><INPUT TYPE="SUBMIT" NAME="virt_server_group_service" VALUE="EDIT"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="virt_server_group_service" VALUE="(DE)ACTIVATE"></TD>
 		</TR>
 	</TABLE>
 	<P>
