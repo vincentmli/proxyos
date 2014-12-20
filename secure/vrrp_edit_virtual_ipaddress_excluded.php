@@ -127,6 +127,9 @@ A.logolink      {
                 <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VIRTUAL IPADDRESS">VIRTUAL IPADDRESS</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="vrrp_edit_unicast_peer.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP UNICAST PEER">UNICAST PEER</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VIRTUAL IPADDRESS EXCLUDED">VIRTUAL IPADDRESS EXCLUDED</A>
 		&nbsp;|&nbsp;
 

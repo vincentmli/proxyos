@@ -3,7 +3,7 @@
         $selected_host = $_GET['selected_host'];
         $selected = $_GET['selected'];
 	if ($edit_action == "CANCEL") {
-		header("Location: vrrp_edit_track_script.php?selected_host=$selected_host&selected=$selected");		
+		header("Location: vrrp_edit_unicast_peer.php?selected_host=$selected_host&selected=$selected");		
 		exit;
 	}
 	
@@ -16,19 +16,15 @@
 
 	require('parse.php');
 
-
-		
 	if ($edit_action == "ACCEPT") {
 
-		$script	=	$_GET['script'];
-		$weight	=	$_GET['weight'];
-		if($weight != '') { 
-	       	   $vrrp_instance[$selected_host]['track_script'][$selected-1] = "$script" . " " . 'weight' . " " . "$weight";	
-		} else {
-		   $vrrp_instance[$selected_host]['track_script'][$selected-1] = "$script";	
-		}
+                $ip     =       $_GET['ip'];
+                $netmask        =       $_GET['netmask'];
+		$cidr 		=	Mask2CIDR($netmask);
+                $vrrp_instance[$selected_host]['unicast_peer'][$selected-1]               = "$ip/$cidr";
 
-		header("Location: vrrp_edit_track_script.php?selected_host=$selected_host&selected=$selected-1");		
+		header("Location: vrrp_edit_unicast_peer.php?selected_host=$selected_host&selected=$selected-1");		
+
 	}
 
 ?>
@@ -90,7 +86,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK SCRIPT</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP UNICAST IPADDRESS</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -118,6 +114,7 @@ A.logolink      {
                 <A HREF="vrrp_edit_unicast_peer.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP UNICAST PEER">UNICAST PEER</A>
                 &nbsp;|&nbsp;
 
+
                 <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VIRTUAL IPADDRESS EXCLUDED">VIRTUAL IPADDRESS EXCLUDED</A>
                 &nbsp;|&nbsp;
 
@@ -138,50 +135,25 @@ A.logolink      {
 <P>
 
 
-<FORM id="vrrp_track_script_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_script_edit.php">
+<FORM id="vrrp_unicast_peer_form" METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_unicast_peer_edit.php">
 
 
 	<TABLE>
 
 	<?php	
-		$element =  $vrrp_instance[$selected_host]['track_script'][$selected-1];
-		$string = explode(" ", $element);
-		if($string[1] == 'weight') {
-			$script = $string[0];
-			$weight = $string[2];
-		} else {
-			$script = $string[0];
-			$weight = '';
-		}
-		
-		global $vrrp_script;
+                $string = explode("/", $vrrp_instance[$selected_host]['unicast_peer'][$selected-1]);
+                $ip = $string[0];
+                $cidr = $string[1];
+		$netmask = CIDRtoMask($cidr);
 
 		echo "<TR>";
-			echo "<TD>SCRIPT: </TD>";
-			echo "<TD>";
-				echo "<SELECT NAME=\"script\">";
-                        	foreach($vrrp_script as $key => $value) {
-                               	   if ($vrrp_instance[$selected_host]['track_script'] == $vrrp_script[$key]['vrrp_script']) {
-                                        $SELECTED = ' selected="selected"';
-                                   } else {
-                                        $SELECTED = '';
-                                   }
-
-                                	echo "<OPTION value=" . $vrrp_script[$key]['vrrp_script'] .  "$SELECTED" . ">"
-                                          .  $vrrp_script[$key]['vrrp_script'] .  "</OPTION>";
-                         	}
-
-                        	echo "</SELECT>";
-			echo "</TD>";
-
-			//echo "<TD><INPUT TYPE=TEXT NAME=script VALUE=\""; echo $script . "\""  . ">"; 
-			//echo "</TD>";
+			echo "<TD>IP: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=ip VALUE=\""; echo $ip . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 		echo "<TR>";
-			echo "<TD>WEIGHT: </TD>";
-			echo "<TD><INPUT TYPE=TEXT NAME=weight VALUE=\""; echo $weight . "\""  . ">";
-		        echo "</TD>";
+			echo "<TD>NETMASK: </TD>";
+			echo "<TD><INPUT TYPE=TEXT NAME=netmask VALUE=\""; echo $netmask . "\""  . ">"; echo "</TD>";
 		echo "</TR>";
 
 	echo "</TABLE>";

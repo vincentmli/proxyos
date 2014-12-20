@@ -10,7 +10,7 @@
 		$selected = $_GET['selected'];
 	}
 
-	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "CANCEL")) {
+	if ((isset($_GET['vrrp_unicast_peer'])) && ($_GET['vrrp_unicast_peer'] == "CANCEL")) {
 		/* Redirect browser to editing page */
 		header("Location: vrrp_edit_vrrp.php?selected_host=$selected_host");
 		/* Make sure that code below does not get executed when we redirect. */
@@ -18,9 +18,9 @@
 	}
 
 	/* Some magic used to allow the edit command to pull up another web page */
-	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "EDIT")) {
+	if ((isset($_GET['vrrp_unicast_peer'])) && ($_GET['vrrp_unicast_peer'] == "EDIT")) {
 		/* Redirect browser to editing page */
-		header("Location: vrrp_edit_track_script_edit.php?selected_host=$selected_host&selected=$selected");
+		header("Location: vrrp_edit_unicast_peer_edit.php?selected_host=$selected_host&selected=$selected");
 		/* Make sure that code below does not get executed when we redirect. */
 		exit;
 	}
@@ -33,18 +33,19 @@
 	
 	require('parse.php');
 
-	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "ADD")) {
-		add_vrrp_track_script($selected_host);
+	if ((isset($_GET['vrrp_unicast_peer'])) && ($_GET['vrrp_unicast_peer'] == "ADD")) {
+		add_vrrp_unicast_peer($selected_host);
 	}
 
-	if ((isset($_GET['vrrp_track_script'])) && ($_GET['vrrp_track_script'] == "DELETE")) {
-		$delete_service = "vrrp_track_script";
+	if ((isset($_GET['vrrp_unicast_peer'])) && ($_GET['vrrp_unicast_peer'] == "DELETE")) {
+		$delete_service = "vrrp_unicast_peer";
 		if ($debug) { echo "About to delete entry number $selected_host<BR>"; }
-		echo "<HR><H2>Click <A HREF=\"vrrp_edit_track_script.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
+		echo "<HR><H2>Click <A HREF=\"vrrp_edit_unicast_peer.php?selected_host=$selected_host\" NAME=\"Virtual\">HERE</A></TD> for refresh</H2><HR>";
 		open_file("w+");
 		write_config("2", $selected_host, $selected-1, $delete_service);
 		exit;
 	}
+
 
 	/* Umm,... just in case someone is dumb enuf to fiddle */
 	if (empty($selected_host)) { $selected_host=1; }
@@ -103,7 +104,7 @@ A.logolink      {
 
 <TABLE WIDTH="100%" BORDER="0" CELLSPACING="0" CELLPADDING="5">
         <TR>
-                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">EDIT VRRP TRACK SCRIPT</FONT><BR>&nbsp;</TD>
+                <TD>&nbsp;<BR><FONT SIZE="+2" COLOR="#CC0000">VRRP UNICAST IPADDRESS</FONT><BR>&nbsp;</TD>
         </TR>
 </TABLE>
 
@@ -121,25 +122,25 @@ A.logolink      {
         <TR BGCOLOR="#EEEEEE">
                 <TD WIDTH="60%">EDIT:
 		
-		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="INSTANCE">VRRP INSTANCE</A>
+		<A HREF="vrrp_edit_vrrp.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP INSTANCE">VRRP INSTANCE</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VIRTUAL IPADDRESS">VIRTUAL IPADDRESS</A>
+                <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS">VIRTUAL IPADDRESS</A>
 		&nbsp;|&nbsp;
 
                 <A HREF="vrrp_edit_unicast_peer.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP UNICAST PEER">UNICAST PEER</A>
-                &nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VIRTUAL IPADDRESS EXCLUDED">VIRTUAL IPADDRESS EXCLUDED</A>
-                &nbsp;|&nbsp;
-
-                <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL ROUTES">VIRTUAL ROUTES</A>
 		&nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK INTERFACE</A>
+                <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS EXCLUDED">VIRTUAL IPADDRESS EXCLUDED</A>
                 &nbsp;|&nbsp;
 
-                <A HREF="vrrp_edit_track_script.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK SCRIPT">TRACK SCRIPT</A>
+                <A HREF="vrrp_edit_virtual_routes.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP VIRTUAL ROUTES">VIRTUAL ROUTES</A>
+		&nbsp;|&nbsp;
+
+                <A HREF="vrrp_edit_track_interface.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VRRP TRACK INTERFACE">TRACK INTERFACE</A>
+                &nbsp;|&nbsp;
+
+                <A HREF="vrrp_edit_track_script.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="TRACK INTERFACE">TRACK SCRIPT</A>
                 &nbsp;|&nbsp;
 
 		</TD>
@@ -150,13 +151,13 @@ A.logolink      {
 
 <P>
 
-<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_track_script.php">
+<FORM METHOD="GET" ENCTYPE="application/x-www-form-urlencoded" ACTION="vrrp_edit_unicast_peer.php">
 
 <TABLE WIDTH="70%" BORDER="0" CELLSPACING="1" CELLPADDING="5">
 	<TR>
 		<TD CLASS="title">&nbsp;</TD>
-		<TD CLASS="title">SCRIPT</TD>
-		<TD CLASS="title">WEIGHT</TD>
+		<TD CLASS="title">IP</TD>
+		<TD CLASS="title">NETMASK</TD>
 	</TR>
 
 <!-- Somehow dynamically generated here -->
@@ -168,23 +169,20 @@ A.logolink      {
 
 	$loop=1;
 
-	foreach ($vrrp_instance[$selected_host]['track_script'] as $element) {
-		$string = explode(" ", $element);
-		if($string[1] == 'weight') {
-			$script = $string[0];
-			$weight = $string[2];
-		} else {
-			$script = $string[0];
-			$weight = '';
-		}
+	foreach ($vrrp_instance[$selected_host]['unicast_peer'] as $ips) {
 		echo "<TR>";
 		echo "<TD><INPUT TYPE=RADIO NAME=selected VALUE=" . $loop; if ($selected == "" ) { $selected = 1; }; if ($loop == $selected) { echo " CHECKED"; }; echo "></TD>";
+                $string = explode("/", $ips);
+                $ip = $string[0];
+                $cidr = $string[1];
+                $netmask = CIDRtoMask($cidr);
+				
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=script COLS=6 VALUE=";	echo $script	. ">";
-		echo $script	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=ip COLS=6 VALUE=";	echo $ip	. ">";
+		echo $ip	. "</TD>";
 
-		echo "<TD><INPUT TYPE=HIDDEN NAME=weight COLS=6 VALUE=";	echo $weight	. ">";
-		echo $weight	. "</TD>";
+		echo "<TD><INPUT TYPE=HIDDEN NAME=netmask COLS=6 VALUE=";	echo $netmask	. ">";
+		echo $netmask	. "</TD>";
 
 		echo "</TR>";
 	
@@ -203,9 +201,9 @@ A.logolink      {
 
 <TABLE>
 		<TR>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="ADD"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="DELETE"></TD>
-			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="EDIT"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_unicast_peer" VALUE="ADD"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_unicast_peer" VALUE="DELETE"></TD>
+			<TD><INPUT TYPE="SUBMIT" NAME="vrrp_unicast_peer" VALUE="EDIT"></TD>
 		</TR>
 </TABLE>
 
@@ -215,7 +213,7 @@ A.logolink      {
 	<TABLE WIDTH="100%" BORDER="0" CELLSPACING="1" CELLPADDING="5" BGCOLOR="#666666"> 
 		<TR> 
 			<TD ALIGN="right">
-				<INPUT TYPE="SUBMIT" NAME="vrrp_track_script" VALUE="CANCEL">
+				<INPUT TYPE="SUBMIT" NAME="vrrp_unicast_peer" VALUE="CANCEL">
 			</TD>
 		</TR>
 	</TABLE>

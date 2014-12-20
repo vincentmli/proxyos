@@ -40,6 +40,7 @@
 		$vrrp_instance[$selected_host]['vrrp_instance'] 	= $_GET['vrrp_instance']; 
 		$vrrp_instance[$selected_host]['state'] 	= $_GET['state']; 
                 $vrrp_instance[$selected_host]['interface']			=	$_GET['interface'];
+                $vrrp_instance[$selected_host]['unicast_src_ip']			=	$_GET['unicast_src_ip'];
                 // $virt[$selected_host]['address']		=	$temp[0];
                 $vrrp_instance[$selected_host]['dont_track_primary']		=	$_GET['dont_track_primary'];
                 $vrrp_instance[$selected_host]['mcast_src_ip']		=	$_GET['mcast_src_ip'];
@@ -155,6 +156,9 @@ A.logolink      {
                 <A HREF="vrrp_edit_virtual_ipaddress.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " NAME="VIRTUAL IPADDRESS">VIRTUAL IPADDRESS</A>
 		&nbsp;|&nbsp;
 
+                <A HREF="vrrp_edit_unicast_peer.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP UNICAST PEER">UNICAST PEER</A>
+                &nbsp;|&nbsp;
+
                 <A HREF="vrrp_edit_virtual_ipaddress_excluded.php<?php if (!empty($selected_host)) { echo "?selected_host=$selected_host"; } ?> " CLASS="tabon" NAME="VRRP VIRTUAL IPADDRESS EXCLUDED">VIRTUAL IPADDRESS EXCLUDED</A>
                 &nbsp;|&nbsp;
 
@@ -183,6 +187,10 @@ A.logolink      {
 	<TR>
 		<TD>Interface:</TD>
 		<TD><INPUT TYPE="TEXT" NAME="interface" VALUE=<?php echo  $vrrp_instance[$selected_host]['interface'] ?>></TD>
+	</TR>
+	<TR>
+		<TD>Unicast source ip:</TD>
+		<TD><INPUT TYPE="TEXT" NAME="unicast_src_ip" VALUE=<?php echo  $vrrp_instance[$selected_host]['unicast_src_ip'] ?>></TD>
 	</TR>
 	<TR>
 		<TD>Do not track primary:</TD>

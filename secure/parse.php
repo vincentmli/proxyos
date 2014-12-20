@@ -55,6 +55,7 @@ $vrrp_instance = array ( "",
 			"track_interface"		=> "",
 			"track_script"			=> "",
 			"mcast_src_ip"			=> "",
+			"unicast_src_ip"		=> "",
 			"lvs_sync_daemon_interface"	=> "",
 			"garp_master_delay"		=> "",
 			"virtual_router_id"		=> "",
@@ -64,6 +65,7 @@ $vrrp_instance = array ( "",
 			"virtual_ipaddress"		=> "",
 			"virtual_ipaddress_excluded"	=> "",
 			"virtual_routes"		=> "",
+			"unicast_peer"			=> "",
 			"nopreempt"			=> "",
 			"preempt_delay"			=> "",
 			"debug"				=> "",
@@ -200,6 +202,7 @@ function parse($name, $datum) {
 		    or $name == "virtual_ipaddress"
 		    or $name == "virtual_ipaddress_excluded"
 		    or $name == "virtual_routes"
+		    or $name == "unicast_peer"
 		    or $name == "track_interface"
 		    or $name == "track_script"
 		    or $name == "group"
@@ -359,6 +362,8 @@ function parse($name, $datum) {
 							break;
 			case "mcast_src_ip"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['mcast_src_ip']	= $datum;
 							break;
+			case "unicast_src_ip"		: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['unicast_src_ip']	= $datum;
+							break;
 			case "lvs_sync_daemon_interface" : if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['lvs_sync_daemon_interface'] = $datum;
 								break;
 			case "garp_master_delay"	: if ($service == "vrrp_instance") $vrrp_instance[$vrrp_instance_count]['garp_master_delay'] = $datum;
@@ -412,6 +417,8 @@ function parse($name, $datum) {
 			case "virtual_ipaddress_excluded"	: /* ignore here for vrrp_instance */ 
 							break;
 			case "virtual_routes"	: /* ignore here for vrrp_instance */ 
+							break;
+			case "unicast_peer"		: 
 							break;
 			case "track_interface"	: /* ignore here for vrrp_instance */ 
 							break;
@@ -607,6 +614,12 @@ function parse($name, $datum) {
 						    }
 							break;
 
+			case "unicast_peer"	:  if ($service == "vrrp_instance") { 
+								$ip_of = "unicast_peer";
+								$vrrp_instance[$vrrp_instance_count]['unicast_peer'] = array(); 
+						    }
+							break;
+
 			case (preg_match("/$ipmask_regex/", $name) ? true : false )	:	
 				if ($name != "" ) { //http://stackoverflow.com/questions/4043741/regexp-in-switch-statement
 						    //This only works when $name evaluates to true. If $name == '' this will yield wrong results. -1 
@@ -626,6 +639,9 @@ function parse($name, $datum) {
 					   }
 					   else if ($ip_of == "virtual_routes") {
 						    $vrrp_instance[$vrrp_instance_count]['virtual_routes'][] = $name . " " . $datum;
+					   }
+					   else if ($ip_of == "unicast_peer") {
+						    $vrrp_instance[$vrrp_instance_count]['unicast_peer'][] = $name . " " . $datum;
 					   }
 					}
 				}
@@ -1137,6 +1153,7 @@ function print_arrays() {
 		echo "<BR>vrrp_instance [$loop1] [interface] = "	. $vrrp_instance[$loop1]['interface'];
 		echo "<BR>vrrp_instance [$loop1] [dont_track_primary] = "	. $vrrp_instance[$loop1]['dont_track_primary'];
 		echo "<BR>vrrp_instance [$loop1] [mcast_src_ip] = "	. $vrrp_instance[$loop1]['mcast_src_ip'];
+		echo "<BR>vrrp_instance [$loop1] [unicast_src_ip] = "	. $vrrp_instance[$loop1]['unicast_src_ip'];
 		echo "<BR>vrrp_instance [$loop1] [lvs_sync_daemon_interface] = "	. $vrrp_instance[$loop1]['lvs_sync_daemon_interface'];
 		echo "<BR>vrrp_instance [$loop1] [garp_master_delay] = "	. $vrrp_instance[$loop1]['garp_master_delay'];
 		echo "<BR>vrrp_instance [$loop1] [virtual_router_id] = "	. $vrrp_instance[$loop1]['virtual_router_id'];
@@ -1166,6 +1183,11 @@ function print_arrays() {
 
 		echo "<P><B>vrrp_instance virtual_routes</B>";
                 foreach ($vrrp_instance[$loop1]['virtual_routes'] as $ip) {
+				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
+		}
+
+		echo "<P><B>vrrp_instance unicast_peer</B>";
+                foreach ($vrrp_instance[$loop1]['unicast_peer'] as $ip) {
 				if ($debug) { echo "$egap1" . $ip . "<BR>"; };
 		}
 
@@ -1358,6 +1380,7 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 	$loop20  = 0; //vrrp virtual_ipaddress_excluded
 	$loop21 = 1; //vrrp_script
 	$loop22 = 0; //track_script
+	$loop23 = 0; //vrrp unicast_peer
 
 	$gap1 = "    ";
 	$gap2 = $gap1 . $gap1;
@@ -1559,6 +1582,36 @@ function write_config($level="0", $delete_virt="", $delete_item="", $delete_serv
 				fputs ($fd, "$gap1 mcast_src_ip "		. $vrrp_instance[$loop7]['mcast_src_ip']	. "\n", 80);
 				if ($debug) { echo "$egap1 mcast_src_ip "	. $vrrp_instance[$loop7]['mcast_src_ip']	. "<BR>"; };
 			}
+
+			if (isset($vrrp_instance[$loop7]['unicast_src_ip']) &&
+			    $vrrp_instance[$loop7]['unicast_src_ip'] != "") {
+				fputs ($fd, "$gap1 unicast_src_ip "		. $vrrp_instance[$loop7]['unicast_src_ip']	. "\n", 80);
+				if ($debug) { echo "$egap1 unicast_src_ip "	. $vrrp_instance[$loop7]['unicast_src_ip']	. "<BR>"; };
+			}
+
+			if (isset($vrrp_instance[$loop7]['unicast_peer']) &&
+			    $vrrp_instance[$loop7]['unicast_peer'] != ""  &&
+			    count($vrrp_instance[$loop7]['unicast_peer']) > 0) {
+				fputs ($fd, "$gap1 unicast_peer "		. " {\n", 80);
+				if ($debug) { echo "$egap1 unicast_peer "	. " {<BR>"; };
+
+		                foreach ($vrrp_instance[$loop7]['unicast_peer'] as $ip) {
+
+                                	if (($loop23 == $delete_item) && ($loop7 == $delete_virt) && ($level == "2") && ($delete_service == "vrrp_unicast_peer")) {
+                                        	$loop23++;
+
+                        		}
+                        		else {
+						fputs ($fd, "$gap2 "		. $ip	. "\n", 80);
+						if ($debug) { echo "$egap2 "	. $ip	. "<BR>"; };
+						$loop23++;
+					}
+                		}
+
+				fputs ($fd,"$gap1 }\n", 80);
+				if ($debug) { echo "$egap1 }<BR>"; }
+			}
+
 			if (isset($vrrp_instance[$loop7]['lvs_sync_daemon_interface']) &&
 			    $vrrp_instance[$loop7]['lvs_sync_daemon_interface'] != "") {
 				fputs ($fd, "$gap1 lvs_sync_daemon_interface "		. $vrrp_instance[$loop7]['lvs_sync_daemon_interface']	. "\n", 80);
@@ -2524,6 +2577,14 @@ function add_vrrp_virtual_routes($vrrp_idx) {
 
 	global $vrrp_instance;
 	$vrrp_instance[$vrrp_idx]['virtual_routes'][] = "src ip to network/netmask via gateway dev ethxxx";
+
+	open_file("w+"); write_config(""); /* umm save this quick to file */
+}
+
+function add_vrrp_unicast_peer($vrrp_idx) {
+
+	global $vrrp_instance;
+	$vrrp_instance[$vrrp_idx]['unicast_peer'][] = "ip/netmask";
 
 	open_file("w+"); write_config(""); /* umm save this quick to file */
 }

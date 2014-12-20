@@ -119,6 +119,10 @@ So the entry here doesn't matter a whole lot.
 Interface for inside_network/outside_network, bound by vrrp instance
 
 <P>
+<SPAN CLASS=title>Unicast source ip:</SPAN>
+Most of cloud network does not allow multicast traffic, use unicast source ip for VRRP unicast in cloud network like Amazon AWS
+
+<P>
 <SPAN CLASS=title>Do not track primary:</SPAN>
 Ignore VRRP interface faults (default unset)
 
