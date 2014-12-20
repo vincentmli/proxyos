@@ -121,6 +121,10 @@ Interface for inside_network/outside_network, bound by vrrp instance
 <P>
 <SPAN CLASS=title>Unicast source ip:</SPAN>
 Most of cloud network does not allow multicast traffic, use unicast source ip for VRRP unicast in cloud network like Amazon AWS
+Unicast peer needs to be configured in: 
+<?php 
+echo "<A HREF=\"./vrrp_edit_unicast_peer.php?selected_host=$selected_host\" target=\"_blank\">UNICAST PEER</A>";
+?>
 
 <P>
 <SPAN CLASS=title>Do not track primary:</SPAN>
