@@ -1,0 +1,28 @@
+Array ( [1] => 
+	Array ( 		
+		[1] => Array ( 
+			[ip] => 192.168.3.2 
+			[port] => 80
+			[weight] => 1
+			[monitor] => Array (
+				 [type] => TCP_CHECK
+				 [connect_port] => 80
+				 [bindto] => 192.168.3.1
+				 [connect_timeout] => 5 
+				) 
+			)
+		 [0] => Array ( 
+			[monitor] => Array ( 
+				[type] => TCP_CHECK
+				[connect_port] => 80
+				[bindto] => 192.168.3.1
+				[connect_timeout] => 5 
+				) 
+			)
+		 [2] => Array (
+			[ip] => 192.168.3.3
+			[port] => 80
+			[weight] => 1 
+			) 
+	)
+) 

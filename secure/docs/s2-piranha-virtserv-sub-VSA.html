@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>4.6.1. The VIRTUAL SERVER Subsection</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-piranha-virtservs-VSA.html" title="4.6. VIRTUAL SERVERS" />
+    <link rel="prev" href="s1-piranha-virtservs-VSA.html" title="4.6. VIRTUAL SERVERS" />
+    <link rel="next" href="s2-piranha-virtservs-rs-VSA.html" title="4.6.2. REAL SERVER Subsection" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>4.6.1. The <span><strong class="guilabel">VIRTUAL SERVER</strong></span> Subsection</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-piranha-virtservs-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-piranha-virtservs-rs-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-piranha-virtserv-sub-VSA"></a>4.6.1. The <span><strong class="guilabel">VIRTUAL SERVER</strong></span> Subsection</h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2815060" class="indexterm"></a>
+      <p>
+				The <span><strong class="guilabel">VIRTUAL SERVER</strong></span> subsection panel shown in <a href="s2-piranha-virtserv-sub-VSA.html#gr-virtual-servers-sub-VSA" title="Figure 4.6. The VIRTUAL SERVERS Subsection">Figure 4.6, “The <span>VIRTUAL SERVERS</span> Subsection”</a> allows you to configure an individual virtual server. Links to subsections related specifically to this virtual server are located along the top of the page. But before configuring any of the subsections related to this virtual server, complete this page and click on the <span><strong class="guibutton">ACCEPT</strong></span> button.
+			</p>
+      <div class="figure">
+        <a id="gr-virtual-servers-sub-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/ha-piranha-gui/virtual-server-sub.png" alt="The VIRTUAL SERVERS Subsection" />
+            <div class="longdesc">
+              <p>
+							The <span><strong class="guilabel">VIRTUAL SERVERS</strong></span> Subsection
+						</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 4.6. The <span>VIRTUAL SERVERS</span> Subsection</h6>
+      </div>
+      <br class="figure-break" />
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Name</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Enter a descriptive name to identify the virtual server. This name is <span class="emphasis"><em>not</em></span> the hostname for the machine, so make it descriptive and easily identifiable. You can even reference the protocol used by the virtual server, such as HTTP.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Application port</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Enter the port number through which the service application will listen. Since this example is for HTTP services, port 80 is used.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guimenu">Protocol</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Choose between UDP and TCP in the drop-down menu. Web servers typically communicate via the TCP protocol, so this is selected in the example above.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Virtual IP Address</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <a id="id2815191" class="indexterm"></a>
+            <p>
+							Enter the virtual server's floating IP address in this text field.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guimenu">Virtual IP Network Mask</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Set the netmask for this virtual server with the drop-down menu.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Firewall Mark</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <a id="id2832841" class="indexterm"></a>
+            <p>
+							Do <span class="emphasis"><em>not</em></span> enter a firewall mark integer value in this field unless you are bundling multi-port protocols or creating a multi-port virtual server for separate, but related protocols. In this example, the above virtual server has a <span><strong class="guilabel">Firewall Mark</strong></span> of 80 because we are bundling connections to HTTP on port 80 and to HTTPS on port 443 using the firewall mark value of 80. When combined with persistence, this technique will ensure users accessing both insecure and secure webpages are routed to the same real server, preserving state.
+						</p>
+            <div class="warning">
+              <h2>Warning</h2>
+              <p>
+								Entering a firewall mark in this field allows IPVS to recognize that packets bearing this firewall mark are treated the same, but you must perform further configuration outside of the <span><strong class="application">Piranha Configuration Tool</strong></span> to actually assign the firewall marks. See <a href="s1-lvs-multi-VSA.html" title="3.4. Multi-port Services and LVS">Section 3.4, “Multi-port Services and LVS”</a> for instructions on creating multi-port services and <a href="s1-lvs-ftp-VSA.html" title="3.5. Configuring FTP">Section 3.5, “Configuring FTP”</a> for creating a highly available FTP virtual server.
+							</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Device</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Enter the name of the network device to which you want the floating IP address defined the <span><strong class="guilabel">Virtual IP Address</strong></span> field to bind.
+						</p>
+            <p>
+							You should alias the public floating IP address to the Ethernet interface connected to the public network. In this example, the public network is on the <code class="filename">eth0</code> interface, so <strong class="userinput"><code>eth0:1</code></strong> should be entered as the device name.
+						</p>
+          </dd>
+        </dl>
+      </div>
+      <div class="variablelist">
+        <dl>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Re-entry Time</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Enter an integer value which defines the length of time, in seconds, before the active LVS router attempts to bring a real server back into the pool after a failure.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Service Timeout</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							Enter an integer value which defines the length of time, in seconds, before a real server is considered dead and removed from the pool.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Quiesce server</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							When the <span><strong class="guilabel">Quiesce server</strong></span> radio button is selected, anytime a new real server node comes online, the least-connections table is reset to zero so the active LVS router routes requests as if all the real servers were freshly added to the pool. This option prevents the a new server from becoming bogged down with a high number of connections upon entering the pool.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Load monitoring tool</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							The LVS router can monitor the load on the various real servers by using either <code class="command">rup</code> or <code class="command">ruptime</code>. If you select <code class="command">rup</code> from the drop-down menu, each real server must run the <code class="command">rstatd</code> service. If you select <code class="command">ruptime</code>, each real server must run the <code class="command">rwhod</code> service.
+						</p>
+            <div class="caution">
+              <h2>Caution</h2>
+              <p>
+								Load monitoring is <span class="emphasis"><em>not</em></span> the same as load balancing and can result in hard to predict scheduling behavior when combined with weighted scheduling algorithms. Also, if you use load monitoring, the real servers must be Linux machines.
+							</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Scheduling</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <a id="id2833059" class="indexterm"></a>
+            <p>
+							Select your preferred scheduling algorithm from the drop-down menu. The default is <strong class="userinput"><code>Weighted least-connection</code></strong>. For more information on scheduling algorithms, see <a href="s2-lvs-sched-VSA.html" title="1.3.1. Scheduling Algorithms">Section 1.3.1, “Scheduling Algorithms”</a>.
+						</p>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guilabel">Persistence</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <a id="id2833100" class="indexterm"></a>
+            <p>
+							If an administrator needs persistent connections to the virtual server during client transactions, enter the number of seconds of inactivity allowed to lapse before a connection times out in this text field.
+						</p>
+            <div class="important">
+              <h2>Important</h2>
+              <p>
+								If you entered a value in the <span><strong class="guilabel">Firewall Mark</strong></span> field above, you should enter a value for persistence as well. Also, be sure that if you use firewall marks and persistence together, that the amount of persistence is the same for each virtual server with the firewall mark. For more on persistence and firewall marks, refer to <a href="s1-lvs-persistance-VSA.html" title="1.5. Persistence and Firewall Marks">Section 1.5, “Persistence and Firewall Marks”</a>.
+							</p>
+            </div>
+          </dd>
+          <dt>
+            <span class="term">
+              <span>
+                <strong class="guimenu">Persistence Network Mask</strong>
+              </span>
+            </span>
+          </dt>
+          <dd>
+            <p>
+							To limit persistence to particular subnet, select the appropriate network mask from the drop-down menu.
+						</p>
+            <div class="note">
+              <h2>Note</h2>
+              <p>
+								Before the advent of firewall marks, persistence limited by subnet was a crude way of bundling connections. Now, it is best to use persistence in relation to firewall marks to achieve the same result.
+							</p>
+            </div>
+          </dd>
+        </dl>
+      </div>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+					Remember to click the <span><strong class="guibutton">ACCEPT</strong></span> button after making any changes in this panel. To make sure you do not lose changes when selecting a new panel.
+				</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-piranha-virtservs-VSA.html"><strong>Prev</strong>4.6. VIRTUAL SERVERS</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-piranha-virtservs-rs-VSA.html"><strong>Next</strong>4.6.2. REAL SERVER Subsection</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

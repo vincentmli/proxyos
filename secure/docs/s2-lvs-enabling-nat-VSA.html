@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.1.3. Enabling NAT Routing on the LVS Routers</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-nat-network-VSA.html" title="3.1. The NAT LVS Network" />
+    <link rel="prev" href="s2-nat-rout-real-VSA.html" title="3.1.2. Routing on the Real Servers" />
+    <link rel="next" href="s1-lvs-direct-VSA.html" title="3.2. LVS via Direct Routing" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.1.3. Enabling NAT Routing on the LVS Routers</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-nat-rout-real-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-direct-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-lvs-enabling-nat-VSA"></a>3.1.3. Enabling NAT Routing on the LVS Routers</h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2870093" class="indexterm"></a>
+      <a id="id2870130" class="indexterm"></a>
+      <p>
+				In a simple NAT LVS configuration where each clustered service uses only one port, like HTTP on port 80, the administrator needs only to enable packet forwarding on the LVS routers for the requests to be properly routed between the outside world and the real servers. See <a href="s1-lvs-forwarding-VSA.html" title="2.5. Turning on Packet Forwarding">Section 2.5, “Turning on Packet Forwarding”</a> for instructions on turning on packet forwarding. However, more configuration is necessary when the clustered services require more than one port to go to the same real server during a user session. For information on creating multi-port services using firewall marks, see <a href="s1-lvs-multi-VSA.html" title="3.4. Multi-port Services and LVS">Section 3.4, “Multi-port Services and LVS”</a>.
+			</p>
+      <p>
+				Once forwarding is enabled on the LVS routers and the real servers are set up and have the clustered services running, use the <span><strong class="application">Piranha Configuration Tool</strong></span> to configure LVS as shown in <a href="ch-lvs-piranha-VSA.html" title="Chapter 4. Configuring the LVS Routers with Piranha Configuration Tool">Chapter 4, <i>Configuring the LVS Routers with <span><strong class="application">Piranha Configuration Tool</strong></span></i></a>.
+			</p>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+					Do not configure the floating IP for <code class="filename">eth0:1</code> or <code class="filename">eth1:1</code> by manually editing network scripts or using a network configuration tool. Instead, use the <span><strong class="application">Piranha Configuration Tool</strong></span> as shown in <a href="s1-piranha-globalset-VSA.html" title="4.4. GLOBAL SETTINGS">Section 4.4, “<span><strong class="guilabel">GLOBAL SETTINGS</strong></span>”</a> and <a href="s2-piranha-virtserv-sub-VSA.html" title="4.6.1. The VIRTUAL SERVER Subsection">Section 4.6.1, “The <span><strong class="guilabel">VIRTUAL SERVER</strong></span> Subsection”</a>.
+				</p>
+      </div>
+      <p>
+				When finished, start the <code class="command">pulse</code> service as shown in <a href="s1-lvs-start-VSA.html" title="4.8. Starting LVS">Section 4.8, “Starting LVS”</a>. Once <code class="command">pulse</code> is up and running, the active LVS router will begin routing requests to the pool of real servers.
+			</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-nat-rout-real-VSA.html"><strong>Prev</strong>3.1.2. Routing on the Real Servers</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s1-lvs-direct-VSA.html"><strong>Next</strong>3.2. LVS via Direct Routing</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

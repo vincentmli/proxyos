@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.2.1. Direct Routing and arptables_jf</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-direct-VSA.html" title="3.2. LVS via Direct Routing" />
+    <link rel="prev" href="s1-lvs-direct-VSA.html" title="3.2. LVS via Direct Routing" />
+    <link rel="next" href="s2-lvs-direct-iptables-VSA.html" title="3.2.2. Direct Routing and iptables" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.2.1. Direct Routing and <code class="command">arptables_jf</code></strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-direct-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-direct-iptables-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-lvs-direct-arptables-VSA"></a>3.2.1. Direct Routing and <code class="command">arptables_jf</code></h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2857365" class="indexterm"></a>
+      <a id="id2916212" class="indexterm"></a>
+      <a id="id2858376" class="indexterm"></a>
+      <p>
+				In order to configure direct routing using <code class="command">arptables_jf</code>, each real server must have their virtual IP address configured, so they can directly route packets. ARP requests for the VIP are ignored entirely by the real servers, and any ARP packets that might otherwise be sent containing the VIPs are mangled to contain the real server's IP instead of the VIPs.
+			</p>
+      <p>
+				Using the <code class="command">arptables_jf</code> method, applications may bind to each individual VIP or port that the real server is servicing. For example, the <code class="command">arptables_jf</code> method allows multiple instances of Apache HTTP Server to be running bound explicitly to different VIPs on the system. There are also significant performance advantages to using <code class="command">arptables_jf</code> over the <code class="command">iptables</code> option.
+			</p>
+      <p>
+				However, using the <code class="command">arptables_jf</code> method, VIPs can not be configured to start on boot using standard Red Hat Enterprise Linux system configuration tools.
+			</p>
+      <p>
+				To configure each real server to ignore ARP requests for each virtual IP addresses, perform the following steps:
+			</p>
+      <div class="orderedlist">
+        <ol>
+          <li>
+            <p>
+						Create the ARP table entries for each virtual IP address on each real server (the real_ip is the IP the director uses to communicate with the real server; often this is the IP bound to <code class="filename">eth0</code>):
+					</p>
+            <pre class="screen">
+arptables -A IN -d &lt;virtual_ip&gt; -j DROP
+arptables -A OUT -d &lt;virtual_ip&gt; -j mangle --mangle-ip-s &lt;real_ip&gt;
+</pre>
+            <p>
+						This will cause the real servers to ignore all ARP requests for the virtual IP addresses, and change any outgoing ARP responses which might otherwise contain the virtual IP so that they contain the real IP of the server instead. The only node that should respond to ARP requests for any of the VIPs is the current active LVS node.
+					</p>
+          </li>
+          <li>
+            <p>
+						Once this has been completed on each real server, save the ARP table entries by typing the following commands on each real server:
+					</p>
+            <p>
+						<code class="command">service arptables_jf save</code>
+					</p>
+            <p>
+						<code class="command">chkconfig --level 2345 arptables_jf on</code>
+					</p>
+            <p>
+						The <code class="command">chkconfig</code> command will cause the system to reload the arptables configuration on bootup — before the network is started.
+					</p>
+          </li>
+          <li>
+            <p>
+						Configure the virtual IP address on all real servers using <code class="command">ifconfig</code> to create an IP alias. For example:
+					</p>
+            <pre class="screen">
+# <strong class="userinput"><code>ifconfig eth0:1 192.168.76.24 netmask 255.255.252.0 broadcast 192.168.79.255 up</code></strong>
+</pre>
+            <p>
+						Or using the <code class="filename">iproute2</code> utility <code class="command">ip</code>, for example:
+					</p>
+            <pre class="screen">
+# <strong class="userinput"><code>ip addr add 192.168.76.24 dev eth0</code></strong>
+</pre>
+            <p>
+						As previously noted, the virtual IP addresses can not be configured to start on boot using the Red Hat system configuration tools. One way to work around this issue is to place these commands in <code class="filename">/etc/rc.d/rc.local</code>.
+					</p>
+          </li>
+          <li>
+            <p>
+						Configure Piranha for Direct Routing. Refer to <a href="ch-lvs-piranha-VSA.html" title="Chapter 4. Configuring the LVS Routers with Piranha Configuration Tool">Chapter 4, <i>Configuring the LVS Routers with <span><strong class="application">Piranha Configuration Tool</strong></span></i></a> for more information.
+					</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-direct-VSA.html"><strong>Prev</strong>3.2. LVS via Direct Routing</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-direct-iptables-VSA.html"><strong>Next</strong>3.2.2. Direct Routing and iptables</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

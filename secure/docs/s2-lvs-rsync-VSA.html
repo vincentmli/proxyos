@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>1.1.1. Data Replication and Data Sharing Between Real Servers</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-basic-VSA.html" title="1.1. A Basic LVS Configuration" />
+    <link rel="prev" href="s1-lvs-basic-VSA.html" title="1.1. A Basic LVS Configuration" />
+    <link rel="next" href="s3-lvs-rsync-VSA.html" title="1.1.1.1. Configuring Real Servers to Synchronize Data" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>1.1.1. Data Replication and Data Sharing Between Real Servers</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-basic-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s3-lvs-rsync-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-lvs-rsync-VSA"></a>1.1.1. Data Replication and Data Sharing Between Real Servers</h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2882526" class="indexterm"></a>
+      <a id="id2882535" class="indexterm"></a>
+      <p>
+				Since there is no built-in component in LVS to share the same data between the real servers, the administrator has two basic options:
+			</p>
+      <div class="itemizedlist">
+        <ul>
+          <li>
+            <p>
+						Synchronize the data across the real server pool
+					</p>
+          </li>
+          <li>
+            <p>
+						Add a third layer to the topology for shared data access
+					</p>
+          </li>
+        </ul>
+      </div>
+      <p>
+				The first option is preferred for servers that do not allow large numbers of users to upload or change data on the real servers. If the configuration allows large numbers of users to modify data, such as an e-commerce website, adding a third layer is preferable.
+			</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-basic-VSA.html"><strong>Prev</strong>1.1. A Basic LVS Configuration</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s3-lvs-rsync-VSA.html"><strong>Next</strong>1.1.1.1. Configuring Real Servers to Synchronize ...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

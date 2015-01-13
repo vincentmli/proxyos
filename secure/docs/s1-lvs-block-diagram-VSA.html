@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>1.6. LVS — A Block Diagram</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-overview-VSA.html" title="Chapter 1. Linux Virtual Server Overview" />
+    <link rel="prev" href="s2-lve-fwmarks-VSA.html" title="1.5.2. Firewall Marks" />
+    <link rel="next" href="s2-lvs-components-VSA.html" title="1.6.1. LVS Components" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>1.6. LVS — A Block Diagram</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lve-fwmarks-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-components-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-block-diagram-VSA"></a>1.6. LVS — A Block Diagram</h2>
+          </div>
+        </div>
+      </div>
+      <p>
+			LVS routers use a collection of programs to monitor cluster members and cluster services. <a href="s1-lvs-block-diagram-VSA.html#gr-lvs-components-VSA" title="Figure 1.5. LVS Components">Figure 1.5, “LVS Components”</a> illustrates how these various programs on both the active and backup LVS routers work together to manage the cluster.
+		</p>
+      <div class="figure">
+        <a id="gr-lvs-components-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/lvs-components.png" alt="LVS Components" />
+            <div class="longdesc">
+              <p>
+						LVS Components
+					</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure 1.5. LVS Components</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+			The <code class="command">pulse</code> daemon runs on both the active and passive LVS routers. On the backup router, <code class="command">pulse</code> sends a <em class="firstterm">heartbeat</em> to the public interface of the active router to make sure the active router is still properly functioning. On the active router, <code class="command">pulse</code> starts the <code class="command">lvs</code> daemon and responds to <em class="firstterm">heartbeat</em> queries from the backup LVS router.
+		</p>
+      <p>
+			Once started, the <code class="command">lvs</code> daemon calls the <code class="command">ipvsadm</code> utility to configure and maintain the IPVS routing table in the kernel and starts a <code class="command">nanny</code> process for each configured virtual server on each real server. Each <code class="command">nanny</code> process checks the state of one configured service on one real server, and tells the <code class="command">lvs</code> daemon if the service on that real server is malfunctioning. If a malfunction is detected, the <code class="command">lvs</code> daemon instructs <code class="command">ipvsadm</code> to remove that real server from the IPVS routing table.
+		</p>
+      <p>
+			If the backup router does not receive a response from the active router, it initiates failover by calling <code class="command">send_arp</code> to reassign all virtual IP addresses to the NIC hardware addresses (<em class="firstterm">MAC</em> address) of the backup node, sends a command to the active router via both the public and private network interfaces to shut down the <code class="command">lvs</code> daemon on the active router, and starts the <code class="command">lvs</code> daemon on the backup node to accept requests for the configured virtual servers.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lve-fwmarks-VSA.html"><strong>Prev</strong>1.5.2. Firewall Marks</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-components-VSA.html"><strong>Next</strong>1.6.1. LVS Components</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

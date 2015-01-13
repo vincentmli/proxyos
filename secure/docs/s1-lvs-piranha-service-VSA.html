@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>2.3. Starting the Piranha Configuration Tool Service</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-initial-setup-VSA.html" title="Chapter 2. Initial LVS Configuration" />
+    <link rel="prev" href="s1-lvs-piranha-password-VSA.html" title="2.2. Setting a Password for the Piranha Configuration Tool" />
+    <link rel="next" href="s2-lvs-piranha-port-VSA.html" title="2.3.1. Configuring the Piranha Configuration Tool Web Server Port" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>2.3. Starting the <span><strong class="application">Piranha Configuration Tool</strong></span> Service</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-piranha-password-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-piranha-port-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-piranha-service-VSA"></a>2.3. Starting the <span><strong class="application">Piranha Configuration Tool</strong></span> Service</h2>
+          </div>
+        </div>
+      </div>
+      <p>
+			After you have set the password for the <span><strong class="application">Piranha Configuration Tool</strong></span>, start or restart the <code class="command">piranha-gui</code> service located in <code class="command">/etc/rc.d/init.d/piranha-gui</code>. To do this, type the following command as root:
+		</p>
+      <p>
+			<code class="command">/sbin/service piranha-gui start</code>
+		</p>
+      <p>
+			or
+		</p>
+      <p>
+			<code class="command">/sbin/service piranha-gui restart</code>
+		</p>
+      <p>
+			Issuing this command starts a private session of the Apache HTTP Server by calling the symbolic link <code class="command">/usr/sbin/piranha_gui -&gt; /usr/sbin/httpd</code>. For security reasons, the <code class="command">piranha-gui</code> version of <code class="command">httpd</code> runs as the piranha user in a separate process. The fact that <code class="command">piranha-gui</code> leverages the <code class="command">httpd</code> service means that:
+		</p>
+      <div class="orderedlist">
+        <ol>
+          <li>
+            <p>
+					The Apache HTTP Server must be installed on the system.
+				</p>
+          </li>
+          <li>
+            <p>
+					Stopping or restarting the Apache HTTP Server via the <code class="command">service</code> command stops the <code class="command">piranha-gui</code> service.
+				</p>
+          </li>
+        </ol>
+      </div>
+      <div class="warning">
+        <h2>Warning</h2>
+        <p>
+				If the command <code class="command">/sbin/service httpd stop</code> or <code class="command">/sbin/service httpd restart</code> is issued on an LVS router, you must start the <code class="command">piranha-gui</code> service by issuing the following command:
+			</p>
+        <p>
+				<code class="command">/sbin/service piranha-gui start</code>
+			</p>
+      </div>
+      <p>
+			The <code class="command">piranha-gui</code> service is all that is necessary to begin configuring LVS. However, if you are configuring LVS remotely, the <code class="command">sshd</code> service is also required. You do <span class="emphasis"><em>not</em></span> need to start the <code class="command">pulse</code> service until configuration using the <span><strong class="application">Piranha Configuration Tool</strong></span> is complete. See <a href="s1-lvs-start-VSA.html" title="4.8. Starting LVS">Section 4.8, “Starting LVS”</a> for information on starting the <code class="command">pulse</code> service.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-piranha-password-VSA.html"><strong>Prev</strong>2.2. Setting a Password for the Piranha Configura...</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-piranha-port-VSA.html"><strong>Next</strong>2.3.1. Configuring the Piranha Configuration Tool...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>4.7.2. Synchronizing sysctl</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-sync-VSA.html" title="4.7. Synchronizing Configuration Files" />
+    <link rel="prev" href="s2-lvs-sync-lvs-cf-VSA.html" title="4.7.1. Synchronizing lvs.cf" />
+    <link rel="next" href="s2-lvs-sync-net-VSA.html" title="4.7.3. Synchronizing Network Packet Filtering Rules" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>4.7.2. Synchronizing <code class="filename">sysctl</code></strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-sync-lvs-cf-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-sync-net-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s2-lvs-sync-sysctl-VSA"></a>4.7.2. Synchronizing <code class="filename">sysctl</code></h3>
+          </div>
+        </div>
+      </div>
+      <p>
+				The <code class="filename">sysctl</code> file is only modified once in most situations. This file is read at boot time and tells the kernel to turn on packet forwarding.
+			</p>
+      <div class="important">
+        <h2>Important</h2>
+        <p>
+					If you are not sure whether or not packet forwarding is enabled in the kernel, see <a href="s1-lvs-forwarding-VSA.html" title="2.5. Turning on Packet Forwarding">Section 2.5, “Turning on Packet Forwarding”</a> for instructions on how to check and, if necessary, enable this key functionality.
+				</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s2-lvs-sync-lvs-cf-VSA.html"><strong>Prev</strong>4.7.1. Synchronizing lvs.cf</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-lvs-sync-net-VSA.html"><strong>Next</strong>4.7.3. Synchronizing Network Packet Filtering Rul...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

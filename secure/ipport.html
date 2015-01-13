@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script language="javascript" type="text/javascript" src="jquery-1.11.0.js"></script>
+<script>
+function delIPPort() {
+    //remove selected index from selected
+    //see http://api.jquery.com/remove/
+}
+function addIPPort() {
+    var ip = $("#ip"); // see http://api.jquery.com/category/selectors/
+    var port = $("#port");
+    //http://api.jquery.com/val/ and http://api.jquery.com/append/
+    $("#select").append("<option>" + ip.val() + ":" + port.val() + "</option>"); 
+    port.val("");
+    ip.val("");
+}
+</script>
+</head>
+
+<body>
+
+pool:
+<input type="text" name="pool">IP:
+<input type="text" id="ip">Port:
+<input type="text" id="port">
+<button onclick="addIPPort()">Add</button>
+<br>
+<select id="select" multiple="multiple"></select>
+<button onclick="delIPPort()">Delete</button>
+
+
+</body>
+</html>
+

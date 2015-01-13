@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.1.1. Configuring Network Interfaces for LVS with NAT</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="s1-lvs-nat-network-VSA.html" title="3.1. The NAT LVS Network" />
+    <link rel="prev" href="s1-lvs-nat-network-VSA.html" title="3.1. The NAT LVS Network" />
+    <link rel="next" href="s2-nat-rout-real-VSA.html" title="3.1.2. Routing on the Real Servers" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.1.1. Configuring Network Interfaces for LVS with NAT</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-nat-network-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-nat-rout-real-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h3 class="title"><a id="s1-nat-router-ifcfg-VSA"></a>3.1.1. Configuring Network Interfaces for LVS with NAT</h3>
+          </div>
+        </div>
+      </div>
+      <a id="id2924254" class="indexterm"></a>
+      <a id="id2924438" class="indexterm"></a>
+      <p>
+				To set up LVS with NAT, you must first configure the network interfaces for the public network and the private network on the LVS routers. In this example, the LVS routers' public interfaces (<code class="filename">eth0</code>) will be on the 192.168.26/24 network (I know, I know, this is not a routable IP, but let us pretend there is a firewall in front of the LVS router for good measure) and the private interfaces which link to the real servers (<code class="filename">eth1</code>) will be on the 10.11.12/24 network.
+			</p>
+      <p>
+				So on the active or <em class="firstterm">primary</em> LVS router node, the public interface's network script, <code class="filename">/etc/sysconfig/network-scripts/ifcfg-eth0</code>, could look something like this:
+			</p>
+      <pre class="screen">
+DEVICE=eth0
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR=192.168.26.9
+NETMASK=255.255.255.0
+GATEWAY=192.168.26.254
+</pre>
+      <p>
+				The <code class="filename">/etc/sysconfig/network-scripts/ifcfg-eth1</code> for the private NAT interface on the LVS router could look something like this:
+			</p>
+      <pre class="screen">
+DEVICE=eth1
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR=10.11.12.9
+NETMASK=255.255.255.0
+</pre>
+      <p>
+				In this example, the VIP for the LVS router's public interface will be 192.168.26.10 and the VIP for the NAT or private interface will be 10.11.12.10. So, it is essential that the real servers route requests back to the VIP for the NAT interface.
+			</p>
+      <div class="important">
+        <h2>Important</h2>
+        <p>
+					The sample Ethernet interface configuration settings in this section are for the real IP addresses of an LVS router and <span class="emphasis"><em>not</em></span> the floating IP addresses. To configure the public and private floating IP addresses the administrator should use the <span><strong class="application">Piranha Configuration Tool</strong></span>, as shown in <a href="s1-piranha-globalset-VSA.html" title="4.4. GLOBAL SETTINGS">Section 4.4, “<span><strong class="guilabel">GLOBAL SETTINGS</strong></span>”</a> and <a href="s2-piranha-virtserv-sub-VSA.html" title="4.6.1. The VIRTUAL SERVER Subsection">Section 4.6.1, “The <span><strong class="guilabel">VIRTUAL SERVER</strong></span> Subsection”</a>.
+				</p>
+      </div>
+      <p>
+				After configuring the primary LVS router node's network interfaces, configure the backup LVS router's real network interfaces — taking care that none of the IP address conflict with any other IP addresses on the network.
+			</p>
+      <div class="important">
+        <h2>Important</h2>
+        <p>
+					Be sure each interface on the backup node services the same network as the interface on primary node. For instance, if eth0 connects to the public network on the primary node, it must also connect to the public network on the backup node as well.
+				</p>
+      </div>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-nat-network-VSA.html"><strong>Prev</strong>3.1. The NAT LVS Network</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="s2-nat-rout-real-VSA.html"><strong>Next</strong>3.1.2. Routing on the Real Servers</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

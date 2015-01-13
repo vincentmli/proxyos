@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Appendix A. Using LVS with Red Hat Cluster</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="prev" href="s1-lvs-start-VSA.html" title="4.8. Starting LVS" />
+    <link rel="next" href="ix01.html" title="Index" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>Appendix A. Using LVS with Red Hat Cluster</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-start-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ix01.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="appendix" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="ch-clumanager-piranha-VSA"></a>Appendix A. Using LVS with Red Hat Cluster</h2>
+          </div>
+        </div>
+      </div>
+      <a id="id2807087" class="indexterm"></a>
+      <a id="id2897528" class="indexterm"></a>
+      <a id="id2887072" class="indexterm"></a>
+      <a id="id2874719" class="indexterm"></a>
+      <p>
+		You can use LVS routers with a Red Hat Cluster to deploy a high-availability e-commerce site that provides load balancing, data integrity, and application availability.
+	</p>
+      <p>
+		The configuration in <a href="ch-clumanager-piranha-VSA.html#fig-lvs-rhclust-VSA" title="Figure A.1. LVS with a Red Hat Cluster">Figure A.1, “LVS with a Red Hat Cluster”</a> represents an e-commerce site used for online merchandise ordering through a URL. Client requests to the URL pass through the firewall to the active LVS load-balancing router, which then forwards the requests to one of the Web servers. The Red Hat Cluster nodes serve dynamic data to the Web servers, which forward the data to the requesting client.
+	</p>
+      <div class="figure">
+        <a id="fig-lvs-rhclust-VSA"></a>
+        <div class="figure-contents">
+          <div class="mediaobject">
+            <img src="./images/9363.png" alt="LVS with a Red Hat Cluster" />
+            <div class="longdesc">
+              <p>
+					LVS with a Red Hat Cluster
+				</p>
+            </div>
+          </div>
+        </div>
+        <h6>Figure A.1. LVS with a Red Hat Cluster</h6>
+      </div>
+      <br class="figure-break" />
+      <p>
+		Serving dynamic Web content with LVS requires a three-tier configuration (as shown in <a href="ch-clumanager-piranha-VSA.html#fig-lvs-rhclust-VSA" title="Figure A.1. LVS with a Red Hat Cluster">Figure A.1, “LVS with a Red Hat Cluster”</a>). This combination of LVS and Red Hat Cluster allows for the configuration of a high-integrity, no-single-point-of-failure e-commerce site. The Red Hat Cluster can run a high-availability instance of a database or a set of databases that are network-accessible to the Web servers.
+	</p>
+      <p>
+		A three-tier configuration is required to provide dynamic content. While a two-tier LVS configuration is suitable if the Web servers serve only static Web content (consisting of small amounts of infrequently changing data), a two-tier configuration is not suitable if the Web servers serve dynamic content. Dynamic content could include product inventory, purchase orders, or customer databases, which must be consistent on all the Web servers to ensure that customers have access to up-to-date and accurate information.
+	</p>
+      <p>
+		Each tier provides the following functions:
+	</p>
+      <div class="itemizedlist">
+        <ul>
+          <li>
+            <p>
+				First tier — LVS routers performing load-balancing to distribute Web requests.
+			</p>
+          </li>
+          <li>
+            <p>
+				Second tier — A set of Web servers to serve the requests.
+			</p>
+          </li>
+          <li>
+            <p>
+				Third tier — A Red Hat Cluster to serve data to the Web servers.
+			</p>
+          </li>
+        </ul>
+      </div>
+      <p>
+		In an LVS configuration like the one in <a href="ch-clumanager-piranha-VSA.html#fig-lvs-rhclust-VSA" title="Figure A.1. LVS with a Red Hat Cluster">Figure A.1, “LVS with a Red Hat Cluster”</a>, client systems issue requests on the World Wide Web. For security reasons, these requests enter a Web site through a firewall, which can be a Linux system serving in that capacity or a dedicated firewall device. For redundancy, you can configure firewall devices in a failover configuration. Behind the firewall are LVS load-balancing routers, which can be configured in an active-standby mode. The active load-balancing router forwards the requests to the set of Web servers.
+	</p>
+      <p>
+		Each Web server can independently process an HTTP request from a client and send the response back to the client. LVS enables you to expand a Web site's capacity by adding Web servers behind the LVS routers; the LVS routers perform load balancing across a wider set of Web servers. In addition, if a Web server fails, it can be removed; LVS continues to perform load balancing across a smaller set of Web servers.
+	</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s1-lvs-start-VSA.html"><strong>Prev</strong>4.8. Starting LVS</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ix01.html"><strong>Next</strong>Index</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>
