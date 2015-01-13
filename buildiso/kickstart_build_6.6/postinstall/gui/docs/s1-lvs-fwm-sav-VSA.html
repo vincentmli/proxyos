@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>3.6. Saving Network Packet Filter Settings</title>
+    <link rel="stylesheet" href="./Common_Content/css/default.css" type="text/css" />
+    <link rel="start" href="index.html" title="Linux Virtual Server Administration" />
+    <link rel="up" href="ch-lvs-setup-VSA.html" title="Chapter 3. Setting Up LVS" />
+    <link rel="prev" href="s3-fwm-passive-VSA.html" title="3.5.3.2. Rules for Passive Connections" />
+    <link rel="next" href="ch-lvs-piranha-VSA.html" title="Chapter 4. Configuring the LVS Routers with Piranha Configuration Tool" />
+    <link rel="copyright" href="ln-id2872232.html" title="Legal Notice" />
+  </head>
+  <body>
+    <p id="title">
+      
+        <strong>3.6. Saving Network Packet Filter Settings</strong>
+      </a>
+    </p>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s3-fwm-passive-VSA.html">
+          <strong>Prev</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ch-lvs-piranha-VSA.html">
+          <strong>Next</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="section" lang="en-US" xml:lang="en-US">
+      <div class="titlepage">
+        <div>
+          <div>
+            <h2 class="title"><a id="s1-lvs-fwm-sav-VSA"></a>3.6. Saving Network Packet Filter Settings</h2>
+          </div>
+        </div>
+      </div>
+      <p>
+			After configuring the appropriate network packet filters for your situation, save the settings so they get restored after a reboot. For <code class="command">iptables</code>, type the following command:
+		</p>
+      <p>
+			<code class="command">/sbin/service iptables save</code>
+		</p>
+      <p>
+			This saves the settings in <code class="filename">/etc/sysconfig/iptables</code> so they can be recalled at boot time.
+		</p>
+      <p>
+			Once this file is written, you are able to use the <code class="command">/sbin/service</code> command to start, stop, and check the status (using the status switch) of <code class="command">iptables</code>. The <code class="command">/sbin/service</code> will automatically load the appropriate module for you. For an example of how to use the <code class="command">/sbin/service</code> command, see <a href="s1-lvs-piranha-service-VSA.html" title="2.3. Starting the Piranha Configuration Tool Service">Section 2.3, “Starting the <span><strong class="application">Piranha Configuration Tool</strong></span> Service”</a>.
+		</p>
+      <p>
+			Finally, you need to be sure the appropriate service is set to activate on the proper runlevels. For more on this, see <a href="s1-lvs-daemons-VSA.html" title="2.1. Configuring Services on the LVS Routers">Section 2.1, “Configuring Services on the LVS Routers”</a>.
+		</p>
+      <p>
+			The next chapter explains how to use the <span><strong class="application">Piranha Configuration Tool</strong></span> to configure the LVS router and describe the steps necessary to activate LVS.
+		</p>
+    </div>
+    <ul class="docnav">
+      <li class="previous">
+        <a accesskey="p" href="s3-fwm-passive-VSA.html"><strong>Prev</strong>3.5.3.2. Rules for Passive Connections</a>
+      </li>
+      <li class="up">
+        <a accesskey="u" href="#">
+          <strong>Up</strong>
+        </a>
+      </li>
+      <li class="home">
+        <a accesskey="h" href="index.html">
+          <strong>Home</strong>
+        </a>
+      </li>
+      <li class="next">
+        <a accesskey="n" href="ch-lvs-piranha-VSA.html"><strong>Next</strong>Chapter 4. Configuring the LVS Routers with Piran...</a>
+      </li>
+    </ul>
+  <br><font size="1"><b>Note:</b> This documentation is provided {and copyrighted} by <b>Red Hat®, Inc.</b> and is released via the Open Publication License. The copyright holder has added the further requirement that <i>Distribution of substantively modified versions of this document is prohibited without the explicit permission of the copyright holder</i>. The <b>CentOS project</b> redistributes these original works (in their unmodified form) as a reference for <b>CentOS-5</b> because <b>CentOS-5</b> is built from publicly available, open source SRPMS. The documentation is unmodified to be compliant with upstream distribution policy. Neither <b>CentOS-5</b> nor the <b>CentOS Project</b> are in any way affiliated with or sponsored by <b>Red Hat®, Inc.</b></font></body>
+</html>

@@ -1,0 +1,403 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use POSIX qw(tmpnam strftime);
+use IO::File;
+use IO::Socket;
+use IO::Interface qw(:flags);
+use File::Copy qw(copy);;
+
+my $dev;
+my @devs;
+my $s = IO::Socket::INET->new(Proto => 'udp');
+my @interfaces = $s->if_list;
+my $menu = ' ';
+my $i = 1;
+for my $if (@interfaces) {
+    print "interface = $if\n";
+    my $flags = $s->if_flags($if);
+    next if $flags & IFF_POINTOPOINT;
+    next if $flags & IFF_LOOPBACK;
+    $menu = $menu . $i . " " . $if . " ";
+    $i=$i+1;   
+    push @devs, $if;
+}
+
+my $netdir = "/etc/sysconfig/network-scripts";
+my $network = "/etc/sysconfig/network";
+my $httpdconf = "/etc/sysconfig/ha/conf/httpd.conf";
+my $htpasswdfile = '/etc/sysconfig/ha/conf/piranha.passwd';
+my $sudoers = "/etc/sudoers";
+my $backup = strftime "%H:%M:%S", localtime;
+my $ipv4regexp = '^(\d+\.){3}(\d+)$';
+my $ipv6regexp = '^([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]*)$';
+my $ipv4partregexp = '(\d+)\.(\d+)\.(\d+)\.(\d+)';
+my $hostnameregexp = '([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$';
+
+
+my $dialog="dialog";
+my $app_title="'Management IP Setup'";
+# get a temporary filename we'll use for communication w/ dialog.
+my $tmpfile;
+my $in;
+my $out;
+my $fh;
+do { $tmpfile=tmpnam(); } 
+until $fh = IO::File->new($tmpfile, O_RDWR|O_CREAT|O_EXCL);
+END { unlink($tmpfile); }
+
+system("$dialog --print-maxsize >/dev/null 2>$tmpfile");
+my $rows;
+my $cols;
+open(FH, $tmpfile) or die "can't open $tmpfile";
+$_ = readline(FH);
+close(FH);
+($rows,$cols) = /MaxSize: (\d+), (\d+)/;
+
+my $brows = int ($rows*3/5);
+$brows = 10 if $brows < 10;
+my $bcols = int ($cols*7/8);
+$bcols = 30 if $bcols < 30;
+
+system ("$dialog --backtitle $app_title --title 'Management Utility' --msgbox 'Use this utility to set hostname, add or change WebUI login user and pssword, WebUI management IP address, netmask and default route on this system. After that you can use the web-based Setup utililty.' $brows $bcols 2>$tmpfile");
+exit if $?;
+
+my $srows = int ($rows*2/5);
+$srows = 10 if $srows < 10;
+my $scols = int ($cols*7/8);
+$scols = 30 if $scols < 30;
+
+my $hostname;
+my $user = "admin";
+my $pass1 = "default";
+my $pass2 = "default";
+my $ipaddress;
+my $netmask;
+my $defaultroute;
+my $valid;
+my $apipaddress;
+
+$_ = `grep 'HOSTNAME' $network`;
+($hostname) = /HOSTNAME=($hostnameregexp)/ if $? == 0;
+$_ = `grep 'IPADDR' $netdir/ifcfg-$dev`;
+($ipaddress) = /IPADDR=([\da-fA-F\.:]+)/ if $? == 0;
+$_ = `grep 'NETMASK' $netdir/ifcfg-$dev`;
+($netmask) = /NETMASK=([\da-fA-F\.:]+)/ if $? == 0;
+$_ = `grep 'GATEWAY' $netdir/ifcfg-$dev`;
+($defaultroute) = /GATEWAY=([\da-fA-F\.:]+)/ if $? == 0;
+
+# now check to see if the default route is all zeros.  If it is, undef it.
+if ($defaultroute) {
+    my (@q, @qip, @qnm);
+    $_ = $defaultroute;
+    @q = /$ipv4partregexp/;
+    my $zerocount = 0;
+    foreach $_ (@q) {
+	$zerocount++ if ($_ == 0 );
+    }
+    undef $defaultroute if ($zerocount == 4);
+}
+
+do {
+    $valid = 1;
+    system( "$dialog --backtitle $app_title --title 'Configure Hostname' --inputbox 'Hostname' $srows $scols $hostname 2> $tmpfile");
+    exit if $?;
+    open(FH, $tmpfile) or die "can't open $tmpfile";
+    $hostname = <FH>;
+    chomp $hostname;
+    #check to be sure the address is ipv4
+    undef $valid unless $hostname=~ /^$hostnameregexp/; 
+
+    if (!defined $valid) {
+	system("$dialog --backtitle $app_title --title 'Configure Hostname' --msgbox '$hostname is not a valid hostname.' $srows $scols");
+    }
+} while !defined $valid;
+
+
+do {
+    $valid = 1;
+    system( "$dialog --backtitle $app_title --title 'WebUI Username and Password' --insecure --mixedform 'set your username and password'  $srows $scols 0 'User name:' 1 1 $user 1 20 20 0 0 'Password:' 2 1 $pass1 2 20 20 0 1 'Retype Password:' 3 1 $pass2 3 20 20 0 1 2> $tmpfile");
+    exit if $?;
+    open(FH, $tmpfile) or die "can't open $tmpfile";
+    my @lines = <FH>;
+    print for @lines;
+    $user = $lines[0];
+    $pass1 = $lines[1];
+    $pass2 = $lines[2];
+
+    chomp $pass1;
+    chomp $pass2;
+    chomp $user;
+    undef $valid if ( $pass1 ne $pass2);
+    if (!defined $valid) {
+        system("$dialog --backtitle $app_title --title 'Password' --msgbox 'typed password does not match.' $srows $scols");
+    }
+} while !defined $valid;
+
+if ( -e $htpasswdfile ) {
+    system("/usr/bin/htpasswd -b $htpasswdfile $user $pass1");
+} else {
+    system("/usr/bin/htpasswd -c -b $htpasswdfile $user $pass1");
+}
+
+system("chmod 600 $htpasswdfile");
+system("chown piranha.piranha $htpasswdfile");
+
+do {
+    $valid = 1;
+    my $item;
+    system( "$dialog --backtitle $app_title --title 'Interfaces list' --menu 'Select management interface' $srows $scols 3  $menu 2> $tmpfile");
+    exit if $?;
+    open(FH, $tmpfile) or die "can't open $tmpfile";
+    $item = <FH>;
+    chomp $item;
+    $dev = $devs[$item-1];
+    print "$dev\n";
+    #check to be sure the address is ipv4
+    undef $valid unless $item=~ /\d/; 
+
+    if (!defined $valid) {
+	system("$dialog --backtitle $app_title --title 'Interfaces list' --msgbox '$dev is not a valid interface.' $srows $scols");
+    }
+} while !defined $valid;
+
+
+do {
+    $valid = 1;
+    system( "$dialog --backtitle $app_title --title 'Configure IP Address' --inputbox 'IP Address' $srows $scols $ipaddress 2> $tmpfile");
+    exit if $?;
+    open(FH, $tmpfile) or die "can't open $tmpfile";
+    $ipaddress = <FH>;
+    chomp $ipaddress;
+    #check to be sure the address is ipv4
+    undef $valid unless $ipaddress=~ /$ipv4regexp/ 
+	or $ipaddress=~ /$ipv6regexp/;
+    # make sure that an IPv4 address is in the correct range
+    my @q;
+    $_ = $ipaddress;
+    @q = /$ipv4partregexp/;
+    foreach $_ (@q) {
+	if ($_ < 0 || $_ > 255) {
+	    undef $valid;
+	}
+    }
+    if (!defined $valid) {
+	system("$dialog --backtitle $app_title --title 'Configure IP Address' --msgbox '$ipaddress is not a valid IP address.' $srows $scols");
+    }
+} while !defined $valid;
+
+# if the ipaddress is v4, then we can use ipcalc to get a suitable netmask
+if ($ipaddress =~ /$ipv4regexp/) {
+    if (! $netmask) {
+        $_ = `ipcalc -m $ipaddress`;
+        ($netmask) = /NETMASK=($ipv4partregexp)/;
+    }
+    # now check to see if it's an 169.254.x.x address, which is APIP, and
+    # MUST have 255.255.0.0 netmask.
+    my @q;
+    $_ = $ipaddress;
+    @q = /$ipv4partregexp/;
+    if ($q[0] == 169 && $q[1] == 254) {
+	$apipaddress = 1;
+	$netmask = "255.255.0.0";
+    }
+} else { # it has to be ipv6, make up a netmask
+    $netmask = "ffff:ffff:ffff:ffff:ffff::"
+}
+do {
+    $valid = 1;
+    if (!defined $apipaddress) {
+	system("$dialog --shadow  --backtitle $app_title --title 'Configure Netmask' --inputbox 'Netmask' $srows $scols $netmask 2> $tmpfile");
+	exit if $?;
+	open(FH, $tmpfile) or die "can't open $tmpfile";
+	$netmask = readline(FH);
+    }
+    undef $valid unless $netmask=~ /$ipv4regexp/ 
+	or $netmask=~ /$ipv6regexp/;
+    # make sure that an IPv4 netmask is in the correct range
+    my @q;
+    $_ = $netmask;
+    @q = /$ipv4partregexp/;
+    foreach $_ (@q) {
+	if ($_ < 0 || $_ > 255) {
+	    undef $valid;
+	}
+    }
+    if (!defined $valid) {
+	system("$dialog --backtitle $app_title --title 'Configure IP Address' --msgbox '$netmask is not a valid netmask.' $srows $scols");
+    }
+} while !defined $valid;
+
+# ask if they want a default route.
+undef $valid;
+my $message = "Do you want to create a default route for the management port?\nThis is required if you want to connect to the management port from another subnet.";
+$message = $message."\nCurrent route is $defaultroute." if $defaultroute;
+system("$dialog --backtitle $app_title --title 'Management Route' --yesno '$message' $srows $scols");
+if ($?) {
+    $valid = 1;
+    undef $defaultroute;
+}
+# if the ipaddress is v4, then we can just substitute .254 for the dft route 
+if ($ipaddress =~ /$ipv4regexp/) {
+    if (! $defaultroute && !defined $valid) {
+        $defaultroute = $ipaddress;
+        $defaultroute =~ s/$ipv4partregexp/${1}.${2}.${3}.254/;
+    }
+} else {
+    if (!$defaultroute && !defined $valid) {
+        $defaultroute = $ipaddress;
+    }
+}
+while (!defined $valid) {
+    $valid = 1;
+    system("$dialog --shadow  --backtitle $app_title --title 'Configure Management Route' --inputbox 'Management Route' $srows $scols $defaultroute 2> $tmpfile");
+    exit if $?;
+    open(FH, $tmpfile) or die "can't open $tmpfile";
+    $defaultroute = readline(FH);
+    undef $valid unless $defaultroute=~ /$ipv4regexp/ 
+	or $defaultroute=~ /$ipv6regexp/;
+    # make sure that an IPv4 defaultroute is in the correct range
+    # and make sure the quads that matter according to our netmask
+    # actually match the ipaddress.  i.e. don't allow and ip of
+    # 192.168.101.245/255.255.255.0
+    # to have a defaultroute that isn't on 192.168.101.*
+    my (@q, @qip, @qnm);
+    $_ = $defaultroute;
+    @q = /$ipv4partregexp/;
+    foreach $_ (@q) {
+	if ($_ < 0 || $_ > 255) {
+	    undef $valid;
+	}
+    }    
+    $_ = $ipaddress;
+    @qip = /$ipv4partregexp/;
+    $_ = $netmask;
+    @qnm = /$ipv4partregexp/;
+    for (my $i = 0; $i < 4; $i++) {
+	if ($qnm[$i] == 255 && $qip[$i] != $q[$i]) {
+	    undef $valid;
+	}
+    }
+    if (!defined $valid) {
+	system("$dialog --backtitle $app_title --title 'Configure IP Address' --msgbox '$defaultroute is not a valid IP address.' $srows $scols");
+    }
+}
+
+# we've got it all, confirm
+$message = "Accept these settings?\nHostname: $hostname\nIP: $ipaddress\nNetmask: $netmask";
+$message = $message."\nRoute: $defaultroute" if $defaultroute;
+system("$dialog --backtitle $app_title --title 'Confirm Configuration' --yesno '$message' $srows $scols");
+exit if $?;
+
+copy "$network", "$network.$backup"; 
+copy "$netdir/ifcfg-$dev", "$netdir/ifcfg-$dev.$backup"; 
+copy "$httpdconf", "$httpdconf.$backup"; 
+chmod 644, $sudoers;
+copy "$sudoers", "$sudoers.$backup"; 
+chmod 644, "$sudoers.$backup";
+
+open $in, "<", "$network.$backup" or die "can't open $network.$backup";
+open $out, ">", "$network" or die "can't open $network";
+
+while (<$in>) {
+	if (/HOSTNAME=/) {
+		print $out "HOSTNAME=$hostname\n";
+	} else {
+		s/"//g;
+		print $out $_;
+	}
+}
+
+
+close $in;
+close $out;
+
+system("/bin/hostname $hostname");
+
+open $in, "<", "$netdir/ifcfg-$dev.$backup" or die "can't open $netdir/ifcfg-$dev.$backup";
+open $out, ">", "$netdir/ifcfg-$dev" or die "can't open $netdir/ifcfg-$dev";
+
+my $is_gw_seen = 0;
+
+while (<$in>) {
+	if (/IPADDR=/) {
+		print $out "IPADDR=$ipaddress\n";
+	} elsif (/NETMASK=/) {
+		print $out "NETMASK=$netmask\n";
+	} elsif (/GATEWAY=/) {
+		$is_gw_seen = 1;
+		if (defined $defaultroute) {
+			print $out "GATEWAY=$defaultroute\n";
+		}
+		next;
+	} elsif (/NM_CONTROLLED=(yes)/i) {
+		s/$1/no/;
+		print $out $_;
+	} else {
+		s/"//g;
+		print $out $_;
+	}
+}
+
+if ($is_gw_seen ==0 && defined $defaultroute ) {
+	print $out "GATEWAY=$defaultroute\n";
+}
+
+close $in;
+close $out;
+
+
+open $in, "<", "$httpdconf.$backup" or die "can't open $httpdconf.$backup";
+open $out, ">", "$httpdconf" or die "can't open $httpdconf";
+
+while (<$in>) {
+        if (/^Listen\s([\da-fA-F\.:]+):443/) {
+                s/$1/$ipaddress/;
+                print $out $_;
+        } elsif (/^\s+Require user/) {
+                if ($_ =~ /$user/) {
+                        print $out $_;
+                } else {
+                        chomp;
+                        print $out $_ . " $user\n";
+                }
+
+        }
+         else {
+                print $out $_;
+        }
+}
+
+close $in;
+close $out;
+
+open $in, "<", "$sudoers.$backup" or die "can't open $sudoers.$backup";
+open $out, ">", "$sudoers" or die "can't open $sudoers";
+
+while (<$in>) {
+	if (/^Host_Alias\tLOCAL\s=\s([\da-fA-F\.:]+)/) {
+		s/$1/$ipaddress/;
+		print $out $_;
+	} else {
+		print $out $_;
+	}
+}
+
+close $in;
+close $out;
+
+chmod 440, $sudoers;
+
+#restart network and gui with new config
+
+print "Bring up new management IP $ipaddress on device $dev\n";
+system("ifdown $dev; ifup $dev");
+system("/etc/init.d/piranha-gui restart");
+
+print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+print "access https://$ipaddress\n";
+print "user:$user\n";
+print "password:$pass1\n";
+print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+
+=cut

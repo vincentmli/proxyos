@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<repomd xmlns="http://linux.duke.edu/metadata/repo" xmlns:rpm="http://linux.duke.edu/metadata/rpm">
+ <revision>1420306499</revision>
+<data type="group">
+  <checksum type="sha256">9e2ddcc42b44eb150ebc61dde29c997318d8330b92205b3dbb3a87bcc06d10be</checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/9e2ddcc42b44eb150ebc61dde29c997318d8330b92205b3dbb3a87bcc06d10be-comps.xml"/>
+  <timestamp>1420306516.54</timestamp>
+  <size>1214917</size>
+</data>
+<data type="filelists">
+  <checksum type="sha256">772658f54d61e1ce31b04f5812d2ff2c1f854102201759294f1bb73472811f17</checksum>
+  <open-checksum type="sha256">5d94e6cc63b63b6a2f9d246bfb5870d32c633f6e0e0bb13325caaa5787314163</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/772658f54d61e1ce31b04f5812d2ff2c1f854102201759294f1bb73472811f17-filelists.xml.gz"/>
+  <timestamp>1420306514</timestamp>
+  <size>314149</size>
+  <open-size>3545932</open-size>
+</data>
+<data type="group_gz">
+  <checksum type="sha256">460862ca0e99160b41eecc41b944eb2abc0b82609bd12407bc5609922627eac4</checksum>
+  <open-checksum type="sha256">9e2ddcc42b44eb150ebc61dde29c997318d8330b92205b3dbb3a87bcc06d10be</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/460862ca0e99160b41eecc41b944eb2abc0b82609bd12407bc5609922627eac4-comps.xml.gz"/>
+  <timestamp>1420306516.53</timestamp>
+  <size>221661</size>
+</data>
+<data type="primary">
+  <checksum type="sha256">2c28c92337ad14e8466cdfab570405708f372630e8a46f1f4425383e788f7063</checksum>
+  <open-checksum type="sha256">630a26ad3912e43eacf98912765d7be155bec23e617bccef2fd0ff30d7843ebf</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/2c28c92337ad14e8466cdfab570405708f372630e8a46f1f4425383e788f7063-primary.xml.gz"/>
+  <timestamp>1420306514</timestamp>
+  <size>383062</size>
+  <open-size>2507609</open-size>
+</data>
+<data type="primary_db">
+  <checksum type="sha256">864ad4076ed7b845fbfdbc73a92525af9f35a85893a5d4b05e92b842c2673221</checksum>
+  <open-checksum type="sha256">eed82c8df64871fc2f5c2da23475e5f5e48f5d6925d4e6fdd1f146131892b907</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/864ad4076ed7b845fbfdbc73a92525af9f35a85893a5d4b05e92b842c2673221-primary.sqlite.bz2"/>
+  <timestamp>1420306516.49</timestamp>
+  <database_version>10</database_version>
+  <size>746052</size>
+  <open-size>3352576</open-size>
+</data>
+<data type="other_db">
+  <checksum type="sha256">9d815e0b40ea662668f61246be18b2a844d479e0c781d9c2ec6e020af638d732</checksum>
+  <open-checksum type="sha256">75271dbae5c0cca5e790bba8d6d59825a57aa11cc4f2b4e83d91f991bc146d30</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/9d815e0b40ea662668f61246be18b2a844d479e0c781d9c2ec6e020af638d732-other.sqlite.bz2"/>
+  <timestamp>1420306514.78</timestamp>
+  <database_version>10</database_version>
+  <size>321580</size>
+  <open-size>1456128</open-size>
+</data>
+<data type="other">
+  <checksum type="sha256">96f991970ef265aca9497cc3e5423567d41b5eaee0ebe9e37aac5874fbccd483</checksum>
+  <open-checksum type="sha256">e3f9b728b8f05479937274a1db427dd5af65d4f5317ce9c2038e0321eb185cdd</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/96f991970ef265aca9497cc3e5423567d41b5eaee0ebe9e37aac5874fbccd483-other.xml.gz"/>
+  <timestamp>1420306514</timestamp>
+  <size>354328</size>
+  <open-size>1482681</open-size>
+</data>
+<data type="filelists_db">
+  <checksum type="sha256">04e3bbe8e23b209a7da82752e4ccafa0af9b0f319e573133118a38155fead8f7</checksum>
+  <open-checksum type="sha256">b51fad6135195d03fdf0cae6247b97dd338b11d0864d5e002a90e6f4a4be4c17</open-checksum>
+  <location xml:base="media://1414159991.958686" href="repodata/04e3bbe8e23b209a7da82752e4ccafa0af9b0f319e573133118a38155fead8f7-filelists.sqlite.bz2"/>
+  <timestamp>1420306515.4</timestamp>
+  <database_version>10</database_version>
+  <size>407729</size>
+  <open-size>1748992</open-size>
+</data>
+</repomd>
