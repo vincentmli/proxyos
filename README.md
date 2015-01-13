@@ -7,13 +7,13 @@ nginx configuration file.
 
 The majority of the load balancing code has been used in Alibaba taobao.com to handle world most busy e-commerce web traffic and in China's number one cloud provider aliyun. 
 
-Some of the  features as below:
+Some of the additional features differs from upstream project highlighted as below :
 
 Layer 4 TCP virtual server load balancing
 
         SYNPROXY: Defence against syn flooding attack
 
-        FULLNAT: source and destination address translation
+        FULLNAT: full source and destination address translation to reduce network maintenances
 
 Layer 7 HTTP/HTTPS load balancing
 
